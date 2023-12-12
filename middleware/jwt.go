@@ -9,6 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"net/http"
 	"os"
 	"time"
 )
@@ -57,26 +58,50 @@ func (token JwtToken) IsExpired() bool {
 	return token.ExpiresAt.Unix() < now
 }
 
-func (token JwtToken) RefreshAccess(accessToken *JwtToken) (error, string) {
-	if token.IsAccess {
-		return errors.New("refresh token not supplied"), ""
-	}
+func (token JwtToken) RefreshAccess(accessToken *JwtToken) (error, string, int) {
 
-	if !accessToken.IsAccess {
-		return errors.New("access token not supplied"), ""
+	if token.ID != accessToken.RefreshID {
+		// check that access token is related to refresh token
+		return errors.New("tokens do not match"), "", http.StatusUnauthorized
 	}
 
 	if token.IsExpired() {
-		return errors.New("refresh token is expired"), ""
+		// check that refresh token is not expired
+		return errors.New("refresh token is expired"), "", http.StatusUnauthorized
 	}
 
-	if token.ID == accessToken.RefreshID {
-		// timeDifference := token.ExpiresAt.Unix() - token.IssuedAt.Unix()
-		return errors.New("refresh token is expired"), ""
+	issuedAt := accessToken.IssuedAt.Time
+
+	expirationMinutes := accessToken.ExpiresAt.Sub(issuedAt).Minutes()
+	tokenId := uuid.New()
+
+	tokenString, er := genJWTTokenFromToken(uint16(expirationMinutes), tokenId, accessToken)
+
+	return er, tokenString, http.StatusOK
+}
+
+func genJWTTokenFromToken(
+	expirationMinutes uint16,
+	tokenId uuid.UUID,
+	token *JwtToken) (string, error) {
+
+	now := time.Now()
+	exp := now.Add(time.Minute * time.Duration(expirationMinutes))
+
+	token.IssuedAt = jwt.NewNumericDate(now)
+	token.ExpiresAt = jwt.NewNumericDate(exp)
+	token.ID = tokenId.String()
+
+	key := []byte(os.Getenv("SECRET_KEY"))
+
+	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, token)
+
+	if signedToken, err := newToken.SignedString(key); err != nil {
+		fmt.Printf("Unable to sign token because: %s \n", err)
+		return "", err
+	} else {
+		return signedToken, nil
 	}
-
-	return errors.New("refresh token is expired"), ""
-
 }
 
 func genJWTToken(

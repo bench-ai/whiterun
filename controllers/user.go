@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
@@ -338,8 +339,97 @@ func Test(c *gin.Context) {
 	c.String(http.StatusOK, "Success")
 }
 
-func refreshTokens() {
+func refreshTokens(accessString string, refreshString string) (error, string, int) {
 
+	c := make(chan map[string]interface{})
+
+	validateToken := func(tokenString string, name string) {
+		sigErr, claimsErr, tkn, val := middleware.ParseToken(tokenString)
+		eMap := map[string]interface{}{}
+
+		if sigErr != nil {
+			if name == "refresh" {
+				eMap["sig"] = false
+				fmt.Println(sigErr)
+			} else {
+				if errors.Is(sigErr, jwt.ErrTokenExpired) {
+					eMap["sig"] = true
+				} else {
+					eMap["sig"] = false
+					fmt.Println(sigErr)
+				}
+			}
+		} else {
+			eMap["sig"] = true
+		}
+
+		if claimsErr != nil {
+			fmt.Println(claimsErr)
+			eMap["clm"] = false
+		} else {
+			eMap["clm"] = true
+		}
+
+		eMap["tkn"] = tkn
+		eMap["val"] = val
+		eMap["name"] = name
+		c <- eMap
+	}
+
+	go validateToken(accessString, "access")
+	go validateToken(refreshString, "refresh")
+
+	var accessToken *middleware.JwtToken
+	var refreshToken *middleware.JwtToken
+
+	for i := 0; i < 2; i++ {
+		dataMap := <-c
+		cond1, _ := dataMap["sig"].(bool)
+		cond2, _ := dataMap["clm"].(bool)
+		jTkn, _ := dataMap["tkn"].(*middleware.JwtToken)
+		cond3 := jTkn != nil
+		cond4, _ := dataMap["val"].(bool)
+		name, _ := dataMap["name"].(string)
+
+		if name == "access" {
+			// check that access token's signature and claims are valid
+			if !(cond1 && cond2 && cond3) {
+				return errors.New("invalid access token"), "", http.StatusUnauthorized
+			}
+			accessToken = jTkn
+		} else {
+			// check that refresh token signature and claims are valid and is not expired
+			if !(cond1 && cond2 && cond3 && cond4) {
+				return errors.New("invalid refresh token"), "", http.StatusUnauthorized
+			}
+			refreshToken = jTkn
+		}
+	}
+
+	return refreshToken.RefreshAccess(accessToken)
+}
+
+func RefreshToken(c *gin.Context) {
+
+	refreshString, err := c.Cookie("refresh")
+
+	accessString := c.GetHeader("Authorization")
+	stringArray := strings.Split(accessString, " ")
+	accessString = stringArray[len(stringArray)-1]
+
+	if err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
+	}
+
+	err, newAccessString, status := refreshTokens(accessString, refreshString)
+
+	if err != nil {
+		c.String(status, err.Error())
+	} else {
+		c.JSON(status, gin.H{
+			"access": newAccessString,
+		})
+	}
 }
 
 func logout() {
