@@ -432,6 +432,14 @@ func RefreshToken(c *gin.Context) {
 	}
 }
 
-func logout() {
+func Logout(c *gin.Context) {
 
+	secure, err := strconv.ParseBool(os.Getenv("SECURE"))
+	httpOnly, err := strconv.ParseBool(os.Getenv("HTTP_ONLY"))
+
+	if err != nil {
+		panic(err)
+	}
+	c.SetCookie("refresh", "", -1, "/", os.Getenv("DOMAIN"), secure, httpOnly)
+	c.String(http.StatusOK, "logged out")
 }
