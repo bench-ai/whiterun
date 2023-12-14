@@ -74,6 +74,7 @@ func main() {
 	r.POST("api/auth/login", controllers.Login)
 	r.POST("api/auth/test", middleware.CheckAccess, controllers.Test)
 	r.POST("api/auth/refresh", controllers.RefreshToken)
+	r.POST("api/auth/logout", controllers.Logout)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")
