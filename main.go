@@ -6,9 +6,12 @@ import (
 	"ApiExecutor/middleware"
 	"context"
 	"fmt"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 )
 
@@ -45,12 +48,34 @@ func main() {
 	go handleShutdown()
 	r := gin.Default()
 
+	mode := os.Getenv("DEV")
+	var backend string
+
+	if mode == "true" {
+		config := cors.DefaultConfig()
+		config.AllowOrigins = []string{"http://localhost:3000"} // Replace with your frontend URL
+		config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+		r.Use(cors.New(config))
+		backend = os.Getenv("D_BACKEND_PORT")
+	} else {
+		backend = os.Getenv("P_BACKEND_PORT")
+		r.Use(static.Serve("/", static.LocalFile("./whiterun-ui/build", true)))
+		r.NoRoute(func(c *gin.Context) {
+			if !strings.HasPrefix(c.Request.RequestURI, "/api") {
+				c.File("./whiterun-ui/build/index.html")
+			}
+			//default 404 page not found
+		})
+	}
+
+	address := fmt.Sprintf(":%s", backend)
+
 	r.POST("api/auth/signup", controllers.Signup)
 	r.POST("api/auth/login", controllers.Login)
 	r.POST("api/auth/test", middleware.CheckAccess, controllers.Test)
 	r.POST("api/auth/refresh", controllers.RefreshToken)
 
-	if err := r.Run(); err != nil {
+	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")
 		panic(err)
 	} // listen and serve on 0.0.0.0:8080
