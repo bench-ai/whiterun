@@ -1,4 +1,4 @@
-<img src="https://static.wikia.nocookie.net/skyrim_gamepedia/images/9/92/WhiterunGuardsShield.png" alt="drawing" width="200"/>
+<img src="https://static.wikia.nocookie.net/skyrim_gamepedia/images/9/92/WhiterunGuardsShield.png" alt="drawing" width="400"/>
 
 # WHITERUN
 
