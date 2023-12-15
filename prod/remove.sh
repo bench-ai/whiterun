@@ -1,0 +1,2 @@
+docker stop whiterun_container
+docker rm whiterun_container
