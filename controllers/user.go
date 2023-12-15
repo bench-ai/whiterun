@@ -443,3 +443,25 @@ func Logout(c *gin.Context) {
 	c.SetCookie("refresh", "", -1, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 	c.String(http.StatusOK, "logged out")
 }
+
+func User(c *gin.Context) {
+	var user *middleware.JwtToken
+	attr, ok := c.Get("accessToken")
+
+	if ok {
+		user, ok = attr.(*middleware.JwtToken)
+
+		if !ok {
+			panic("user is not of type token")
+		}
+	} else {
+		panic("attribute does not exist")
+	}
+
+	pUserModel := user.GetUser()
+	if pUserModel != nil {
+		c.JSON(http.StatusOK, pUserModel)
+	} else {
+		panic("access key exists but user model does not")
+	}
+}
