@@ -50,13 +50,16 @@ func main() {
 
 	mode := os.Getenv("DEV")
 	var backend string
+	var address string
 
 	if mode == "true" {
 		config := cors.DefaultConfig()
 		config.AllowOrigins = []string{"http://localhost:3000"} // Replace with your frontend URL
 		config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+		config.AllowCredentials = true
 		r.Use(cors.New(config))
 		backend = os.Getenv("D_BACKEND_PORT")
+		address = ":%s"
 	} else {
 		backend = os.Getenv("P_BACKEND_PORT")
 		r.Use(static.Serve("/", static.LocalFile("./whiterun-ui/build", true)))
@@ -66,9 +69,10 @@ func main() {
 			}
 			//default 404 page not found
 		})
+		address = "0.0.0.0:%s"
 	}
 
-	address := fmt.Sprintf(":%s", backend)
+	address = fmt.Sprintf(address, backend)
 
 	r.POST("api/auth/signup", controllers.Signup)
 	r.POST("api/auth/login", controllers.Login)

@@ -1,1 +1,1 @@
-docker run -d -p 27017:27017 -v mongodb_data:/data/db --restart unless-stopped --name mongodb_container mongodb_local:latest
+docker run -d -p 27017:27017 -v mongodb_data:/data/db --restart unless-stopped --name mongodb_container --network bench_network mongodb_local:latest

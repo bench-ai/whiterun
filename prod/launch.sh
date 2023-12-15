@@ -1,0 +1,1 @@
+docker run -d -p 3000:3000 --name whiterun_container --network bench_network whiterun:latest
