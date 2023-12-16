@@ -80,6 +80,7 @@ func main() {
 	r.POST("api/auth/refresh", controllers.RefreshToken)
 	r.POST("api/auth/logout", controllers.Logout)
 	r.GET("api/user/details", middleware.CheckAccess, controllers.User)
+	r.Any("api/proxy", controllers.Proxy)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")
