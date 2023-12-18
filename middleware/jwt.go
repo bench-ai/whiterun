@@ -146,7 +146,7 @@ func GenRefreshToken(username string) (string, uuid.UUID, error) {
 
 	refreshID := uuid.New()
 
-	token, err := genJWTToken(refreshID, username, refreshClaims, 20160)
+	token, err := genJWTToken(refreshID, username, refreshClaims, 1)
 
 	return token, refreshID, err
 }
@@ -161,7 +161,7 @@ func GenBasicAccessToken(username string, email string, refreshID uuid.UUID) (st
 
 	accessID := uuid.New()
 
-	token, err := genJWTToken(accessID, username, accessClaims, 5)
+	token, err := genJWTToken(accessID, username, accessClaims, 1)
 
 	return token, err
 }
@@ -177,6 +177,10 @@ func ParseToken(tokenString string) (error, error, *JwtToken, bool) {
 		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
 		return []byte(os.Getenv("SECRET_KEY")), nil
 	})
+
+	if token == nil {
+		return err, nil, nil, false
+	}
 
 	if clm, ok := token.Claims.(*JwtToken); ok {
 		return err, nil, clm, token.Valid

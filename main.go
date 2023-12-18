@@ -57,6 +57,7 @@ func main() {
 		config.AllowOrigins = []string{"http://localhost:3000"} // Replace with your frontend URL
 		config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 		config.AllowCredentials = true
+		config.AllowHeaders = append(config.AllowHeaders, "Authorization")
 		r.Use(cors.New(config))
 		backend = os.Getenv("D_BACKEND_PORT")
 		address = ":%s"

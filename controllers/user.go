@@ -154,8 +154,9 @@ func Signup(c *gin.Context) {
 		c.String(status, er.Error())
 	} else {
 		c.SetCookie("refresh", refresh, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
+		c.SetCookie("access", access, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 		c.JSON(http.StatusOK, gin.H{
-			"access": access,
+			//"access": access,
 			"user": map[string]interface{}{
 				"email":       user.Email,
 				"username":    user.Username,
@@ -260,8 +261,10 @@ func Login(c *gin.Context) {
 		c.String(status, er.Error())
 	} else {
 		c.SetCookie("refresh", refresh, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
+		c.SetCookie("access", access, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
+
 		c.JSON(http.StatusOK, gin.H{
-			"access": access,
+			//"access": access,
 			"user": map[string]interface{}{
 				"email":       pUser.Email,
 				"username":    pUser.Username,
@@ -413,9 +416,9 @@ func RefreshToken(c *gin.Context) {
 
 	refreshString, err := c.Cookie("refresh")
 
-	accessString := c.GetHeader("Authorization")
-	stringArray := strings.Split(accessString, " ")
-	accessString = stringArray[len(stringArray)-1]
+	accessString, err := c.Cookie("access")
+	//stringArray := strings.Split(accessString, " ")
+	//accessString = stringArray[len(stringArray)-1]
 
 	if err != nil {
 		c.AbortWithStatus(http.StatusUnauthorized)
@@ -426,9 +429,16 @@ func RefreshToken(c *gin.Context) {
 	if err != nil {
 		c.String(status, err.Error())
 	} else {
-		c.JSON(status, gin.H{
-			"access": newAccessString,
-		})
+		lifetime, err := strconv.Atoi(os.Getenv("LIFETIME"))
+		secure, err := strconv.ParseBool(os.Getenv("SECURE"))
+		httpOnly, err := strconv.ParseBool(os.Getenv("HTTP_ONLY"))
+		if err != nil {
+			panic(err)
+		}
+		c.SetCookie("access", newAccessString, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
+		//c.JSON(status, gin.H{
+		//	"access": newAccessString,
+		//})
 	}
 }
 
@@ -441,5 +451,6 @@ func Logout(c *gin.Context) {
 		panic(err)
 	}
 	c.SetCookie("refresh", "", -1, "/", os.Getenv("DOMAIN"), secure, httpOnly)
+	c.SetCookie("access", "", -1, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 	c.String(http.StatusOK, "logged out")
 }
