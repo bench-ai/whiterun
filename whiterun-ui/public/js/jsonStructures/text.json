@@ -1,0 +1,21 @@
+{
+  "inputs": {
+    "static": [
+      {
+        "name": "name",
+        "type": "text",
+        "default_value": "text"
+      },
+      {
+        "name": "outputText",
+        "type": "text",
+        "default_value": ""
+      }],
+    "dynamic": []
+  },
+  "outputs": [
+    {
+      "type": "text"
+    }
+  ]
+}
