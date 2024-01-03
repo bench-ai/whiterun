@@ -1,38 +1,38 @@
 import React from 'react';
 import './App.css';
 import {Route, Routes, useNavigate} from "react-router-dom";
-
 import Login from "./views/login/login";
 import Register from "./views/register/register";
-import Home from "./views/home/home";
-import {createTheme, ThemeProvider} from "@mui/material/styles";
-import {CssBaseline} from "@mui/material";
 import Protected from './views/protected/protected';
 import globalRouter from "./globalRouter";
 import AppPage from "./views/app_page/app_page";
+import {ConfigProvider, theme} from "antd";
+import DragAndDrop from "./testDnd/dnd";
 
 const App = () => {
 
     globalRouter.navigate = useNavigate();
 
-    const darkTheme = createTheme({
-        palette: {
-            mode: 'dark',
-        },
-    });
-
     return (
-        <ThemeProvider theme={darkTheme}>
-            <CssBaseline/>
+        <div>
+            <ConfigProvider
+                theme={{
+                    algorithm: theme.darkAlgorithm,
+                    token: {
+                        "colorBgBase": "#0d1117",
+                        "colorBgContainer": "#12181f"
+                    },
+                }}
+            >
                 <Routes>
                     <Route path={"/protected"} element={<Protected/>}/>
-                    <Route path={"/app"} element={<AppPage/>}/>
-                    <Route path={"/"} element={<Home/>}/>
+                    <Route path={"/"} element={<DragAndDrop/>}/>
+                    <Route path={"/browse"} element={<AppPage/>}/>
                     <Route path={"/login"} element={<Login/>}/>
                     <Route path={"/register"} element={<Register/>}/>
                 </Routes>
-        </ThemeProvider>
-
+            </ConfigProvider>
+        </div>
     );
 }
 

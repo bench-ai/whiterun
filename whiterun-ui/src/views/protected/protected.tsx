@@ -6,7 +6,6 @@ const Protected = () => {
     const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
 
     useEffect(() => {
-        console.log('Component rendered');
         (async () => {
             try {
                 await axios.post(`http://localhost:${port}/api/auth/test`, {}, {
@@ -16,7 +15,7 @@ const Protected = () => {
                 console.log(e);
             }
         })();
-    }, []);
+    }, [port]);
 
     return (
         <div>

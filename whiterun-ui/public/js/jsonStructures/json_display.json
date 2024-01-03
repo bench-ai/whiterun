@@ -1,0 +1,20 @@
+{
+  "inputs": {
+    "static": [
+      {
+        "name": "name",
+        "type": "text",
+        "default_value": "json"
+      }
+    ],
+    "dynamic": [
+      {
+        "name": "displayValue",
+        "type": "text | number | boolean | list | object | null",
+        "default_value": "\"Hello World\""
+      }
+    ]
+  },
+  "outputs": []
+}
+

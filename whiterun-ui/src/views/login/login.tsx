@@ -1,15 +1,13 @@
-import React, {SyntheticEvent, useState} from 'react';
-import {
-    Box,
-    Button,
-    Card,
-    Link,
-    Stack,
-    TextField,
-    Typography
-} from "@mui/material";
-import {Navigate, Link as RouterLink} from "react-router-dom";
+import React, {useState} from 'react';
+import {Navigate,Link} from "react-router-dom";
 import axios from "axios";
+import {AlertContainer, Container, LoginContainer, LoginForm} from './login.styles';
+import {Button, Form, Input, Alert, Typography, Col, Row} from 'antd';
+import {EmailOutlined, LockOutlined} from "@mui/icons-material";
+import BenchLogo from "../../assets/benchLogo.svg";
+import Title from "antd/es/typography/Title";
+import {BackgroundGradient} from "../register/register.styles";
+import BenchLogoBig from "../../assets/bench.svg";
 
 const Login = () => {
 
@@ -18,96 +16,103 @@ const Login = () => {
     const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
     const [redirect, setRedirect] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [error, setError] = useState(false);
 
-    const submit = async (e: SyntheticEvent) => {
-        e.preventDefault();
-        console.log(port);
+    const submit = async () => {
+        try {
+            const {data} = await axios.post(
+                `http://localhost:${port}/api/auth/login`,
+                {
+                    email,
+                    password,
+                },
+                {withCredentials: true}
+            );
 
-        const {data} = await axios.post(`http://localhost:${port}/api/auth/login`, {
-            email, password
-        }, {withCredentials: true,});
-
-        axios.defaults.headers.common['Authorization'] = `Bearer ${data['access']}`;
-        setRedirect(true);
-    }
+            axios.defaults.headers.common['Authorization'] = `Bearer ${data['access']}`;
+            setRedirect(true);
+        } catch (error) {
+            setErrorMessage('Failed to log in. Please check your credentials.');
+            setError(true);
+        }
+    };
 
     if (redirect) {
         return <Navigate to="/protected"/>
     }
 
     return (
-        <Box
-            sx={{
-                flex: '1 1 auto',
-                alignItems: 'center',
-                display: 'flex',
-                justifyContent: 'center',
-                height: '100vh'
-            }}
-        >
-            <Card
-                sx={{
-                    maxWidth: 550,
-                    px: 5,
-                    py: '100px',
-                    width: '100%',
-                    boxShadow: 3
-                }}
-            >
-                <div>
-                    <Stack
-                        spacing={1}
-                        sx={{mb: 3}}
-                    >
-                        <Typography variant="h4">
-                            Login
-                        </Typography>
-                        <Typography
-                            color="text.secondary"
-                            variant="body2"
-                        >
-                            Don't have an account?
-                            &nbsp;
-                            <Link
-                                component={RouterLink}
-                                to="/register"
-                                underline="hover"
-                                variant="subtitle2"
-                            >
-                                Register
+
+        <Container>
+            <Row justify="center" align="middle" style={{minHeight: '100vh', width: '100%'}}>
+                {/*Left section: Register container */}
+                <Col xs={24} md={14}>
+                    <div>
+                        <AlertContainer>
+                        {
+                            error &&
+                            <Alert
+                                message={errorMessage}
+                                type="error"
+                                showIcon
+                                closable={true}
+                                afterClose={() => setError(false)}
+                                style={{width: '60%'}}
+                            />
+                        }
+                        </AlertContainer>
+                        <LoginContainer>
+                            <Link to="/">
+                                <img width={50} src={BenchLogo} alt="Bench Logo" />
                             </Link>
-                        </Typography>
-                    </Stack>
-                    <form onSubmit={submit}>
-                        <Stack spacing={3}>
-                            <TextField
-                                label="Email Address"
-                                onChange={e => setEmail(e.target.value)}
-                            />
-                            <TextField
-                                label="Password"
-                                type="password"
-                                onChange={e => setPassword(e.target.value)}
-                            />
-                            {errorMessage && (
-                                <Typography color="error">
-                                    {errorMessage}
-                                </Typography>
-                            )}
-                        </Stack>
-                        <Button
-                            fullWidth
-                            size="large"
-                            sx={{mt: 3}}
-                            type="submit"
-                            variant="contained"
-                        >
-                            Login
-                        </Button>
-                    </form>
-                </div>
-            </Card>
-        </Box>
+                            <Title level={3} style={{marginBottom: '10px'}}>Log in to your Account</Title>
+                            <LoginForm name="login_form"
+                                       initialValues={{remember: true}}
+                                       onFinish={submit}
+                                       layout={"vertical"}
+                                       requiredMark={false}
+                            >
+                                <Form.Item name="email"
+                                           label="Email"
+                                           rules={[{required: true, message: 'Email field is required'}]}
+                                >
+                                    <Input prefix={<EmailOutlined/>} placeholder="Enter your email"
+                                           onChange={(e) => setEmail(e.target.value)}
+                                           size="large"
+                                    />
+                                </Form.Item>
+                                <Form.Item name="password"
+                                           label="Password"
+                                           rules={[{required: true, message: 'Password field is required'}]}>
+                                    <Input.Password
+                                        prefix={<LockOutlined/>}
+                                        placeholder="Enter your password"
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        size="large"
+                                    />
+                                </Form.Item>
+                                <Form.Item>
+                                    <Button type="primary" htmlType="submit" size="large"
+                                            style={{width: '100%', marginTop: '25px'}}>
+                                        Login
+                                    </Button>
+                                </Form.Item>
+                            </LoginForm>
+                            <Typography.Paragraph>
+                                New to Bench? <Link to="/register">Create an Account</Link>
+                            </Typography.Paragraph>
+                        </LoginContainer>
+                    </div>
+                </Col>
+                {/*Right section: Colored background with logo and text */}
+                <BackgroundGradient xs={24} md={10}>
+                    <div style={{textAlign: 'left', padding: '40px', width: '500px'}}>
+                        <img width={300} src={BenchLogoBig} alt="Bench Logo"/>
+                        <Title level={3}>Welcome to Bench AI</Title>
+                    </div>
+                </BackgroundGradient>
+            </Row>
+        </Container>
     );
 };
 

@@ -17,7 +17,7 @@ import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import BenchLogo from "../../assets/bench.svg";
-import ApiCard from "../../components/api_card";
+import ApiCard from "../../components/api_card/api_card";
 import axios from "axios";
 import {Navigate} from "react-router-dom";
 const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
@@ -50,7 +50,7 @@ const Home = () => {
 
     const drawer = (
         <div>
-            <Toolbar disableGutters={true} sx={{display: 'flex', justifyContent: 'left', paddingLeft: '12px'}}>
+            <Toolbar disableGutters={true} sx={{display: 'flex', justifyContent: 'center', paddingLeft: '12px'}}>
                 <img src={BenchLogo} style={{maxWidth: '150px'}} alt="Bench Logo"/>
             </Toolbar>
             <Divider/>
@@ -110,7 +110,7 @@ const Home = () => {
                     }}
                     sx={{
                         display: {xs: 'block', sm: 'none'},
-                        '& .MuiDrawer-paper': {boxSizing: 'border-box', width: drawerWidth},
+                        '& .MuiDrawer-paper': {boxSizing: 'border-box', width: drawerWidth, borderWidth: 0},
                     }}
                 >
                     {drawer}
@@ -119,7 +119,7 @@ const Home = () => {
                     variant="permanent"
                     sx={{
                         display: {xs: 'none', sm: 'block'},
-                        '& .MuiDrawer-paper': {boxSizing: 'border-box', width: drawerWidth},
+                        '& .MuiDrawer-paper': {boxSizing: 'border-box', width: drawerWidth, borderWidth: 0},
                     }}
                     open
                 >
@@ -136,7 +136,6 @@ const Home = () => {
                 </Typography>
                 <Divider sx={{width: "85%", bgcolor: "#3FB950", borderBottomWidth: 2}}/>
                 <div style={{marginBottom: '60px'}}/>
-                <ApiCard/>
                 <ApiCard/>
             </Box>
         </Box>
