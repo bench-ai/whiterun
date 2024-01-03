@@ -3,7 +3,6 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -36,18 +35,24 @@ func checkValidToken(accessToken string) *JwtToken {
 
 func CheckAccess(c *gin.Context) {
 
-	accessToken := c.GetHeader("Authorization")
-	stringArray := strings.Split(accessToken, " ")
-	accessToken = stringArray[len(stringArray)-1]
+	accessString, err := c.Cookie("access")
 
-	token := checkValidToken(accessToken)
+	if err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	// stringArray := strings.Split(accessToken, " ")
+	// accessToken = stringArray[len(stringArray)-1]
+
+	token := checkValidToken(accessString)
 
 	if token == nil {
 		c.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
 
 	c.Set("accessToken", token)
 
 	c.Next()
-
 }
