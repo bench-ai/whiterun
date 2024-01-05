@@ -42,9 +42,6 @@ func CheckAccess(c *gin.Context) {
 		return
 	}
 
-	// stringArray := strings.Split(accessToken, " ")
-	// accessToken = stringArray[len(stringArray)-1]
-
 	token := checkValidToken(accessString)
 
 	if token == nil {
