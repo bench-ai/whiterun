@@ -83,7 +83,7 @@ func main() {
 	r.POST("api/auth/logout", controllers.Logout)
 	r.GET("api/user/details", middleware.CheckAccess, controllers.User)
 	r.Any("api/proxy", controllers.Proxy)
-	r.POST("api/stability/text-to-image", stability.TextToImage)
+	r.POST("api/stability/text-to-image", middleware.CheckExecutionAccess, stability.TextToImage)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")

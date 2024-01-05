@@ -1,10 +1,14 @@
 package stability
 
 import (
+	"ApiExecutor/controllers"
 	"ApiExecutor/miscellaneous"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -19,6 +23,10 @@ type sdEngine struct {
 
 func (engine sdEngine) ParametersValid() (bool, string) {
 	return true, "success"
+}
+
+func urlBuilder(class string, action string, version string, engineId string) string {
+	return fmt.Sprintf("https://api.stability.ai/%s/%s/%s/%s", version, class, engineId, action)
 }
 
 type sdxlBeta struct {
@@ -136,7 +144,7 @@ func (tti textToImage) getEngine() engine {
 			sdEngine: stableEngine,
 		}
 		eng = &betaEng
-	case "SD_v1.6":
+	case "SD_v1.6", "SD_v2.1":
 		betaEng := sd{
 			sdEngine: stableEngine,
 		}
@@ -224,26 +232,71 @@ func TextToImage(c *gin.Context) {
 	var body textToImage
 
 	if err := c.Bind(&body); err != nil {
-		fmt.Println(err)
-		c.String(http.StatusBadRequest, "Failed to read body")
+		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	fmt.Println(body.EngineId,
-		body.Height,
-		body.StylePreset,
-		body.Width,
-		body.Seed,
-		body.CfgScale,
-		body.Sampler,
-		body.TextPrompts,
-		body.Steps)
+	engineIdMap := map[string]string{
+		"SDXL_Beta": "stable-diffusion-xl-beta-v2-2-2",
+		"SDXL_v0.9": "stable-diffusion-xl-1024-v0-9",
+		"SDXL_v1.0": "stable-diffusion-xl-1024-v1-0",
+		"SD_v1.6":   "stable-diffusion-v1-6",
+		"SD_v2.1":   "stable-diffusion-512-v2-1",
+	}
 
-	if status, message := body.validate(); status {
-		c.String(http.StatusOK, "success")
+	engineId := engineIdMap[body.EngineId]
+
+	url := urlBuilder("generation", "text-to-image", "v1", engineId)
+
+	postMap := map[string]interface{}{
+		"width":                body.Width,
+		"height":               body.Height,
+		"text_prompts":         body.TextPrompts,
+		"cfg_scale":            body.CfgScale,
+		"clip_guidance_preset": body.ClipGuidancePreset,
+		"sampler":              body.Sampler,
+		"seed":                 body.Seed,
+		"style":                body.StylePreset,
+		"steps":                body.Steps,
+		"samples":              1,
+	}
+
+	if status, message := body.validate(); !status {
+		c.String(http.StatusBadRequest, message)
 		return
+	}
+
+	postBody, err := json.Marshal(postMap)
+
+	if err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	responseBody := bytes.NewBuffer(postBody)
+	newReq, _ := http.NewRequest("POST", url, responseBody)
+	apiKey := os.Getenv("STABILITY_AI_KEY")
+
+	newReq.Header.Add("Content-Type", "application/json")
+	newReq.Header.Add("Accept", "application/json")
+	newReq.Header.Add("Authorization", "Bearer "+apiKey)
+
+	channel := make(chan *http.Response)
+
+	go func() {
+		pResponse, er := http.DefaultClient.Do(newReq)
+		if er != nil {
+			c.String(http.StatusBadRequest, er.Error())
+			channel <- nil
+		}
+		channel <- pResponse
+	}()
+
+	pResponse := <-channel
+
+	if pResponse != nil {
+		controllers.CopyResponse(c.Writer, pResponse)
 	} else {
-		c.String(http.StatusNotAcceptable, message)
 		return
 	}
 }

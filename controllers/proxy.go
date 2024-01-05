@@ -53,7 +53,7 @@ func Proxy(c *gin.Context) {
 		return
 	}
 
-	copyResponse(c.Writer, pResponse)
+	CopyResponse(c.Writer, pResponse)
 }
 
 func writeHeaders(newReq *http.Request, oldReq *http.Request) {
@@ -189,7 +189,7 @@ func forwardMultipartRequest(c *gin.Context, targetUrl string) (*http.Response, 
 	return http.DefaultClient.Do(newReq)
 }
 
-func copyResponse(w http.ResponseWriter, resp *http.Response) {
+func CopyResponse(w http.ResponseWriter, resp *http.Response) {
 
 	w.WriteHeader(resp.StatusCode)
 
