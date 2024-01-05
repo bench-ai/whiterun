@@ -2,14 +2,17 @@ package stability
 
 import (
 	"ApiExecutor/controllers"
+	"ApiExecutor/middleware"
 	"ApiExecutor/miscellaneous"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 type engine interface {
@@ -283,6 +286,8 @@ func TextToImage(c *gin.Context) {
 
 	channel := make(chan *http.Response)
 
+	startTime := time.Now().Unix()
+
 	go func() {
 		pResponse, er := http.DefaultClient.Do(newReq)
 		if er != nil {
@@ -293,6 +298,21 @@ func TextToImage(c *gin.Context) {
 	}()
 
 	pResponse := <-channel
+	endTime := time.Now().Unix() - startTime
+
+	if attr, ok := c.Get("accessToken"); ok {
+		user, valid := attr.(*middleware.JwtToken)
+
+		if !valid {
+			panic("user is not of type token")
+		}
+
+		err := LogApiRequest(user.Email, "stability.ai:text-to-image", uint16(endTime), postMap, "")
+
+		if err != nil {
+			log.Fatal("unable to log request")
+		}
+	}
 
 	if pResponse != nil {
 		controllers.CopyResponse(c.Writer, pResponse)
