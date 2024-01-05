@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"log"
 	"net/http"
 	"os"
@@ -127,6 +128,35 @@ type textToImage struct {
 	StylePreset        string                   `json:"style_preset,omitempty"`
 }
 
+type imageToImage struct {
+	EngineId           string                   `json:"engine_id,omitempty"`
+	TextPrompts        []map[string]interface{} `json:"text_prompts,omitempty"`
+	InitImageMode      string                   `form:"init_image_mode,omitempty"`
+	ImageStrength      float32                  `form:"image_strength,omitempty"`
+	CfgScale           uint8                    `json:"cfg_scale,omitempty"`
+	ClipGuidancePreset string                   `json:"clip_guidance_preset,omitempty"`
+	Sampler            string                   `json:"sampler,omitempty"`
+	Seed               uint64                   `json:"seed,omitempty"`
+	Steps              uint8                    `json:"steps,omitempty"`
+	StylePreset        string                   `json:"style_preset,omitempty"`
+}
+
+func (iti imageToImage) validate() (bool, string) {
+
+	validPresets, msg := validateOptions(iti.ClipGuidancePreset, iti.Sampler, iti.StylePreset)
+
+	if !validPresets {
+		return validPresets, msg
+	}
+
+	if success, message := validateNumericScale(iti.CfgScale, iti.Seed, iti.Steps); !success {
+		return false, message
+	}
+
+	return true, ""
+
+}
+
 func (tti textToImage) getEngine() engine {
 	var eng engine
 
@@ -152,13 +182,14 @@ func (tti textToImage) getEngine() engine {
 			sdEngine: stableEngine,
 		}
 		eng = &betaEng
+	default:
+		eng = nil
 	}
 
 	return eng
 }
 
-func (tti textToImage) validate() (bool, string) {
-
+func validateOptions(clipGuidance, samplerPreset, style string) (bool, string) {
 	clipGuidancePreset := []string{
 		"FAST_BLUE",
 		"FAST_GREEN",
@@ -204,28 +235,53 @@ func (tti textToImage) validate() (bool, string) {
 
 	contains := miscellaneous.Contains[string]
 
-	if !contains(strings.ToUpper(tti.ClipGuidancePreset), clipGuidancePreset) {
+	if !contains(strings.ToUpper(clipGuidance), clipGuidancePreset) {
 		return false, "clip guidance preset not present"
 	}
 
-	if !contains(strings.ToUpper(tti.Sampler), sampler) {
+	if !contains(strings.ToUpper(samplerPreset), sampler) {
 		return false, "sampler not present"
 	}
 
-	if !contains(strings.ToLower(tti.StylePreset), stylePreset) {
+	if !contains(strings.ToLower(style), stylePreset) {
 		return false, "style preset not present"
 	}
 
-	if success, message := tti.getEngine().ParametersValid(); !success {
-		return false, message
-	}
+	return true, ""
+}
 
-	if tti.CfgScale > 35 {
+func validateNumericScale(cfg uint8, seed uint64, steps uint8) (bool, string) {
+	if cfg > 35 {
 		return false, "scale is between 0 and 35"
 	}
 
-	if tti.Seed > 4294967295 {
+	if seed > 4294967295 {
 		return false, "seed is between 0 and 4294967295"
+	}
+
+	if (steps < 10) || (steps > 50) {
+		return false, "seed is between 0 and 4294967295"
+	}
+
+	return true, ""
+}
+
+func (tti textToImage) validate() (bool, string) {
+
+	validPresets, msg := validateOptions(tti.ClipGuidancePreset, tti.Sampler, tti.StylePreset)
+
+	if !validPresets {
+		return validPresets, msg
+	}
+
+	if eng := tti.getEngine(); eng != nil {
+		if success, message := eng.ParametersValid(); !success {
+			return false, message
+		}
+	}
+
+	if success, message := validateNumericScale(tti.CfgScale, tti.Seed, tti.Steps); !success {
+		return false, message
 	}
 
 	return true, "success"
@@ -307,7 +363,7 @@ func TextToImage(c *gin.Context) {
 			panic("user is not of type token")
 		}
 
-		err := LogApiRequest(user.Email, "stability.ai:text-to-image", uint16(endTime), postMap, "")
+		err = LogApiRequest(user.Email, "stability.ai:text-to-image", uint16(endTime), postMap, "")
 
 		if err != nil {
 			log.Fatal("unable to log request")
@@ -319,4 +375,35 @@ func TextToImage(c *gin.Context) {
 	} else {
 		return
 	}
+}
+
+func ImageToImage(c *gin.Context) {
+	var body imageToImage
+
+	if err := c.Bind(&body); err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	engineIdMap := map[string]string{
+		"SDXL_Beta": "stable-diffusion-xl-beta-v2-2-2",
+		"SDXL_v0.9": "stable-diffusion-xl-1024-v0-9",
+		"SDXL_v1.0": "stable-diffusion-xl-1024-v1-0",
+		"SD_v1.6":   "stable-diffusion-v1-6",
+		"SD_v2.1":   "stable-diffusion-512-v2-1",
+	}
+
+	engineId := engineIdMap[body.EngineId]
+
+	url := urlBuilder("generation", "image-to-image", "v1", engineId)
+
+	if err := c.ShouldBindWith(&body, binding.FormMultipart); err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	fmt.Println(url, body)
+
+	c.String(http.StatusOK, "success")
+	return
 }
