@@ -17,7 +17,7 @@ var (
 
 func InitMongoClient() {
 	if err := godotenv.Load(); err != nil {
-		fmt.Println("No .env file found")
+		fmt.Println("No ..env file found")
 		panic(err)
 	}
 

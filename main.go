@@ -1,7 +1,9 @@
 package main
 
 import (
+	"ApiExecutor/cloud"
 	"ApiExecutor/controllers"
+	"ApiExecutor/controllers/stability"
 	"ApiExecutor/db"
 	"ApiExecutor/middleware"
 	"context"
@@ -20,6 +22,7 @@ import (
 func init() {
 	// establishes a connection to mongo DB
 	db.InitMongoClient()
+	cloud.InitAWSConfig()
 }
 
 // severs mongodb connection when shutting down server
@@ -80,6 +83,12 @@ func main() {
 	r.POST("api/auth/test", middleware.CheckAccess, controllers.Test)
 	r.POST("api/auth/refresh", controllers.RefreshToken)
 	r.POST("api/auth/logout", controllers.Logout)
+	r.GET("api/user/details", middleware.CheckAccess, controllers.User)
+	r.Any("api/proxy", controllers.Proxy)
+	r.POST("api/stability/text-to-image", middleware.CheckExecutionAccess, stability.TextToImage)
+	r.POST("api/stability/image-to-image", middleware.CheckExecutionAccess, stability.ImageToImage)
+	r.POST("api/stability/image-to-image/upscale", middleware.CheckExecutionAccess, stability.ImageToImageUpscale)
+	r.POST("api/stability/image-to-image/mask", middleware.CheckExecutionAccess, stability.ImageToImageMask)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")
