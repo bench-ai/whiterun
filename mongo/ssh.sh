@@ -1,1 +1,1 @@
-docker exec -it mongodb_container mongosh "mongodb://root:r0adtos33d@localhost:27017/"
+docker exec -it mongodb_container mongosh "mongodb://root:root@localhost:27017/"

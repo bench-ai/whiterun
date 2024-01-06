@@ -50,9 +50,6 @@ func getIpDocument(ipAddress string) (error, *models.IpAddress) {
 		year, month, day := ip.UpdatedAt.UTC().Date()
 		nowYear, nowMonth, nowDay := now.UTC().Date()
 
-		fmt.Println("here", year, month, day)
-		fmt.Println("here", nowYear, nowMonth, nowDay)
-
 		cond1 := year == nowYear
 		cond2 := month == nowMonth
 		cond3 := nowDay == day
