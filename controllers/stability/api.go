@@ -804,8 +804,6 @@ func latentUpscaler(c *gin.Context, body *apiParameters, engineId string) {
 		return
 	}
 
-	fmt.Println(body.Seed)
-
 	if status, message := body.validate(imageToImageUpscaleLatent); !status {
 		c.String(http.StatusBadRequest, message)
 		return
