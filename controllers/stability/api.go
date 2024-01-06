@@ -212,6 +212,8 @@ type apiParameters struct {
 	StepScheduleStart  float32  `json:"step_schedule_start"`
 	StepScheduleEnd    float32  `json:"step_schedule_end"`
 	Image              string   `json:"image"`
+	MaskSource         string   `json:"mask_source"`
+	MaskImage          string   `json:"mask_image"`
 }
 
 type image struct {
@@ -297,6 +299,30 @@ func textToImageValidator(tti *apiParameters) (bool, string) {
 	}
 
 	return true, "success"
+}
+
+func imageToImageMaskingValidator(tti *apiParameters) (bool, string) {
+
+	validPresets, msg := validateOptions(tti.ClipGuidancePreset, tti.Sampler, tti.StylePreset)
+
+	if !validPresets {
+		return validPresets, msg
+	}
+
+	if success, message := validateNumericScale(tti.CfgScale, tti.Seed, tti.Steps); !success {
+		return false, message
+	}
+
+	maskSet := map[string]struct{}{
+		"MASK_IMAGE_WHITE": {},
+		"MASK_IMAGE_BLACK": {},
+	}
+
+	if _, v := maskSet[tti.MaskSource]; !v {
+		return false, "invalid mask source options are MASK_IMAGE_WHITE & MASK_IMAGE_BLACK"
+	}
+
+	return true, ""
 }
 
 func imageToImageValidator(iti *apiParameters) (bool, string) {
@@ -399,7 +425,6 @@ func executeRequest(
 		if err := json.NewDecoder(pResponse.Body).Decode(&failed); err != nil {
 			return err, ""
 		}
-		fmt.Println(failed.Id, failed.Message, failed.Name)
 		return errors.New(failed.Message), ""
 	}
 
@@ -595,6 +620,7 @@ func ImageToImage(c *gin.Context) {
 			"seed":                 body.Seed,
 			"steps":                body.Steps,
 			"style_preset":         body.StylePreset,
+			"text_prompts":         body.TextPrompts,
 		},
 		"header": map[string]interface{}{
 			"Content-Type":  "application/json",
@@ -789,12 +815,13 @@ func latentUpscaler(c *gin.Context, body *apiParameters, engineId string) {
 
 	postMap := map[string]interface{}{
 		"body": map[string]interface{}{
-			"image":     body.Image,
-			"height":    body.Height,
-			"width":     body.Width,
-			"seed":      body.Seed,
-			"steps":     body.Steps,
-			"cfg_scale": body.CfgScale,
+			"image":        body.Image,
+			"height":       body.Height,
+			"width":        body.Width,
+			"seed":         body.Seed,
+			"steps":        body.Steps,
+			"cfg_scale":    body.CfgScale,
+			"text_prompts": body.TextPrompts,
 		},
 		"header": map[string]interface{}{
 			"Content-Type":  "application/json",
@@ -842,6 +869,122 @@ func latentUpscaler(c *gin.Context, body *apiParameters, engineId string) {
 	defer newReq.Body.Close()
 
 	if ero, urll := executeRequest(newReq, c, postMap, "image-to-image/upscale/LATENT"); ero != nil {
+		c.String(http.StatusBadRequest, ero.Error())
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{"url": urll})
+	}
+}
+
+func ImageToImageMask(c *gin.Context) {
+	var body apiParameters
+
+	if err := c.Bind(&body); err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if status, message := body.validate(imageToImageMaskingValidator); !status {
+		c.String(http.StatusBadRequest, message)
+		return
+	}
+
+	type tempChan struct {
+		bytes  []byte
+		err    error
+		isMask bool
+	}
+
+	channel := make(chan tempChan)
+
+	fileGetter := func(imageKey string, ch chan tempChan, isMask bool) {
+
+		file, err := cloud.DownloadFromS3(imageKey)
+		ch <- tempChan{
+			file,
+			err,
+			isMask,
+		}
+
+	}
+
+	go fileGetter(body.InitImage, channel, false)
+	go fileGetter(body.MaskImage, channel, true)
+
+	postMap := map[string]interface{}{
+		"body": map[string]interface{}{
+			"init_image":           body.InitImage,
+			"mask_image":           body.MaskImage,
+			"cfg_scale":            body.CfgScale,
+			"clip_guidance_preset": body.ClipGuidancePreset,
+			"sampler":              body.Sampler,
+			"samples":              1,
+			"seed":                 body.Seed,
+			"steps":                body.Steps,
+			"style_preset":         body.StylePreset,
+			"text_prompts":         body.TextPrompts,
+			"mask_source":          body.MaskSource,
+		},
+		"header": map[string]interface{}{
+			"Content-Type":  "application/json",
+			"Accept":        "application/json",
+			"Authorization": "Bearer ",
+		},
+	}
+
+	formBuilder := miscellaneous.NewMultiPartFormBuilder()
+	formBuilder.
+		AddField("mask_source", body.MaskSource).
+		AddField("cfg_scale", strconv.Itoa(int(body.CfgScale))).
+		AddField("clip_guidance_preset", body.ClipGuidancePreset).
+		AddField("sampler", body.Sampler).
+		AddField("samples", "1").
+		AddField("seed", strconv.FormatUint(body.Seed, 10)).
+		AddField("steps", strconv.Itoa(int(body.Steps))).
+		AddField("style_preset", body.StylePreset)
+
+	convertJsonPrompt(&formBuilder, body.TextPrompts)
+
+	fileOne := <-channel
+	fileTwo := <-channel
+
+	if (fileOne.err != nil) || (fileTwo.err != nil) {
+		c.String(http.StatusInternalServerError, "could not get requested image files")
+	}
+
+	if fileOne.isMask {
+		formBuilder.AddFile("mask_image", body.MaskImage, fileOne.bytes)
+		formBuilder.AddFile("init_image", body.InitImage, fileTwo.bytes)
+	} else {
+		formBuilder.AddFile("mask_image", body.MaskImage, fileTwo.bytes)
+		formBuilder.AddFile("init_image", body.InitImage, fileOne.bytes)
+	}
+
+	form, contentType := formBuilder.Finish()
+
+	if form == nil {
+		c.String(http.StatusInternalServerError, "cannot complete request")
+		return
+	}
+
+	url := body.urlBuilder("generation", "image-to-image/masking", "v1")
+
+	newReq, err := http.NewRequest("POST", url, form)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	apiKey := os.Getenv("STABILITY_AI_KEY")
+
+	newReq.Header.Add("Content-Type", contentType)
+	newReq.Header.Add("Accept", "application/json")
+	newReq.Header.Add("Authorization", "Bearer "+apiKey)
+
+	defer newReq.Body.Close()
+
+	if ero, urll := executeRequest(newReq, c, postMap, "image-to-image/masking"); ero != nil {
 		c.String(http.StatusBadRequest, ero.Error())
 		return
 	} else {

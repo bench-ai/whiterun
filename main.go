@@ -88,6 +88,7 @@ func main() {
 	r.POST("api/stability/text-to-image", middleware.CheckExecutionAccess, stability.TextToImage)
 	r.POST("api/stability/image-to-image", middleware.CheckExecutionAccess, stability.ImageToImage)
 	r.POST("api/stability/image-to-image/upscale", middleware.CheckExecutionAccess, stability.ImageToImageUpscale)
+	r.POST("api/stability/image-to-image/mask", middleware.CheckExecutionAccess, stability.ImageToImageMask)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")
