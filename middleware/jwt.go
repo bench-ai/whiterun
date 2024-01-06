@@ -146,7 +146,7 @@ func GenRefreshToken(username string) (string, uuid.UUID, error) {
 
 	refreshID := uuid.New()
 
-	token, err := genJWTToken(refreshID, username, refreshClaims, 1)
+	token, err := genJWTToken(refreshID, username, refreshClaims, 24*60*14)
 
 	return token, refreshID, err
 }
@@ -161,7 +161,7 @@ func GenBasicAccessToken(username string, email string, refreshID uuid.UUID) (st
 
 	accessID := uuid.New()
 
-	token, err := genJWTToken(accessID, username, accessClaims, 1)
+	token, err := genJWTToken(accessID, username, accessClaims, 5)
 
 	return token, err
 }

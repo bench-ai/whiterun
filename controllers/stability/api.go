@@ -1,16 +1,19 @@
 package stability
 
 import (
-	"ApiExecutor/controllers"
+	"ApiExecutor/cloud"
 	"ApiExecutor/middleware"
 	"ApiExecutor/miscellaneous"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -86,7 +89,7 @@ func validateNumericScale(cfg uint8, seed uint64, steps uint8) (bool, string) {
 	}
 
 	if (steps < 10) || (steps > 50) {
-		return false, "seed is between 0 and 4294967295"
+		return false, "steps are between 10 and 50"
 	}
 
 	return true, ""
@@ -187,19 +190,38 @@ func (engine sd) ParametersValid() (bool, string) {
 	return true, "success"
 }
 
+type prompt struct {
+	Text   string   `json:"text"`
+	Weight *float32 `json:"weight,omitempty"`
+}
+
 type apiParameters struct {
-	EngineId           string                   `json:"engine_id,omitempty" form:"engine_id,omitempty"`
-	Width              uint16                   `json:"width,omitempty"`
-	Height             uint16                   `json:"height,omitempty"`
-	TextPrompts        []map[string]interface{} `json:"text_prompts,omitempty" form:"text_prompts,omitempty"`
-	CfgScale           uint8                    `json:"cfg_scale,omitempty" form:"cfg_scale,omitempty"`
-	ClipGuidancePreset string                   `json:"clip_guidance_preset,omitempty" form:"clip_guidance_preset,omitempty"`
-	Sampler            string                   `json:"sampler,omitempty" form:"sampler,omitempty"`
-	Seed               uint64                   `json:"seed,omitempty" form:"seed,omitempty"`
-	Steps              uint8                    `json:"steps,omitempty" form:"steps,omitempty"`
-	StylePreset        string                   `json:"style_preset,omitempty" form:"style_preset,omitempty"`
-	InitImageMode      string                   `form:"init_image_mode,omitempty"`
-	ImageStrength      float32                  `form:"image_strength,omitempty"`
+	EngineId           string   `json:"engine_id"`
+	Width              uint16   `json:"width"`
+	Height             uint16   `json:"height"`
+	TextPrompts        []prompt `json:"text_prompts"`
+	CfgScale           uint8    `json:"cfg_scale"`
+	ClipGuidancePreset string   `json:"clip_guidance_preset"`
+	Sampler            string   `json:"sampler"`
+	Seed               uint64   `json:"seed"`
+	Steps              uint8    `json:"steps"`
+	StylePreset        string   `json:"style_preset"`
+	InitImageMode      string   `json:"init_image_mode"`
+	ImageStrength      float32  `json:"image_strength"`
+	InitImage          string   `json:"init_image"`
+	StepScheduleStart  float32  `json:"step_schedule_start"`
+	StepScheduleEnd    float32  `json:"step_schedule_end"`
+	Image              string   `json:"image"`
+}
+
+type image struct {
+	Base64       string `json:"base64"`
+	Seed         uint32 `json:"seed"`
+	FinishReason string `json:"finishReason"`
+}
+
+type apiResponse struct {
+	Images []image `json:"artifacts"`
 }
 
 func (tti apiParameters) getEngine() engine {
@@ -278,6 +300,17 @@ func textToImageValidator(tti *apiParameters) (bool, string) {
 }
 
 func imageToImageValidator(iti *apiParameters) (bool, string) {
+
+	between0to1 := func(property float32, name string) (bool, string) {
+		if property > 1 {
+			return false, fmt.Sprintf("%s must be less than or equal to 1", name)
+		} else if property < 0 {
+			return false, fmt.Sprintf("%s must be greater than or equal to 0", name)
+		} else {
+			return true, ""
+		}
+	}
+
 	validPresets, msg := validateOptions(iti.ClipGuidancePreset, iti.Sampler, iti.StylePreset)
 
 	if !validPresets {
@@ -288,39 +321,170 @@ func imageToImageValidator(iti *apiParameters) (bool, string) {
 		return false, message
 	}
 
+	set := map[string]struct{}{
+		"IMAGE_STRENGTH": {},
+		"STEP_SCHEDULE":  {},
+	}
+
+	_, exists := set[strings.ToUpper(iti.InitImageMode)]
+
+	if !exists {
+		return false, "The only allowed Image Modes are STEP_SCHEDULE & IMAGE_STRENGTH"
+	}
+
+	if strings.ToUpper(iti.InitImageMode) == "IMAGE_STRENGTH" {
+
+		if status, msgg := between0to1(iti.ImageStrength, "IMAGE_STRENGTH"); !status {
+			return status, msgg
+		}
+	} else {
+		if status, msgg := between0to1(iti.StepScheduleStart, "step_schedule_start"); !status {
+			return status, msgg
+		}
+
+		if status, msgg := between0to1(iti.StepScheduleEnd, "step_schedule_end"); !status {
+			return status, msgg
+		}
+	}
+
 	return true, ""
+}
+
+func imageToImageUpscaleRealESRGAN(iti *apiParameters) (bool, string) {
+	if (iti.Height == 0) || (iti.Width == 0) {
+		if !((iti.Height+iti.Width >= 512) || (iti.Height == iti.Width)) {
+			return false, "either height or width must be greater than 512"
+		} else {
+			return true, ""
+		}
+	} else {
+		return false, "only one dimension height or width can be specified"
+	}
+}
+
+func imageToImageUpscaleLatent(iti *apiParameters) (bool, string) {
+	if success, message := validateNumericScale(iti.CfgScale, iti.Seed, iti.Steps); !success {
+		return false, message
+	}
+
+	return imageToImageUpscaleRealESRGAN(iti)
 }
 
 func executeRequest(
 	pRequest *http.Request,
 	c *gin.Context,
-	requestMap map[string]interface{}) error {
+	requestMap map[string]interface{},
+	requestName string) (error, string) {
 
 	startTime := time.Now().Unix()
 	pResponse, er := http.DefaultClient.Do(pRequest)
-
-	if er != nil {
-		return er
-	}
-
 	endTime := time.Now().Unix() - startTime
 
-	if attr, ok := c.Get("accessToken"); ok {
-		user, valid := attr.(*middleware.JwtToken)
+	defer pResponse.Body.Close()
 
-		if !valid {
-			panic("user is not of type token")
+	if er != nil {
+		return er, ""
+	}
+
+	var response apiResponse
+
+	if pResponse.StatusCode != 200 {
+
+		var failed struct {
+			Id      string `json:"id"`
+			Message string `json:"message"`
+			Name    string `json:"name"`
 		}
 
-		er = LogApiRequest(user.Email, "stability.ai:text-to-image", uint16(endTime), requestMap, "")
+		if err := json.NewDecoder(pResponse.Body).Decode(&failed); err != nil {
+			return err, ""
+		}
+		fmt.Println(failed.Id, failed.Message, failed.Name)
+		return errors.New(failed.Message), ""
+	}
 
-		if er != nil {
-			log.Fatal("unable to log request")
+	if err := json.NewDecoder(pResponse.Body).Decode(&response); err != nil {
+		return err, ""
+	}
+
+	uuidString := uuid.New().String()
+	uuidString += "-bench.png"
+
+	b64 := response.Images[0].Base64
+
+	channel := make(chan map[string]string)
+
+	go func(ch chan map[string]string) {
+		channelMap := map[string]string{
+			"type":  "upload",
+			"url":   "",
+			"error": "",
+		}
+		err := cloud.UploadToS3fromBase64(b64, uuidString)
+
+		if err != nil {
+			channelMap["error"] = err.Error()
+			ch <- channelMap
+			return
+		}
+
+		err, s := cloud.GetPresignedURL(uuidString)
+
+		if err != nil {
+			channelMap["error"] = err.Error()
+			ch <- channelMap
+			return
+		}
+
+		channelMap["url"] = s
+		ch <- channelMap
+		return
+	}(channel)
+
+	go func(ch chan map[string]string) {
+		if attr, ok := c.Get("accessToken"); ok {
+			user, valid := attr.(*middleware.JwtToken)
+
+			if !valid {
+				panic("user is not of type token")
+			}
+
+			requestMap["response"] = map[string]string{
+				"object": uuidString,
+			}
+
+			er = LogApiRequest(
+				user.Email,
+				fmt.Sprintf("stability.ai:%s", requestName),
+				uint16(endTime),
+				requestMap,
+				"")
+
+			if er != nil {
+				log.Fatal("unable to log request")
+			}
+		}
+		ch <- map[string]string{
+			"type": "log",
+		}
+	}(channel)
+
+	channelOut := []map[string]string{
+		<-channel,
+		<-channel,
+	}
+
+	for _, i := range channelOut {
+		if i["type"] == "upload" {
+			if i["url"] == "" {
+				return errors.New(i["error"]), ""
+			} else {
+				return nil, i["url"]
+			}
 		}
 	}
 
-	controllers.CopyResponse(c.Writer, pResponse)
-	return nil
+	return errors.New("failed"), ""
 }
 
 func TextToImage(c *gin.Context) {
@@ -339,16 +503,23 @@ func TextToImage(c *gin.Context) {
 	}
 
 	postMap := map[string]interface{}{
-		"width":                body.Width,
-		"height":               body.Height,
-		"text_prompts":         body.TextPrompts,
-		"cfg_scale":            body.CfgScale,
-		"clip_guidance_preset": body.ClipGuidancePreset,
-		"sampler":              body.Sampler,
-		"seed":                 body.Seed,
-		"style":                body.StylePreset,
-		"steps":                body.Steps,
-		"samples":              1,
+		"header": map[string]interface{}{
+			"Content-Type":  "application/json",
+			"Accept":        "application/json",
+			"Authorization": "Bearer ",
+		},
+		"body": map[string]interface{}{
+			"width":                body.Width,
+			"height":               body.Height,
+			"text_prompts":         body.TextPrompts,
+			"cfg_scale":            body.CfgScale,
+			"clip_guidance_preset": body.ClipGuidancePreset,
+			"sampler":              body.Sampler,
+			"seed":                 body.Seed,
+			"style":                body.StylePreset,
+			"steps":                body.Steps,
+			"samples":              1,
+		},
 	}
 
 	if status, message := body.validate(textToImageValidator); !status {
@@ -356,7 +527,7 @@ func TextToImage(c *gin.Context) {
 		return
 	}
 
-	postBody, err := json.Marshal(postMap)
+	postBody, err := json.Marshal(postMap["body"])
 
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
@@ -371,39 +542,309 @@ func TextToImage(c *gin.Context) {
 	newReq.Header.Add("Accept", "application/json")
 	newReq.Header.Add("Authorization", "Bearer "+apiKey)
 
-	if err = executeRequest(newReq, c, postMap); err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+	if ero, urll := executeRequest(newReq, c, postMap, "text-to-image"); ero != nil {
+		c.String(http.StatusBadRequest, ero.Error())
 		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{"url": urll})
+	}
+}
+
+func convertJsonPrompt(builder *miscellaneous.MultiPartFormBuilder, prompts []prompt) {
+
+	for i, v := range prompts {
+
+		textString := fmt.Sprintf("text_prompts[%d][text]", i)
+		weightString := fmt.Sprintf("text_prompts[%d][weight]", i)
+
+		builder.AddField(textString, v.Text)
+		if v.Weight != nil {
+			builder.AddField(weightString, fmt.Sprintf("%f", *v.Weight))
+		}
 	}
 }
 
 func ImageToImage(c *gin.Context) {
-	//var body imageToImage
-	//
-	//if err := c.Bind(&body); err != nil {
-	//	c.String(http.StatusBadRequest, err.Error())
-	//	return
-	//}
-	//
-	//engineIdMap := map[string]string{
-	//	"SDXL_Beta": "stable-diffusion-xl-beta-v2-2-2",
-	//	"SDXL_v0.9": "stable-diffusion-xl-1024-v0-9",
-	//	"SDXL_v1.0": "stable-diffusion-xl-1024-v1-0",
-	//	"SD_v1.6":   "stable-diffusion-v1-6",
-	//	"SD_v2.1":   "stable-diffusion-512-v2-1",
-	//}
-	//
-	//engineId := engineIdMap[body.EngineId]
-	//
-	//url := urlBuilder("generation", "image-to-image", "v1", engineId)
-	//
-	//if err := c.ShouldBindWith(&body, binding.FormMultipart); err != nil {
-	//	c.String(http.StatusBadRequest, err.Error())
-	//	return
-	//}
-	//
-	//fmt.Println(url, body)
+	var body apiParameters
 
-	c.String(http.StatusOK, "success")
-	return
+	if err := c.Bind(&body); err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if status, message := body.validate(imageToImageValidator); !status {
+		c.String(http.StatusBadRequest, message)
+		return
+	}
+
+	file, err := cloud.DownloadFromS3(body.InitImage)
+
+	if err != nil {
+		c.String(http.StatusBadRequest, "supplied image does not exist")
+		return
+	}
+
+	postMap := map[string]interface{}{
+		"body": map[string]interface{}{
+			"init_image":           body.InitImage,
+			"init_image_mode":      body.InitImageMode,
+			"cfg_scale":            body.CfgScale,
+			"clip_guidance_preset": body.ClipGuidancePreset,
+			"sampler":              body.Sampler,
+			"samples":              1,
+			"seed":                 body.Seed,
+			"steps":                body.Steps,
+			"style_preset":         body.StylePreset,
+		},
+		"header": map[string]interface{}{
+			"Content-Type":  "application/json",
+			"Accept":        "application/json",
+			"Authorization": "Bearer ",
+		},
+	}
+
+	formBuilder := miscellaneous.NewMultiPartFormBuilder()
+	formBuilder.
+		AddFile("init_image", body.InitImage, file).
+		AddField("init_image_mode", body.InitImageMode).
+		AddField("cfg_scale", strconv.Itoa(int(body.CfgScale))).
+		AddField("clip_guidance_preset", body.ClipGuidancePreset).
+		AddField("sampler", body.Sampler).
+		AddField("samples", "1").
+		AddField("seed", strconv.FormatUint(body.Seed, 10)).
+		AddField("steps", strconv.Itoa(int(body.Steps))).
+		AddField("style_preset", body.StylePreset)
+
+	if body.InitImageMode == "IMAGE_STRENGTH" {
+		formBuilder.AddField("image_strength", fmt.Sprintf("%f", body.ImageStrength))
+		postMap["image_strength"] = body.ImageStrength
+
+	} else {
+		formBuilder.
+			AddField("step_schedule_start", fmt.Sprintf("%f", body.StepScheduleStart)).
+			AddField("step_schedule_end", fmt.Sprintf("%f", body.StepScheduleEnd))
+
+		postMap["step_schedule_start"] = body.StepScheduleStart
+		postMap["step_schedule_end"] = body.StepScheduleEnd
+	}
+
+	convertJsonPrompt(&formBuilder, body.TextPrompts)
+
+	form, contentType := formBuilder.Finish()
+
+	if form == nil {
+		c.String(http.StatusInternalServerError, "cannot complete request")
+		return
+	}
+
+	url := body.urlBuilder("generation", "image-to-image", "v1")
+
+	newReq, err := http.NewRequest("POST", url, form)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	apiKey := os.Getenv("STABILITY_AI_KEY")
+
+	newReq.Header.Add("Content-Type", contentType)
+	newReq.Header.Add("Accept", "application/json")
+	newReq.Header.Add("Authorization", "Bearer "+apiKey)
+
+	defer newReq.Body.Close()
+
+	if ero, urll := executeRequest(newReq, c, postMap, "image-to-image"); ero != nil {
+		c.String(http.StatusBadRequest, ero.Error())
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{"url": urll})
+	}
+}
+
+func ImageToImageUpscale(c *gin.Context) {
+	var body apiParameters
+
+	if err := c.Bind(&body); err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	engineMap := map[string]string{
+		"ESRGAN_V1X2": "esrgan-v1-x2plus",
+		"SD_X4_LU":    "stable-diffusion-x4-latent-upscaler",
+	}
+
+	v, ok := engineMap[body.EngineId]
+
+	if !ok {
+		c.String(http.StatusBadRequest, "Engine must be either ESRGAN_V1X2 or SD_X4_LU")
+		return
+	}
+
+	if body.EngineId == "ESRGAN_V1X2" {
+		realEsrganUpscaler(c, &body, v)
+	} else {
+		latentUpscaler(c, &body, v)
+	}
+}
+
+func addHeightOrWidth(
+	height,
+	width uint16,
+	formBuilder *miscellaneous.MultiPartFormBuilder) {
+
+	if height > width {
+		formBuilder.AddField("height", strconv.Itoa(int(height)))
+	} else if width > height {
+		formBuilder.AddField("width", strconv.Itoa(int(width)))
+	}
+}
+
+func realEsrganUpscaler(c *gin.Context, body *apiParameters, engineId string) {
+
+	file, err := cloud.DownloadFromS3(body.Image)
+
+	if err != nil {
+		c.String(http.StatusBadRequest, "supplied image does not exist")
+		return
+	}
+
+	if status, message := body.validate(imageToImageUpscaleRealESRGAN); !status {
+		c.String(http.StatusBadRequest, message)
+		return
+	}
+
+	formBuilder := miscellaneous.NewMultiPartFormBuilder()
+
+	postMap := map[string]interface{}{
+		"body": map[string]interface{}{
+			"image":  body.Image,
+			"Height": body.Height,
+			"Width":  body.Width,
+		},
+		"header": map[string]interface{}{
+			"Content-Type":  "application/json",
+			"Accept":        "application/json",
+			"Authorization": "Bearer ",
+		},
+	}
+
+	addHeightOrWidth(body.Height, body.Width, &formBuilder)
+	formBuilder.AddFile("image", body.Image, file)
+	form, contentType := formBuilder.Finish()
+
+	if form == nil {
+		c.String(http.StatusInternalServerError, "cannot complete request")
+		return
+	}
+
+	url := fmt.Sprintf(
+		"https://api.stability.ai/%s/%s/%s/%s",
+		"v1",
+		"generation",
+		engineId,
+		"image-to-image/upscale")
+
+	newReq, err := http.NewRequest("POST", url, form)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	apiKey := os.Getenv("STABILITY_AI_KEY")
+
+	newReq.Header.Add("Content-Type", contentType)
+	newReq.Header.Add("Accept", "application/json")
+	newReq.Header.Add("Authorization", "Bearer "+apiKey)
+
+	defer newReq.Body.Close()
+
+	if ero, urll := executeRequest(newReq, c, postMap, "image-to-image/upscale/ESRGAN"); ero != nil {
+		c.String(http.StatusBadRequest, ero.Error())
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{"url": urll})
+	}
+}
+
+func latentUpscaler(c *gin.Context, body *apiParameters, engineId string) {
+
+	file, err := cloud.DownloadFromS3(body.Image)
+
+	if err != nil {
+		c.String(http.StatusBadRequest, "supplied image does not exist")
+		return
+	}
+
+	fmt.Println(body.Seed)
+
+	if status, message := body.validate(imageToImageUpscaleLatent); !status {
+		c.String(http.StatusBadRequest, message)
+		return
+	}
+
+	formBuilder := miscellaneous.NewMultiPartFormBuilder()
+
+	postMap := map[string]interface{}{
+		"body": map[string]interface{}{
+			"image":     body.Image,
+			"height":    body.Height,
+			"width":     body.Width,
+			"seed":      body.Seed,
+			"steps":     body.Steps,
+			"cfg_scale": body.CfgScale,
+		},
+		"header": map[string]interface{}{
+			"Content-Type":  "application/json",
+			"Accept":        "application/json",
+			"Authorization": "Bearer ",
+		},
+	}
+
+	addHeightOrWidth(body.Height, body.Width, &formBuilder)
+	formBuilder.
+		AddFile("image", body.Image, file).
+		AddField("seed", strconv.FormatUint(body.Seed, 10)).
+		AddField("steps", strconv.Itoa(int(body.Steps))).
+		AddField("cfg_scale", strconv.Itoa(int(body.CfgScale)))
+
+	convertJsonPrompt(&formBuilder, body.TextPrompts)
+
+	form, contentType := formBuilder.Finish()
+
+	if form == nil {
+		c.String(http.StatusInternalServerError, "cannot complete request")
+		return
+	}
+
+	url := fmt.Sprintf(
+		"https://api.stability.ai/%s/%s/%s/%s",
+		"v1",
+		"generation",
+		engineId,
+		"image-to-image/upscale")
+
+	newReq, err := http.NewRequest("POST", url, form)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	apiKey := os.Getenv("STABILITY_AI_KEY")
+
+	newReq.Header.Add("Content-Type", contentType)
+	newReq.Header.Add("Accept", "application/json")
+	newReq.Header.Add("Authorization", "Bearer "+apiKey)
+
+	defer newReq.Body.Close()
+
+	if ero, urll := executeRequest(newReq, c, postMap, "image-to-image/upscale/LATENT"); ero != nil {
+		c.String(http.StatusBadRequest, ero.Error())
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{"url": urll})
+	}
 }
