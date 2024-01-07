@@ -22,6 +22,10 @@ export function getOperator(nodeId, editor) {
       return new ImageHandler(editor, idNode)
     case 'jsonDisplay':
       return new JsonDisplayHandler(editor, idNode)
+    case 'weightedPrompt':
+      return new ImagePromptHandler(editor, idNode)
+    case 'promptGrouper':
+      return new promptGrouperHandler(editor, idNode)
     default:
       throw new ReferenceError("operator does not exist")
   }
@@ -621,3 +625,194 @@ export class JsonDisplayHandler extends operatorHandler {
     return {}
   }
 }
+
+export class ImagePromptHandler extends operatorHandler {
+  constructor(editor, nodeId) {
+    super(editor, nodeId);
+  }
+
+  getIntInputValue(fieldNumber) {
+    const val = parseFloat(this.getInputValue(fieldNumber, "static"))
+    if (isNaN(val)) {
+      throw new TypeCastingError("int", "string")
+    } else {
+      return val
+    }
+  }
+
+  updateVisualizations() {
+    let name = this.getInputValue(0, "static");
+    const prompt = this.getInputValue(1, "static");
+    const negative = this.getInputValue(2, "static").toLowerCase();
+    let weight;
+
+    this.getVisualProperties("ipo-name").textContent = name;
+
+    try{
+      weight = this.getIntInputValue(3);
+    }catch (error){
+      return false
+    }
+
+    if ((0 <= weight) && (weight <= 2)) {
+      this.getVisualProperties("ipo-weight").value = weight;
+      this.getVisualProperties("ipo-weight-display").textContent = weight;
+    } else {
+      return false;
+    }
+
+    const isNegative = negative === "true";
+
+    this.getVisualProperties("ipo-negative").checked = isNegative;
+
+    if (isNegative) {
+      weight = weight * -1;
+      this.getVisualProperties("ipo-weight").value = weight * -1;
+      this.getVisualProperties("ipo-weight-display").textContent = weight;
+    }
+    this.getVisualProperties("ipo-prompt").textContent = prompt;
+
+
+    return super.updateVisualizations();
+  }
+
+  changeWeightSlider(event) {
+    if (event.target && event.target.classList.contains('ipo-weight')) {
+      const outputElement = event.target.parentElement.querySelector('.ipo-weight-display');
+      const negativeCheckbox = document.querySelector('.ipo-negative');
+      const isNegative = negativeCheckbox ? negativeCheckbox.checked : false;
+      let weight = parseFloat(event.target.value);
+
+      if (isNegative) {
+        weight *= -1;
+      }
+
+      outputElement.textContent = weight;
+    }
+  }
+
+  changeSign() {
+    const weightSlider = this.getVisualProperties("ipo-weight");
+    const outputElement = weightSlider.parentElement.querySelector('.ipo-weight-display');
+    const isNegative = this.getVisualProperties("ipo-negative").checked;
+    let weight = parseFloat(weightSlider.value);
+
+    if (isNegative) {
+      weight *= -1;
+    }
+
+    outputElement.textContent = weight;
+  }
+
+  setExecVisualizations() {
+    this.getVisualProperties("ipo-name").disabled = false;
+    this.getVisualProperties("ipo-weight").disabled = false;
+    this.getVisualProperties("ipo-prompt").readOnly = false;
+
+    const negativeCheckbox = this.getVisualProperties("ipo-negative");
+    negativeCheckbox.disabled = false;
+
+    this.getVisualizations().addEventListener('input', this.changeWeightSlider);
+    negativeCheckbox.addEventListener('change', () => this.changeSign());
+
+    return super.setExecVisualizations();
+  }
+
+  removeExecVisualizations() {
+    this.getVisualProperties("ipo-name").disabled = true;
+    this.getVisualProperties("ipo-weight").disabled = true;
+    this.getVisualProperties("ipo-negative").disabled = true;
+    this.getVisualProperties("ipo-prompt").readOnly = true;
+
+    this.getVisualizations().removeEventListener('input', this.changeWeightSlider)
+
+    const negativeCheckbox = this.getVisualProperties("ipo-negative");
+    negativeCheckbox.removeEventListener('change', () => this.changeSign());
+
+    return super.removeExecVisualizations();
+  }
+
+  async getOutputObject(inputObject) {
+    const weight = parseFloat(this.getVisualProperties("ipo-weight").value);
+    const isNegative = this.getVisualProperties("ipo-negative").checked;
+
+    let finalWeight = weight;
+    if (isNegative) {
+      finalWeight *= -1;
+    }
+
+    return this.checkOutputs({
+      "output_1": {
+        "weight": finalWeight,
+        "prompt": this.getVisualProperties("ipo-prompt").value,
+      }
+    });
+  }
+}
+
+export class promptGrouperHandler extends operatorHandler {
+  constructor(editor, nodeId) {
+    super(editor, nodeId);
+    console.log("entered constructor");
+  }
+
+  updateVisualizations() {
+
+    let name = this.getVisualProperties("prompt-group-name");
+    name.textContent = this.getInputValue(0, "static");
+    let prompts = [];
+
+    for (let i = 0; i < 5; i++) {
+      let prompt = this.getInputValue(i, "dynamic");
+
+      if (prompt.startsWith("{") || prompt.startsWith("[")) {
+        prompt = JSON.parse(prompt);
+        prompt = JSON.stringify(prompt, null, 3);
+      }
+
+      prompts.push(prompt);
+    }
+
+    // Filter out undefined prompts
+    prompts = prompts.filter((prompt) => prompt !== undefined);
+
+    const output = this.getVisualProperties("prompt-group-display");
+    output.textContent = JSON.stringify(prompts, null, 3);
+
+    return super.updateVisualizations();
+  }
+
+  updateVisualOutput(jOut) {
+    if (typeof(jOut) === "object"){
+      jOut = JSON.stringify(jOut, null, 3);
+    }
+
+    const output = this.getVisualProperties("prompt-group-display")
+    output.textContent = jOut
+  }
+
+  async getOutputObject(inputObject) {
+    const combinedPrompts = [];
+
+    for (let i = 1; i <= 5; i++) {
+      const prompt = inputObject[`input_${i}`];
+
+      // Check if the prompt exists
+      if (prompt) {
+        combinedPrompts.push({
+          "weight": prompt.weight,
+          "prompt": prompt.prompt,
+        });
+      }
+    }
+
+    // Update visual output with the combined prompts
+    this.updateVisualOutput(combinedPrompts);
+
+    return {
+      "output_1": combinedPrompts,
+    };
+  }
+
+}
+

@@ -3,10 +3,16 @@
   --background-color: #0d1117;
 }
 
+.wrapper {
+  display: flex;
+  margin: 20px 0 0 20px
+}
+
 body{
   color: white;
   background: #0d1117;
   font-family: Inter;
+  overflow-y:hidden;
 }
 
 .drag-drawflow {
@@ -25,6 +31,12 @@ body{
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   margin-bottom: 20px;
   font-size: 15px;
+}
+
+.drag-drawflow span{
+  white-space: nowrap; /* Prevent text from wrapping to the next line */
+  overflow: hidden; /* Hide the overflowed content */
+  text-overflow: ellipsis;
 }
 
 .drag-drawflow:last-child {
@@ -46,20 +58,21 @@ body{
 
 }
 
-span {
+.operator-title {
   margin-left: 20px;
   /* Add any additional styles for your text */
 }
 
 #drawflow {
-  position: fixed;
+  /*position: fixed;*/
   width: calc(98vw - 300px);;
-  height: calc(95vh);
+  height: calc(85vh);
   border-color: #696B6F;
   border-style: solid;
   border-radius: 30px;
-  left: 300px;
-  top: 20px;
+  /*left: 300px;*/
+  /*top: 20px;*/
+  margin-left: 20px;
   background-image:
     radial-gradient(circle, #696B6F 4px, transparent 4px),
     radial-gradient(circle, #606060 0px, transparent 0px);
@@ -330,9 +343,10 @@ span {
   border-radius: 5px;
   cursor: pointer;
   font-size: 15px;
-  top: 30px;
-  left: 400px;
+  top: 92px;
+  left: 350px;
   display: none;
+  z-index: 1000;
 }
 
 .play-button img{
@@ -388,7 +402,112 @@ span {
   margin-left: 230px;
   height: 20px;
 }
+/*-------------Image Prompt Operator--------------*/
+
+.ipo-name {
+  padding-top: 15px;
+  /*border: 1px solid white;*/
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+}
+
+.ipo-negative-title {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: white;
+  margin: 10px 0 10px 0;
+}
+
+.ipo-weight {
+  -webkit-appearance: none;
+  margin-top: 15px;
+  width: 98%;
+  border: 1px solid #3FB950;
+  height: 1px;
+  background-color: #3FB950;
+  border-radius: 1px;
+  position: relative;
+}
+
+.ipo-weight:disabled {
+  -webkit-appearance: none;
+  width: 98%;
+  border: 1px solid #3FB950;
+  height: 1px;
+  background-color: #3FB950;
+  border-radius: 1px;
+}
+
+.ipo-weight::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  background: #3FB950;
+  border-radius: 50%;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0 10px 0;
+}
+
+.label-left,
+.label-right,
+.ipo-weight-display {
+  flex: 1;
+  text-align: center;
+}
+
+.ipo-weight-display {
+  border: 1px solid white;
+  border-radius: 5px;
+  color: white;
+  /*max-width: calc(100% - 300px); !* Adjust the value to leave space for the div *!*/
+  max-width: 30px;
+  box-sizing: border-box;
+  white-space: nowrap; /* Prevent text from wrapping to the next line */
+  overflow: hidden; /* Hide any overflow beyond the specified width */
+  text-overflow: ellipsis;
+}
+
+.label-left {
+  text-align: left;
+}
+
+.label-right {
+  text-align: right;
+}
+
+.drawflow-node .ipo-prompt {
+  border: solid 1px white;
+  background:  var(--background-color);
+  font-size: 14px;
+  line-height: 1.4;
+  height: 100px;
+}
+
 /*------------------------------*/
+
+.prompt-group-name {
+  padding-top: 15px;
+  /*border: 1px solid white;*/
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+}
+
+.drawflow-node .prompt-group-display {
+  margin-top: 20px;
+  border: solid 1px white;
+  background:  var(--background-color);
+  font-size: 14px;
+  line-height: 1.4;
+  height: 300px;
+}
 
 /*------------------------------*/
 .drawflow-node .json-output{

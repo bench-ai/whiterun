@@ -114,58 +114,72 @@ const DragAndDrop = () => {
   <div class="col">
 
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="slider">
-      <span>Slider Operator</span>
+      <span class="operator-title">Slider Operator</span>
       <i class="icon">
         <img class="logo" src="assets/slider-logo.svg" alt="Icon description" draggable="false">
       </i>
     </div>
 
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="image">
-      <span>Image Operator</span>
+      <span class="operator-title">Image Operator</span>
       <i class="icon">
         <img class="logo" src="assets/image-logo.svg" alt="Icon description" draggable="false">
       </i>
     </div>
 
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="text">
-      <span>Text Operator</span>
+      <span class="operator-title">Text Operator</span>
       <i class="icon">
         <img class="logo" src="assets/text-logo.svg" alt="Icon description" draggable="false">
       </i>
     </div>
 
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="python">
-      <span>Python Operator</span>
+      <span class="operator-title">Python Operator</span>
       <i class="icon">
         <img class="logo" src="assets/python-logo.svg" alt="Icon description" draggable="false">
       </i>
     </div>
 
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="internet">
-      <span>Internet Operator</span>
+      <span class="operator-title">Internet Operator</span>
       <i class="icon">
         <img class="logo" src="assets/web-logo.svg" alt="Icon description" draggable="false">
       </i>
     </div>
 
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="diffusion">
-      <span>Diffus. Operator</span>
+      <span class="operator-title">Diffus. Operator</span>
       <i class="icon">
         <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
       </i>
     </div>
 
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="internet">
-      <span>Chat Operator</span>
+      <span class="operator-title">Chat Operator</span>
       <i class="icon">
         <img class="logo" src="assets/chat-logo.svg" alt="Icon description" draggable="false">
       </i>
     </div>
 
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="jsonDisplay">
-      <span>Display Operator</span>
+      <span class="operator-title">Display Operator</span>
       <i class="icon">
         <img class="logo" src="assets/json-logo.svg" alt="Icon description" draggable="false">
+      </i>
+    </div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="weightedPrompt">
+      <span class="operator-title">Image Prompt Operator</span>
+      <i class="icon">
+        <img class="logo" src="assets/image-prompt-logo.svg" alt="Icon description" draggable="false">
+      </i>
+    </div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="promptGrouper">
+      <span class="operator-title">Prompt Grouper</span>
+      <i class="icon">
+        <img class="logo" src="assets/prompt-grouper-logo.svg" alt="Icon description" draggable="false">
       </i>
     </div>
 

@@ -63,6 +63,20 @@ export async function collectOperatorMetaData(name){
       operatorLogo = "assets/text-logo.svg";
       break;
 
+    case "weightedPrompt":
+      viz = await fetchHTML("imagePrompt");
+      dataList = await fetchJSON("image_prompt");
+      operatorTitle = "Image Prompt Operator";
+      operatorLogo = "assets/image-prompt-logo.svg";
+      break;
+
+    case "promptGrouper":
+      viz = await fetchHTML("promptGrouper");
+      dataList = await fetchJSON("prompt_grouper");
+      operatorTitle = "Prompt Grouper";
+      operatorLogo = "assets/prompt-grouper-logo.svg";
+      break;
+
     default:
       throw new Error("invalid name")
   }

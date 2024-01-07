@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Navigate,Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {AlertContainer, Container, LoginContainer, LoginForm} from './login.styles';
 import {Button, Form, Input, Alert, Typography, Col, Row} from 'antd';
@@ -8,15 +8,18 @@ import BenchLogo from "../../assets/benchLogo.svg";
 import Title from "antd/es/typography/Title";
 import {BackgroundGradient} from "../register/register.styles";
 import BenchLogoBig from "../../assets/bench.svg";
+import {useAuth} from "../../auth/auth_context";
 
 const Login = () => {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
-    const [redirect, setRedirect] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [error, setError] = useState(false);
+
+    const { login } = useAuth();
+    const navigate = useNavigate();
 
     const submit = async () => {
         try {
@@ -30,16 +33,13 @@ const Login = () => {
             );
 
             axios.defaults.headers.common['Authorization'] = `Bearer ${data['access']}`;
-            setRedirect(true);
+            login();
+            navigate("/home");
         } catch (error) {
             setErrorMessage('Failed to log in. Please check your credentials.');
             setError(true);
         }
     };
-
-    if (redirect) {
-        return <Navigate to="/protected"/>
-    }
 
     return (
 
@@ -62,7 +62,7 @@ const Login = () => {
                         }
                         </AlertContainer>
                         <LoginContainer>
-                            <Link to="/">
+                            <Link to="/login">
                                 <img width={50} src={BenchLogo} alt="Bench Logo" />
                             </Link>
                             <Title level={3} style={{marginBottom: '10px'}}>Log in to your Account</Title>

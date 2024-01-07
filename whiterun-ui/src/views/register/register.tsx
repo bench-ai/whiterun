@@ -142,7 +142,7 @@ const Register = () => {
                             }
                         </AlertContainer>
                         <SignUpContainer>
-                            <Link to="/">
+                            <Link to="/login">
                                 <img width={50} src={BenchLogo} alt="Bench Logo" />
                             </Link>
                             <Title level={3} style={{marginBottom: '10px'}}>Register for an Account</Title>

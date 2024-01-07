@@ -1,0 +1,43 @@
+{
+  "inputs": {
+    "static": [
+      {
+        "name": "name",
+        "type": "text",
+        "default_value": "promptGrouper"
+      }
+    ],
+    "dynamic": [
+      {
+        "name": "promptOne",
+        "type": "object",
+        "default_value": null
+      },
+      {
+        "name": "promptTwo",
+        "type": "object",
+        "default_value": null
+      },
+      {
+        "name": "promptTwo",
+        "type": "object",
+        "default_value": null
+      },
+      {
+        "name": "promptTwo",
+        "type": "object",
+        "default_value": null
+      },
+      {
+        "name": "promptTwo",
+        "type": "object",
+        "default_value": null
+      }
+    ]
+  },
+  "outputs": [
+    {
+      "type": "list"
+    }
+  ]
+}

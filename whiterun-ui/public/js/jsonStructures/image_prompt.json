@@ -1,0 +1,32 @@
+{
+  "inputs": {
+    "static": [
+      {
+        "name": "name",
+        "type": "text",
+        "default_value": "ImagePrompt"
+      },
+      {
+        "name": "prompt",
+        "type": "text",
+        "default_value": ""
+      },
+      {
+        "name": "isNegative",
+        "type": "boolean",
+        "default_value": false
+      },
+      {
+        "name": "weight",
+        "type": "number",
+        "default_value": 0
+      }
+    ],
+    "dynamic": []
+  },
+  "outputs": [
+    {
+      "type": "object"
+    }
+  ]
+}
