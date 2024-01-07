@@ -1,144 +1,125 @@
-import React, {useState} from 'react';
-import {
-    AppBar,
-    Box, Button, CssBaseline,
-    Divider,
-    Drawer, IconButton,
-    List,
-    ListItem,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText, Stack,
-    Toolbar,
-    Typography
-} from "@mui/material";
+import React, {useEffect, useState} from 'react';
 
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
-import MenuIcon from '@mui/icons-material/Menu';
-import BenchLogo from "../../assets/bench.svg";
-import ApiCard from "../../components/api_card/api_card";
 import axios from "axios";
-import {Navigate} from "react-router-dom";
-const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
+import Title from "antd/es/typography/Title";
+import {Button, Form, Input, Layout, Modal} from 'antd';
+import {Content} from "antd/es/layout/layout";
+import {WorkflowList} from "./home.styles";
+import {WorkflowCard} from "../../components/workflow_card/workflow_card";
+import {AddApiForm} from "../app_page/app_page.styles";
+
+interface Workflow {
+    id: string;
+    name: string;
+}
 
 const Home = () => {
 
-    const drawerWidth = 240;
-    const [mobileOpen, setMobileOpen] = React.useState(false);
-    const [redirect, setRedirect] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [name, setName] = useState('');
+    const [workflows, setWorkflows] = useState<Record<string, Workflow> | null>(null);
+    const [, setErrorMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
 
-    const handleDrawerToggle = () => {
-        setMobileOpen(!mobileOpen);
+    const showModal = () => {
+        setIsModalOpen(true);
     };
 
-    const handleLogout = async () => {
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const response = await axios.get(
+                    `http://localhost:${port}/api/user/details`, {
+                        withCredentials: true,
+                    }
+                );
+
+                const userData = response.data;
+                setWorkflows(userData.work_flows);
+
+            } catch (e) {
+                console.log(e);
+            }
+        })();
+    }, [port]);
+
+    const submit = async () => {
+        setLoading(true);
         try {
-            await axios.post(`http://localhost:${port}/api/auth/logout`, {
+            await axios.post(
+                `http://localhost:${port}/api/workflows/new`,
+                {
+                    name,
+                },
+                {withCredentials: true}
+            );
 
-            }, {withCredentials: true, });
-
-            setRedirect(true);
         } catch (error) {
-            console.error('Error during logout:', error);
+            setErrorMessage('Failed to Create Workflow');
         }
+        setLoading(false);
+        window.location.reload();
     };
-
-    if (redirect) {
-        return <Navigate to="/login"/>
-    }
-
-    const drawer = (
-        <div>
-            <Toolbar disableGutters={true} sx={{display: 'flex', justifyContent: 'center', paddingLeft: '12px'}}>
-                <img src={BenchLogo} style={{maxWidth: '150px'}} alt="Bench Logo"/>
-            </Toolbar>
-            <Divider/>
-            <List>
-                {['Browse'].map((text, index) => (
-                    <ListItem key={text} disablePadding>
-                        <ListItemButton>
-                            <ListItemIcon>
-                                {index % 2 === 0 ? <InboxIcon/> : <MailIcon/>}
-                            </ListItemIcon>
-                            <ListItemText primary={text}/>
-                        </ListItemButton>
-                    </ListItem>
-                ))}
-            </List>
-        </div>
-    );
 
     return (
-        <Box sx={{display: 'flex'}}>
-            <CssBaseline/>
-            <AppBar
-                position="fixed"
-                sx={{
-                    width: {sm: `calc(100% - ${drawerWidth}px)`},
-                    ml: {sm: `${drawerWidth}px`},
-                }}
-            >
-                <Toolbar>
-                    <IconButton
-                        color="inherit"
-                        aria-label="open drawer"
-                        edge="start"
-                        onClick={handleDrawerToggle}
-                        sx={{mr: 2, display: {sm: 'none'}}}
+        <div>
+            <Layout style={{height: "100vh"}}>
+                <Content style={{padding: "0 48px"}}>
+                    <div>
+                        <Title style={{fontSize: '50px', marginBottom: '0'}}>Home</Title>
+                        <hr style={{border: '2px solid #3FB950', borderRadius: '5px', width: '65%', marginLeft: '0'}}/>
+                    </div>
+                    <Title level={2} style={{marginBottom: '30px'}}>My Workflows</Title>
+                    <Button type="primary" onClick={showModal} style={{marginBottom: "20px"}}>
+                        Create WorkFlow
+                    </Button>
+                    <Modal
+                        title={<Title level={3}>Create a Workflow</Title>}
+                        visible={isModalOpen}
+                        onCancel={handleCancel}
+                        footer={null}
+                        destroyOnClose={true}
                     >
-                        <MenuIcon/>
-                    </IconButton>
-                    <Stack direction='row' spacing={4} flexGrow={1}>
-                        <Button color='inherit'>Browse</Button>
-                        <Button color='inherit'>Manage my API</Button>
-                    </Stack>
-                        <Button color='inherit' onClick={handleLogout}>Logout</Button>
-                </Toolbar>
-            </AppBar>
-            <Box
-                component="nav"
-                sx={{width: {sm: drawerWidth}, flexShrink: {sm: 0}}}
-                aria-label="mailbox folders"
-            >
-                <Drawer
-                    variant="temporary"
-                    open={mobileOpen}
-                    onClose={handleDrawerToggle}
-                    ModalProps={{
-                        keepMounted: true,
-                    }}
-                    sx={{
-                        display: {xs: 'block', sm: 'none'},
-                        '& .MuiDrawer-paper': {boxSizing: 'border-box', width: drawerWidth, borderWidth: 0},
-                    }}
-                >
-                    {drawer}
-                </Drawer>
-                <Drawer
-                    variant="permanent"
-                    sx={{
-                        display: {xs: 'none', sm: 'block'},
-                        '& .MuiDrawer-paper': {boxSizing: 'border-box', width: drawerWidth, borderWidth: 0},
-                    }}
-                    open
-                >
-                    {drawer}
-                </Drawer>
-            </Box>
-            <Box
-                component="main"
-                sx={{flexGrow: 1, p: 3, width: {sm: `calc(100% - ${drawerWidth}px)`}}}
-            >
-                <Toolbar/>
-                <Typography variant="h3">
-                    Marketplace
-                </Typography>
-                <Divider sx={{width: "85%", bgcolor: "#3FB950", borderBottomWidth: 2}}/>
-                <div style={{marginBottom: '60px'}}/>
-                <ApiCard/>
-            </Box>
-        </Box>
+                        <AddApiForm name="create_workflow_form"
+                                    initialValues={{remember: false}}
+                                    layout={"vertical"}
+                                    requiredMark={false}
+                                    onFinish={submit}
+                        >
+                            <Form.Item name="workflow_name"
+                                       label="Workflow Name"
+                                       rules={[{required: true, message: 'Please add a name for your workflow'}]}
+                            >
+                                <Input
+                                    placeholder="Enter workflow name"
+                                    onChange={(e) => setName(e.target.value)}
+                                    size="large"
+                                />
+                            </Form.Item>
+                            <Form.Item>
+                                <Button type="primary" htmlType="submit" size="large" loading={loading}
+                                        style={{width: '100%', marginTop: '25px'}}>
+                                    Create Workflow
+                                </Button>
+                            </Form.Item>
+                        </AddApiForm>
+                    </Modal>
+                    <WorkflowList>
+
+                        {workflows &&
+                            Object.keys(workflows).map((workflowId) => (
+                                <WorkflowCard key={workflowId} id={workflowId} name={workflows[workflowId].name}/>
+                            ))}
+
+                    </WorkflowList>
+                </Content>
+            </Layout>
+        </div>
     );
 }
 
