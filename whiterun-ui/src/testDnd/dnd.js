@@ -195,7 +195,7 @@ const DragAndDrop = () => {
           <img class="lock-logo" src="assets/lock-logo.svg" alt="Icon description" draggable="false">
         </i>
 
-        <i id="unlock" class="icon" onclick="changeMode('lock');">
+        <i id="unlock" class="icon" onclick="changeMode('lock');" style="display:none;">
           <img class="lock-logo" src="assets/unlock-logo.svg" alt="Icon description" draggable="false">
         </i>
       </div>
@@ -278,7 +278,11 @@ const DragAndDrop = () => {
 </button>
 
 <button class="play-button" id="disabled-play-button">
-  <img src="assets/play-button-disabled-logo.svg" alt="Play Button">
+  <img src="assets/play-button-disabled-logo.svg" alt="Play Button" style="display:none;">
+</button>
+
+<button class="save-button">
+  <img src="assets/save-logo.svg" alt="Save Button" onclick="saveDrawFlow()">
 </button>
 
 </body>
