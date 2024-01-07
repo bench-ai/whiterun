@@ -51,6 +51,9 @@ func main() {
 	go handleShutdown()
 	r := gin.Default()
 
+	// Limit the file size to 15 mb
+	r.MaxMultipartMemory = 15 << 20
+
 	mode := os.Getenv("DEV")
 	var backend string
 	var address string
@@ -99,8 +102,11 @@ func main() {
 
 	// workflows
 	r.POST("api/workflows/new", middleware.CheckAccess, controllers.CreateWorkflow)
+	r.PATCH("api/workflows/save", middleware.CheckAccess, controllers.SaveWorkflow)
+	r.GET("api/workflows", controllers.GetWorkFlow)
 
-	// workflows
+	// upload
+	r.POST("api/upload/image", middleware.CheckAccess, controllers.UploadImageFile)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")
