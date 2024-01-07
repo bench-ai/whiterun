@@ -156,15 +156,7 @@ func Signup(c *gin.Context) {
 		c.SetCookie("refresh", refresh, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 		c.SetCookie("access", access, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 		c.JSON(http.StatusOK, gin.H{
-			//"access": access,
-			"user": map[string]interface{}{
-				"email":       user.Email,
-				"username":    user.Username,
-				"created_at":  user.CreatedAt.Unix(),
-				"updated_at":  user.UpdatedAt.Unix(),
-				"verified":    user.Verified,
-				"token_count": user.TokenCount,
-			},
+			"user": user,
 		})
 	}
 
@@ -264,15 +256,7 @@ func Login(c *gin.Context) {
 		c.SetCookie("access", access, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 
 		c.JSON(http.StatusOK, gin.H{
-			//"access": access,
-			"user": map[string]interface{}{
-				"email":       pUser.Email,
-				"username":    pUser.Username,
-				"created_at":  pUser.CreatedAt.Unix(),
-				"updated_at":  pUser.UpdatedAt.Unix(),
-				"verified":    pUser.Verified,
-				"token_count": pUser.TokenCount,
-			},
+			"user": pUser,
 		})
 	}
 }
