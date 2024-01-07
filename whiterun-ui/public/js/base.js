@@ -3,16 +3,95 @@ import {PythonTable} from "./pythonTable.js";
 import {collectOperatorMetaData, fetchHTML, mapToDiv} from "./constuctOperator.js"
 import {Drawflowoverride} from "./drawflowOverride.js";
 import {ExecutionGraph} from "./checkGraph.js"
+import {getUser, getWorkflow, requestInterceptor, saveWorkflow} from "./api.js";
+
+function parseUrl(){
+  const queryString = window.location.search;
+  const queryParams = new URLSearchParams(queryString);
+  return queryParams.get('id')
+}
+
+
+async function userLoader(){
+  try{
+    const lock = document.getElementById(`lock`)
+    const userObject = await requestInterceptor(getUser,{}, false)
+
+    if (userObject["work_flows"].hasOwnProperty(parseUrl())){
+      lock.style.display = "block"
+      return [userObject, true]
+    }
+
+    return [userObject, false]
+  }catch (error){
+    return [{}, false]
+  }
+}
+
+async function workflowLoader(){
+  const queryId = parseUrl()
+  try{
+    return await getWorkflow(queryId)
+  }catch (error){
+    return undefined
+  }
+}
+
+let userPromise = userLoader()
+let workflowPromise = workflowLoader()
 
 let pythonOutputTable;
 let pythonInputTable;
 let selectedNode;
-let mode = "editor";
+let mode = "execute";
 let connectionRemovalReason = "";
 var id = document.getElementById("drawflow");
 const editor = new Drawflowoverride(id);
 editor.reroute = true;
 editor.start();
+
+
+async function saveDrawFlow(){
+  const exported_data = editor.export()
+
+  Object.keys(exported_data["drawflow"]["Home"]["data"]).forEach(k =>{
+    const currentNode = exported_data["drawflow"]["Home"]["data"][k]
+    const nodeHtml = document.getElementById(`node-${k}`)
+    let saveHtml = nodeHtml.getElementsByClassName("drawflow_content_node")[0]
+    saveHtml = nodeHtml.getElementsByClassName("drawflow_content_node")[0]
+
+    console.log(saveHtml)
+    // currentNode["html"] = saveHtml
+    // console.log(currentNode["html"])
+  })
+  const body = {
+    "structure": exported_data,
+    "id": parseUrl()
+  }
+
+  // await saveWorkflow(body)
+}
+
+window.saveDrawFlow = saveDrawFlow;
+
+
+async function loadEditor(){
+  const workflow = await workflowPromise
+
+  if (workflow === undefined){
+    window.location.replace("http://localhost:3000/");
+  }
+  if (workflow["structure"] !== null){
+    editor.import(workflow["structure"])
+    console.log("here", document.getElementById("node-2"))
+    console.log(workflow["structure"])
+  }
+
+  console.log(workflow)
+}
+
+loadEditor().then(r => {})
+
 
 var elements = document.getElementsByClassName('drag-drawflow');
 for (var i = 0; i < elements.length; i++) {
@@ -346,48 +425,60 @@ async function executeGraph(){
 }
 window.executeGraph = executeGraph;
 
-function changeMode(option) {
+async function changeMode(option) {
   const lock = document.getElementById(`lock`)
   const unlock = document.getElementById(`unlock`)
+  const save = document.getElementsByClassName(`save-button`)[0]
   const drawflowContainer = document.getElementById('drawflow');
   const playButton = document.getElementById('enabled-play-button');
   let xport = editor.export()["drawflow"]["Home"]["data"];
   let xportKeys = Object.keys(xport);
 
-  // let e = new ExecutionGraph(xport)
-  // e.getGraphExecutionOrder(editor)
+  const up = await userPromise
 
-  if (option === 'unlock') {
-    mode = "editor"
-    lock.style.display = 'none';
-    unlock.style.display = 'block';
-    playButton.style.display = 'none'
+  const hasProp = up[1]
 
-    drawflowContainer.style.backgroundImage = `
+  // const id = parseUrl()
+
+  if (hasProp){
+
+    if (option === 'unlock') {
+      mode = "editor"
+      lock.style.display = 'none';
+      unlock.style.display = 'block';
+      playButton.style.display = 'none'
+      save.style.display = "block"
+
+      drawflowContainer.style.backgroundImage = `
       radial-gradient(circle, #696B6F 4px, transparent 4px),
       radial-gradient(circle, #606060 0px, transparent 0px)
     `;
 
-    xportKeys.forEach((element) => {
-      const op = getOperator(element, editor);
-      op.unlockInputFields()
-      op.removeExecVisualizations();
-    })
+      xportKeys.forEach((element) => {
+        const op = getOperator(element, editor);
+        op.unlockInputFields()
+        op.removeExecVisualizations();
+      })
 
-  } else {
-    mode = "execute"
-    lock.style.display = 'block';
-    unlock.style.display = 'none';
-    playButton.style.display = 'block'
+    } else {
+      mode = "execute"
+      lock.style.display = 'block';
+      unlock.style.display = 'none';
+      playButton.style.display = 'block'
+      save.style.display = "none"
 
-    drawflowContainer.style.backgroundImage = 'none';
+      drawflowContainer.style.backgroundImage = 'none';
 
-    xportKeys.forEach((element) => {
-      const op = getOperator(element, editor);
-      op.lockInputFields();
-      op.setExecVisualizations();
-    })
+      xportKeys.forEach((element) => {
+        const op = getOperator(element, editor);
+        op.lockInputFields();
+        op.setExecVisualizations();
+      })
+    }
+
   }
+  // let e = new ExecutionGraph(xport)
+  // e.getGraphExecutionOrder(editor)
 }
 
 window.changeMode = changeMode;
