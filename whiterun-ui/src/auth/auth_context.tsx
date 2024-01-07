@@ -38,8 +38,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
 
     useEffect(() => {
-        // Check if user details are saved in local storage
         const storedUser = localStorage.getItem('user');
+
         if (storedUser) {
             try {
                 const parsedUser = JSON.parse(storedUser);
@@ -48,10 +48,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             } catch (error) {
                 console.error('Error parsing user details:', error);
             }
-        } else {
-            onLoad();
         }
-    }, [isLoggedIn]);
+    }, []);
 
     const onLoad = async () => {
         try {
@@ -79,7 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
     const login = async () => {
         setIsLoggedIn(true);
-        // Additional logic for fetching user details upon login
+        // Fetch user details upon login
         await onLoad();
     };
 
