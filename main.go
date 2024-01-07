@@ -99,8 +99,8 @@ func main() {
 
 	// workflows
 	r.POST("api/workflows/new", middleware.CheckAccess, controllers.CreateWorkflow)
-
-	// workflows
+	r.PATCH("api/workflows/save", middleware.CheckAccess, controllers.SaveWorkflow)
+	r.GET("api/workflows", controllers.GetWorkFlow)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")
