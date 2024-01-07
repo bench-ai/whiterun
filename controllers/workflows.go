@@ -5,9 +5,11 @@ import (
 	"ApiExecutor/middleware"
 	"ApiExecutor/models"
 	"context"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 	"time"
 )
@@ -106,10 +108,91 @@ func CreateWorkflow(c *gin.Context) {
 	c.JSON(http.StatusOK, &wf)
 }
 
-//func SaveWorkflow(c *gin.Context) {
-//
-//	var body struct {
-//		Name string
-//	}
-//
-//}
+func SaveWorkflow(c *gin.Context) {
+
+	var body struct {
+		Structure map[string]interface{}
+		Id        string
+	}
+
+	if c.Bind(&body) != nil {
+		c.String(http.StatusBadRequest, "Failed to read body")
+		return
+	}
+
+	var user *middleware.JwtToken
+	attr, ok := c.Get("accessToken")
+
+	if ok {
+		user, ok = attr.(*middleware.JwtToken)
+
+		if !ok {
+			panic("user is not of type token")
+		}
+	} else {
+		panic("attribute does not exist")
+	}
+
+	pUserModel := user.GetUser()
+
+	if _, has := pUserModel.WorkFlows[body.Id]; !has {
+		c.String(http.StatusNotFound, "workflow does not exist")
+	}
+
+	builder := db.NewUpdateBuilder()
+
+	operator := "$set"
+
+	element := bson.E{
+		Key: "structure", Value: body.Structure,
+	}
+
+	builder.BuildRequest(operator, element).BuildRequest("$currentDate", bson.E{Key: "updated_at", Value: true})
+
+	filter := bson.D{
+		{"_id", body.Id},
+	}
+
+	client, err := db.GetDatabaseClient()
+
+	if err != nil {
+		panic(err)
+	}
+
+	workFlowsCollection := client.Collection("workflow")
+
+	_, err = builder.ExecuteUpdate(workFlowsCollection, filter)
+
+	if err != nil {
+		c.String(http.StatusInternalServerError, "could not save workflow")
+	} else {
+		c.String(http.StatusOK, "workflow has been saved")
+	}
+}
+
+func GetWorkFlow(c *gin.Context) {
+	id := c.Query("id")
+
+	client, err := db.GetDatabaseClient()
+
+	if err != nil {
+		panic(err)
+	}
+
+	workFlowsCollection := client.Collection("workflow")
+	filter := bson.D{{"_id", id}}
+
+	var result models.Workflow
+	err = workFlowsCollection.FindOne(context.TODO(), filter).Decode(&result)
+
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			c.String(http.StatusNotFound, "workflow not found")
+		} else {
+			c.String(http.StatusInternalServerError, "could not get workflow")
+		}
+	} else {
+		result.OwnersEmail = ""
+		c.JSON(http.StatusOK, result)
+	}
+}

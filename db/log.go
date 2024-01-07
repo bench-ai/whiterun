@@ -1,7 +1,6 @@
-package stability
+package db
 
 import (
-	"ApiExecutor/db"
 	"ApiExecutor/models"
 	"context"
 	"time"
@@ -15,7 +14,7 @@ func LogApiRequest(email string,
 
 	var log models.Log
 
-	database, err := db.GetDatabaseClient()
+	database, err := GetDatabaseClient()
 
 	if err != nil {
 		panic(err)

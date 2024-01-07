@@ -2,6 +2,7 @@ package stability
 
 import (
 	"ApiExecutor/cloud"
+	"ApiExecutor/db"
 	"ApiExecutor/middleware"
 	"ApiExecutor/miscellaneous"
 	"bytes"
@@ -478,7 +479,7 @@ func executeRequest(
 				"object": uuidString,
 			}
 
-			er = LogApiRequest(
+			er = db.LogApiRequest(
 				user.Email,
 				fmt.Sprintf("stability.ai:%s", requestName),
 				uint16(endTime),

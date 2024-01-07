@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"io"
+	"mime/multipart"
 	"os"
 	"time"
 )
@@ -33,6 +34,33 @@ func UploadToS3fromBase64(data string, objectKey string) error {
 		Key:         aws.String(objectKey),
 		Body:        bytes.NewReader(decode),
 		ContentType: aws.String("image/png"), // required. Notice the back ticks
+	})
+
+	return err
+}
+
+func UploadToS3FromMultiPart(file *multipart.FileHeader, objectKey, contentType string) error {
+
+	fileContent, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer fileContent.Close()
+
+	// Specify the S3 bucket name and region
+	bucketName := os.Getenv("AWS_BUCKET")
+	client, err := GetClient()
+
+	if err != nil {
+		panic(err)
+	}
+
+	// Upload the file to S3
+	_, err = client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket:      aws.String(bucketName),
+		Key:         aws.String(objectKey),
+		Body:        fileContent,
+		ContentType: aws.String(contentType), // required. Notice the back ticks
 	})
 
 	return err
