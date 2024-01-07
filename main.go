@@ -78,17 +78,29 @@ func main() {
 
 	address = fmt.Sprintf(address, backend)
 
+	// auth
 	r.POST("api/auth/signup", controllers.Signup)
 	r.POST("api/auth/login", controllers.Login)
 	r.POST("api/auth/test", middleware.CheckAccess, controllers.Test)
 	r.POST("api/auth/refresh", controllers.RefreshToken)
 	r.POST("api/auth/logout", controllers.Logout)
+
+	// user
 	r.GET("api/user/details", middleware.CheckAccess, controllers.User)
+
+	// proxy
 	r.Any("api/proxy", controllers.Proxy)
+
+	// stability ai
 	r.POST("api/stability/text-to-image", middleware.CheckExecutionAccess, stability.TextToImage)
 	r.POST("api/stability/image-to-image", middleware.CheckExecutionAccess, stability.ImageToImage)
 	r.POST("api/stability/image-to-image/upscale", middleware.CheckExecutionAccess, stability.ImageToImageUpscale)
 	r.POST("api/stability/image-to-image/mask", middleware.CheckExecutionAccess, stability.ImageToImageMask)
+
+	// workflows
+	r.POST("api/workflows/new", middleware.CheckAccess, controllers.CreateWorkflow)
+
+	// workflows
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")

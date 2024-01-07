@@ -1,6 +1,9 @@
 package miscellaneous
 
-import "golang.org/x/exp/constraints"
+import (
+	"golang.org/x/exp/constraints"
+	"strings"
+)
 
 func Contains[T constraints.Ordered](item T, slice []T) bool {
 
@@ -40,4 +43,10 @@ func SlicesAreEquals[T constraints.Ordered](slice1, slice2 []T) bool {
 
 	return true
 
+}
+
+func LowerSlice(currentSlice []string) {
+	for i, v := range currentSlice {
+		currentSlice[i] = strings.ToLower(v)
+	}
 }
