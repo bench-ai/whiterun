@@ -959,7 +959,161 @@ export class textToImageHandler extends operatorHandler {
   constructor(editor, nodeId) {
     super(editor, nodeId);
     console.log("entered constructor");
+
   }
+
+  updateHeightAndWidth(event) {
+    const engineSelect = document.querySelector('.txt-to-img-engine');
+    const heightInput = document.querySelector('.txt-to-img-height');
+    const widthInput = document.querySelector('.txt-to-img-width');
+
+    const engineValue = engineSelect.value;
+
+    switch (engineValue) {
+      case "SDXL Beta":
+        heightInput.value = 512;
+        widthInput.value = 896;
+        break;
+      case "SDXL v0.9":
+        heightInput.value = 832;
+        widthInput.value = 1216;
+        break;
+      case "SDXL v1.0":
+        heightInput.value = 832;
+        widthInput.value = 1216;
+        break;
+      case "SD v1.6":
+        heightInput.value = 832;
+        widthInput.value = 1216;
+        break;
+      default:
+        heightInput.value = 512;
+        widthInput.value = 512;
+    }
+  }
+
+  getIntInputValue(fieldNumber) {
+    const val = parseFloat(this.getInputValue(fieldNumber, "static"))
+    if (isNaN(val)) {
+      throw new TypeCastingError("int", "string")
+    } else {
+      return val
+    }
+  }
+
+  updateVisualizations() {
+    let name = this.getInputValue(0, "static");
+    let seed;
+
+    this.setField(this.getVisualProperties("txt-to-img-name"), "textContent", name)
+    try {
+      seed = this.getIntInputValue(1)
+    } catch (error) {
+      return false
+    }
+
+    if ((0 <= seed) && (seed <= 4294967295)) {
+      this.setField(this.getVisualProperties("txt-to-img-seed"), "value", seed)
+    } else {
+      return false;
+    }
+
+    try {
+      let prompt = this.getInputValue(0, "dynamic")
+
+      if (prompt.startsWith("{") || prompt.startsWith("[")) {
+        prompt = JSON.parse(prompt)
+        prompt = JSON.stringify(prompt, null, 3);
+      }
+
+      const output = this.getVisualProperties("txt-to-img-prompt")
+
+      this.setField(output, "textContent", prompt)
+
+      return super.updateVisualizations();
+
+    } catch (error) {
+      return false
+    }
+  }
+
+  setExecVisualizations() {
+    this.getVisualProperties("txt-to-img-style").disabled = false;
+    this.getVisualProperties("txt-to-img-prompt").readOnly = false;
+    this.getVisualProperties("txt-to-img-engine").disabled = false;
+    this.getVisualProperties("txt-to-img-clip").disabled = false;
+    this.getVisualProperties("txt-to-img-sampler").disabled = false;
+    this.getVisualProperties("txt-to-img-cfg").disabled = false;
+    this.getVisualProperties("txt-to-img-seed").disabled = false;
+    this.getVisualProperties("txt-to-img-step").disabled = false;
+
+    const engineSelect = this.getVisualProperties("txt-to-img-engine");
+    engineSelect.addEventListener("change", this.updateHeightAndWidth);
+
+    return super.setExecVisualizations();
+  }
+
+  removeExecVisualizations() {
+    this.setField(this.getVisualProperties("txt-to-img-style"), "disabled", "true")
+    this.setField(this.getVisualProperties("txt-to-img-prompt"), "readOnly", "true")
+    this.setField(this.getVisualProperties("txt-to-img-engine"), "disabled", "true")
+    this.setField(this.getVisualProperties("txt-to-img-clip"), "disabled", "true")
+    this.setField(this.getVisualProperties("txt-to-img-sampler"), "disabled", "true")
+    this.setField(this.getVisualProperties("txt-to-img-cfg"), "disabled", "true")
+    this.setField(this.getVisualProperties("txt-to-img-seed"), "disabled", "true")
+    this.setField(this.getVisualProperties("txt-to-img-step"), "disabled", "true")
+
+
+
+    return super.setExecVisualizations();
+  }
+
+  updateVisualOutput(jOut) {
+    if (typeof(jOut) === "object"){
+      jOut = JSON.stringify(jOut, null, 3);
+    }
+    else if(typeof(jOut) === "string"){
+      if (jOut.startsWith("{") || jOut.startsWith("[")) {
+        jOut = JSON.parse(jOut)
+        jOut = JSON.stringify(jOut, null, 3);
+      }
+    }
+
+    const output = this.getVisualProperties("txt-to-img-prompt")
+    this.setField(output, "textContent", jOut)
+
+  }
+
+  async getOutputObject(inputObject) {
+
+    const height = parseFloat(this.getVisualProperties("txt-to-img-height").value);
+    const width = parseFloat(this.getVisualProperties("txt-to-img-width").value);
+    const cfgScale = parseFloat(this.getVisualProperties("txt-to-img-cfg").value);
+    const seed = parseFloat(this.getVisualProperties("txt-to-img-seed").value);
+    const step = parseFloat(this.getVisualProperties("txt-to-img-step").value);
+
+    const data = inputObject["input_1"]
+    if (data !== undefined){
+      this.updateVisualOutput(inputObject["input_1"])
+    }
+
+    return this.checkOutputs({
+      "output_1": {
+        "height": height,
+        "width" : width,
+        "text_prompts": this.getVisualProperties("txt-to-img-prompt").value,
+        "style_preset": this.getVisualProperties("txt-to-img-style").value,
+        "engine_id": this.getVisualProperties("txt-to-img-engine").value,
+        "clip_guidance_preset": this.getVisualProperties("txt-to-img-clip").value,
+        "sampler": this.getVisualProperties("txt-to-img-sampler").value,
+        "cfg_scale": cfgScale,
+        "seed": seed,
+        "steps": step,
+      }
+    });
+  }
+
+
 
 }
 
