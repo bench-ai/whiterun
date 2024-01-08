@@ -491,7 +491,7 @@ body{
   height: 100px;
 }
 
-/*------------------------------*/
+/*---------Prompt Grouper------------*/
 
 .prompt-group-name {
   padding-top: 15px;
@@ -508,6 +508,66 @@ body{
   font-size: 14px;
   line-height: 1.4;
   height: 300px;
+}
+
+/*-------------Text to Image Operator--------------*/
+
+.txt-to-img-name {
+  padding-top: 15px;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+}
+
+
+.txt-to-img-height-title,
+.txt-to-img-width-title,
+.txt-to-img-engine-title,
+.txt-to-img-cfg-title,
+.txt-to-img-clip-title,
+.txt-to-img-sampler-title,
+.txt-to-img-seed-title,
+.txt-to-img-step-title,
+.txt-to-img-style-title {
+  font-size: 13px;
+  color: white;
+  flex: 1;
+  margin-bottom: 5px;
+  margin-right: 9px;
+}
+
+.txt-to-img-height,
+.txt-to-img-width,
+.txt-to-img-engine,
+.txt-to-img-cfg,
+.txt-to-img-clip,
+.txt-to-img-sampler,
+.txt-to-img-seed,
+.txt-to-img-step,
+.txt-to-img-style {
+  display: block;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #696b6f;
+  max-width: 100px;
+  margin-top: 10px;
+}
+
+.text-to-img-divider {
+  display: flex;
+  border: 0;
+  margin-top: 15px;
+}
+
+.text-to-img-prompt-divider {
+  margin-top: 15px;
+}
+.drawflow-node .txt-to-img-prompt {
+  border: solid 1px white;
+  background:  var(--background-color);
+  font-size: 14px;
+  line-height: 1.4;
+  height: 100px;
 }
 
 /*------------------------------*/

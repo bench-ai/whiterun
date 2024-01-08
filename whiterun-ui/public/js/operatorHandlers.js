@@ -26,6 +26,8 @@ export function getOperator(nodeId, editor) {
       return new ImagePromptHandler(editor, idNode)
     case 'promptGrouper':
       return new promptGrouperHandler(editor, idNode)
+    case 'textToImage':
+      return new textToImageHandler(editor,idNode)
     default:
       throw new ReferenceError("operator does not exist")
   }
@@ -909,6 +911,14 @@ export class promptGrouperHandler extends operatorHandler {
     return {
       "output_1": combinedPrompts,
     };
+  }
+
+}
+
+export class textToImageHandler extends operatorHandler {
+  constructor(editor, nodeId) {
+    super(editor, nodeId);
+    console.log("entered constructor");
   }
 
 }
