@@ -1,0 +1,23 @@
+{
+  "inputs": {
+    "static": [
+      {
+        "name": "name",
+        "type": "text",
+        "default_value": "textToImage"
+      }
+    ],
+    "dynamic": [
+      {
+        "name": "prompts",
+        "type": "list",
+        "default_value": null
+      }
+    ]
+  },
+  "outputs": [
+    {
+      "type": "file"
+    }
+  ]
+}

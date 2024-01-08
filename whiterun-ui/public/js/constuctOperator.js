@@ -77,6 +77,13 @@ export async function collectOperatorMetaData(name){
       operatorLogo = "assets/prompt-grouper-logo.svg";
       break;
 
+    case "textToImage":
+      viz = await fetchHTML("textToImage");
+      dataList = await fetchJSON("text_to_image");
+      operatorTitle = "Text to Image";
+      operatorLogo = "assets/palette-logo.svg";
+      break;
+
     default:
       throw new Error("invalid name")
   }
