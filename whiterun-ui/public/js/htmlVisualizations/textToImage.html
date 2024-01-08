@@ -3,7 +3,7 @@
         <div class="txt-to-img-name">textToImage</div>
         <div class="text-to-img-divider">
             <label class="txt-to-img-height-title">Height:
-                <input class="txt-to-img-height" type="number"/>
+                <input class="txt-to-img-height" type="number" disabled/>
             </label>
             <label class="txt-to-img-width-title">Width:
                 <input class="txt-to-img-width" type="number" disabled/>
@@ -11,7 +11,7 @@
         </div>
         <div class="text-to-img-divider">
             <label class="txt-to-img-style-title">Style:
-                <select class="txt-to-img-style">
+                <select class="txt-to-img-style" disabled>
                     <option value="3d-model">3d-model</option>
                     <option value="analog-film">analog-film</option>
                     <option value="anime">anime</option>
@@ -33,7 +33,7 @@
                 </select>
             </label>
             <label class="txt-to-img-engine-title">Engine:
-                <select class="txt-to-img-engine">
+                <select class="txt-to-img-engine" disabled>
                     <option value="SDXL Beta">SDXL Beta</option>
                     <option value="SDXL v0.9">SDXL v0.9</option>
                     <option value="mercedes">SDXL v1.0</option>
@@ -46,7 +46,7 @@
         </div>
         <div class="text-to-img-divider">
             <label class="txt-to-img-clip-title">Clip Guidance:
-                <select class="txt-to-img-clip">
+                <select class="txt-to-img-clip" disabled>
                     <option value="NONE">NONE</option>
                     <option value="FAST_BLUE">FAST_BLUE</option>
                     <option value="FAST_GREEN">SDXL v0.9</option>
@@ -57,7 +57,7 @@
                 </select>
             </label>
             <label class="txt-to-img-sampler-title">Sampler:
-                <select class="txt-to-img-sampler">
+                <select class="txt-to-img-sampler" disabled>
                     <option value=""></option>
                     <option value="DDIM">DDIM</option>
                     <option value="DDPM">DDPM</option>
@@ -79,6 +79,8 @@
             <label class="txt-to-img-seed-title">Seed:
                 <input class="txt-to-img-seed" type="number" value="0" min="0" max="4294967295" disabled/>
             </label>
+        </div>
+        <div class ="text-img-divider">
             <label class="txt-to-img-step-title">Steps:
                 <input class="txt-to-img-step" type="number" value="30" min="10" max="50" disabled/>
             </label>
