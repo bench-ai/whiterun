@@ -11,6 +11,7 @@ import Navbar from "./components/navbar/navbar";
 import {AuthProvider} from "./auth/auth_context";
 import Home from "./views/home/home";
 import ErrorPage from "./views/error_page/error_page";
+import Workbench from './views/workbench/workbench';
 
 const App = () => {
 
@@ -36,7 +37,7 @@ const App = () => {
                         {/*</Route>*/}
                         <Route path={"/browse"} element={<AppPage/>}/>
                         {/*<Route path={"/protected"} element={<Protected/>}/>*/}
-                        <Route path="/workbench" element={<DragAndDrop />} />
+                        <Route path="/workbench" element={<Workbench />} />
                         <Route path={"/home"} element={<Home/>}/>
                         <Route path={"/login"} element={<Login/>}/>
                         <Route path={"/register"} element={<Register/>}/>
