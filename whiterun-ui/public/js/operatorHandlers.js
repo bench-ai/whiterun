@@ -1,6 +1,5 @@
 import {evaluatePython} from "./pyodide.js";
-import {imageToImage, imageToImageMask, requestInterceptor, uploadImage} from "./api.js";
-
+import {imageToImage, imageUpscaler, textToImage, imageToImageMask, requestInterceptor, uploadImage} from "./api.js";
 
 class TypeCastingError extends Error {
   constructor(expectedType, receivedValue) {
@@ -33,6 +32,8 @@ export function getOperator(nodeId, editor) {
       return new ImageDisplayHandler(editor,idNode)
     case 'imageToImage':
       return new ImageToImageHandler(editor, idNode)
+    case 'imageUpscaler':
+      return new ImageUpscalerHandler(editor, idNode)
     case 'imageToImageMasking':
       return new ImageToImageMaskHandler(editor, idNode)
     default:
@@ -944,7 +945,7 @@ export class promptGrouperHandler extends operatorHandler {
 
         combinedPrompts.push({
           "weight": prompt.weight,
-          "prompt": prompt.prompt,
+          "text": prompt.text,
         });
       }
     }
@@ -962,8 +963,6 @@ export class promptGrouperHandler extends operatorHandler {
 export class textToImageHandler extends operatorHandler {
   constructor(editor, nodeId) {
     super(editor, nodeId);
-    console.log("entered constructor");
-
   }
 
   updateHeightAndWidth(event) {
@@ -974,19 +973,24 @@ export class textToImageHandler extends operatorHandler {
     const engineValue = engineSelect.value;
 
     switch (engineValue) {
-      case "SDXL Beta":
+      case "SDXL_Beta":
         heightInput.value = 512;
         widthInput.value = 896;
+        console.log(heightInput.value);
         break;
-      case "SDXL v0.9":
+      case "SDXL_v0.9":
         heightInput.value = 832;
         widthInput.value = 1216;
         break;
-      case "SDXL v1.0":
+      case "SDXL_v1.0":
         heightInput.value = 832;
         widthInput.value = 1216;
         break;
-      case "SD v1.6":
+      case "SD_v1.6":
+        heightInput.value = 832;
+        widthInput.value = 1216;
+        break;
+      case "SD_v2.1":
         heightInput.value = 832;
         widthInput.value = 1216;
         break;
@@ -994,6 +998,83 @@ export class textToImageHandler extends operatorHandler {
         heightInput.value = 512;
         widthInput.value = 512;
     }
+    heightInput.setAttribute("value", heightInput.value)
+    widthInput.setAttribute("value", widthInput.value)
+  }
+
+  updateCfg(event) {
+    if (event.target && event.target.classList.contains('txt-to-img-cfg')) {
+      const cfg = event.target;
+
+      cfg.addEventListener('blur', function() {
+        let cfgValue = parseFloat(cfg.value);
+
+        if (!isNaN(cfgValue) && cfgValue >= 0 && cfgValue <= 35) {
+          cfg.value = cfgValue;
+          cfg.setAttribute("value", cfgValue)
+        } else {
+          cfg.value = '7';
+          cfg.setAttribute("value", "7")
+        }
+      });
+    }
+  }
+
+  updateSeed(event) {
+    if (event.target && event.target.classList.contains('txt-to-img-seed')) {
+      const seed = event.target;
+
+      seed.addEventListener('blur', function() {
+        let seedValue = parseFloat(seed.value);
+
+        if (!isNaN(seedValue) && seedValue >= 0 && seedValue <= 4294967295) {
+          seed.value = seedValue;
+          seed.setAttribute("value", seedValue)
+        } else {
+          seed.value = '0';
+          seed.setAttribute("value", "0")
+        }
+      });
+    }
+  }
+
+  updateStep(event) {
+    if (event.target && event.target.classList.contains('txt-to-img-step')) {
+      const step = event.target;
+
+      step.addEventListener('blur', function() {
+        let stepValue = parseFloat(step.value);
+
+        if (!isNaN(stepValue) && stepValue >= 10 && stepValue <= 50) {
+          step.value = stepValue;
+          step.setAttribute("value", stepValue)
+        } else {
+          step.value = '30';
+          step.setAttribute("value", "30")
+        }
+      });
+    }
+  }
+
+  handleTextChange(event) {
+    const inputValue = event.target.value;
+
+    const targetList = event.target.getElementsByTagName("option")
+
+    const targetObject = {}
+
+    for (let i = 0; i < targetList.length; i++){
+      targetObject[targetList[i].value] = {
+        "number": i,
+        "text": targetList[i].textContent
+      }
+
+      targetList[i].removeAttribute("selected")
+    }
+
+    targetList[targetObject[inputValue]["number"]].setAttribute("selected", "true")
+    targetList[targetObject[inputValue]["number"]]["selected"] = "true"
+
   }
 
   getIntInputValue(fieldNumber) {
@@ -1006,10 +1087,11 @@ export class textToImageHandler extends operatorHandler {
   }
 
   updateVisualizations() {
-    let name = this.getInputValue(0, "static");
+    let name = this.getVisualProperties("txt-to-img-name");
     let seed;
 
-    this.setField(this.getVisualProperties("txt-to-img-name"), "textContent", name)
+    this.setField(name, "textContent", this.getInputValue(0, "static"))
+
     try {
       seed = this.getIntInputValue(1)
     } catch (error) {
@@ -1023,16 +1105,6 @@ export class textToImageHandler extends operatorHandler {
     }
 
     try {
-      let prompt = this.getInputValue(0, "dynamic")
-
-      if (prompt.startsWith("{") || prompt.startsWith("[")) {
-        prompt = JSON.parse(prompt)
-        prompt = JSON.stringify(prompt, null, 3);
-      }
-
-      const output = this.getVisualProperties("txt-to-img-prompt")
-
-      this.setField(output, "textContent", prompt)
 
       return super.updateVisualizations();
 
@@ -1042,24 +1114,40 @@ export class textToImageHandler extends operatorHandler {
   }
 
   setExecVisualizations() {
-    this.getVisualProperties("txt-to-img-style").disabled = false;
-    this.getVisualProperties("txt-to-img-prompt").readOnly = false;
-    this.getVisualProperties("txt-to-img-engine").disabled = false;
-    this.getVisualProperties("txt-to-img-clip").disabled = false;
-    this.getVisualProperties("txt-to-img-sampler").disabled = false;
-    this.getVisualProperties("txt-to-img-cfg").disabled = false;
-    this.getVisualProperties("txt-to-img-seed").disabled = false;
-    this.getVisualProperties("txt-to-img-step").disabled = false;
+    const styleSelect = this.getVisualProperties("txt-to-img-style")
+    this.deleteField(styleSelect, "disabled")
+    styleSelect.addEventListener("input", this.handleTextChange)
 
-    const engineSelect = this.getVisualProperties("txt-to-img-engine");
-    engineSelect.addEventListener("change", this.updateHeightAndWidth);
+    const engine = this.getVisualProperties("txt-to-img-engine")
+    this.deleteField(engine, "disabled")
+    engine.addEventListener("change", this.updateHeightAndWidth);
+    engine.addEventListener("input", this.handleTextChange)
+
+    const clip = this.getVisualProperties("txt-to-img-clip")
+    this.deleteField(clip, "disabled")
+    clip.addEventListener("input", this.handleTextChange)
+
+    const sampler = this.getVisualProperties("txt-to-img-sampler")
+    this.deleteField(sampler, "disabled")
+    sampler.addEventListener("input", this.handleTextChange)
+
+    const cfg = this.getVisualProperties("txt-to-img-cfg")
+    this.deleteField(cfg, "disabled")
+    cfg.addEventListener('input', this.updateCfg);
+
+    const seed = this.getVisualProperties("txt-to-img-seed")
+    this.deleteField(seed, "disabled")
+    seed.addEventListener('input', this.updateSeed);
+
+    const step = this.getVisualProperties("txt-to-img-step")
+    this.deleteField(step, "disabled")
+    step.addEventListener('input', this.updateStep);
 
     return super.setExecVisualizations();
   }
 
   removeExecVisualizations() {
     this.setField(this.getVisualProperties("txt-to-img-style"), "disabled", "true")
-    this.setField(this.getVisualProperties("txt-to-img-prompt"), "readOnly", "true")
     this.setField(this.getVisualProperties("txt-to-img-engine"), "disabled", "true")
     this.setField(this.getVisualProperties("txt-to-img-clip"), "disabled", "true")
     this.setField(this.getVisualProperties("txt-to-img-sampler"), "disabled", "true")
@@ -1067,26 +1155,31 @@ export class textToImageHandler extends operatorHandler {
     this.setField(this.getVisualProperties("txt-to-img-seed"), "disabled", "true")
     this.setField(this.getVisualProperties("txt-to-img-step"), "disabled", "true")
 
+    const styleSelect = this.getVisualProperties("txt-to-img-style")
+    styleSelect.removeEventListener("input", this.handleTextChange)
 
+    const engine = this.getVisualProperties("txt-to-img-engine")
+    engine.removeEventListener("change", this.updateHeightAndWidth);
+    engine.removeEventListener("input", this.handleTextChange)
+
+    const clip = this.getVisualProperties("txt-to-img-clip")
+    clip.removeEventListener("input", this.handleTextChange)
+
+    const sampler = this.getVisualProperties("txt-to-img-sampler")
+    sampler.removeEventListener("input", this.handleTextChange)
+
+    const cfg = this.getVisualProperties("txt-to-img-cfg")
+    cfg.removeEventListener('input', this.updateCfg);
+
+    const seed = this.getVisualProperties("txt-to-img-seed")
+    seed.removeEventListener('input', this.updateSeed);
+
+    const step = this.getVisualProperties("txt-to-img-step")
+    step.removeEventListener('input', this.updateStep);
 
     return super.setExecVisualizations();
   }
 
-  updateVisualOutput(jOut) {
-    if (typeof(jOut) === "object"){
-      jOut = JSON.stringify(jOut, null, 3);
-    }
-    else if(typeof(jOut) === "string"){
-      if (jOut.startsWith("{") || jOut.startsWith("[")) {
-        jOut = JSON.parse(jOut)
-        jOut = JSON.stringify(jOut, null, 3);
-      }
-    }
-
-    const output = this.getVisualProperties("txt-to-img-prompt")
-    this.setField(output, "textContent", jOut)
-
-  }
 
   async getOutputObject(inputObject) {
 
@@ -1096,29 +1189,56 @@ export class textToImageHandler extends operatorHandler {
     const seed = parseFloat(this.getVisualProperties("txt-to-img-seed").value);
     const step = parseFloat(this.getVisualProperties("txt-to-img-step").value);
 
-    const data = inputObject["input_1"]
-    if (data !== undefined){
-      this.updateVisualOutput(inputObject["input_1"])
+    let textPrompts = inputObject["input_1"]
+    console.log(textPrompts)
+
+    if (textPrompts) {
+      if (Array.isArray(textPrompts)) {
+      } else if (typeof textPrompts === "object") {
+        textPrompts = [textPrompts];
+      } else {
+        textPrompts = [];
+      }
+    } else {
+      textPrompts = [];
     }
 
-    return this.checkOutputs({
+    const requestBody = {
+      "height": height,
+      "width" : width,
+      "text_prompts": textPrompts,
+      "style_preset": this.getVisualProperties("txt-to-img-style").value,
+      "engine_id": this.getVisualProperties("txt-to-img-engine").value,
+      "clip_guidance_preset": this.getVisualProperties("txt-to-img-clip").value,
+      "sampler": this.getVisualProperties("txt-to-img-sampler").value,
+      "cfg_scale": cfgScale,
+      "seed": seed,
+      "steps": step,
+    };
+
+    let apiResponse;
+
+    try {
+      apiResponse = await requestInterceptor(textToImage, requestBody);
+    } catch(error) {
+      console.log(error);
+    }
+
+    console.log(apiResponse);
+
+    let fileId = apiResponse["url"].split("?X-Amz-Algorithm")[0]
+
+    fileId = fileId.split("amazonaws.com/")[1]
+
+    return {
       "output_1": {
-        "height": height,
-        "width" : width,
-        "text_prompts": this.getVisualProperties("txt-to-img-prompt").value,
-        "style_preset": this.getVisualProperties("txt-to-img-style").value,
-        "engine_id": this.getVisualProperties("txt-to-img-engine").value,
-        "clip_guidance_preset": this.getVisualProperties("txt-to-img-clip").value,
-        "sampler": this.getVisualProperties("txt-to-img-sampler").value,
-        "cfg_scale": cfgScale,
-        "seed": seed,
-        "steps": step,
+        "file_id": fileId,
+        "file": "",
+        "url": apiResponse["url"],
+        "type": "image"
       }
-    });
+    };
   }
-
-
-
 }
 
 export class ImageDisplayHandler extends operatorHandler {
@@ -1366,6 +1486,130 @@ export class ImageToImageHandler extends operatorHandler {
       "type": "image"
     }
   }}
+
+}
+
+export class ImageUpscalerHandler extends operatorHandler {
+
+  constructor(editor, nodeId) {
+    super(editor, nodeId);
+    this._image_set = false
+  }
+
+  setExecVisualizations() {
+    this.deleteField(this.getVisualProperties("download-Button"), "disabled")
+    this.getVisualProperties("download-Button").addEventListener('click', this.downloadImage);
+
+    return super.setExecVisualizations();
+  }
+
+  removeExecVisualizations() {
+    this.setField(this.getVisualProperties("download-Button"), "disabled", "true")
+    this.getVisualProperties("download-Button").removeEventListener('click', this.downloadImage);
+
+    if (this._image_set){
+      console.log("entered here2")
+      this.getVisualProperties("download-Button").removeEventListener('click', this.downloadImage);
+    }
+
+    return super.removeExecVisualizations();
+  }
+
+  downloadImage(event) {
+
+    console.log(event)
+
+    const visualizationElement = event.target.closest('.visualization');
+    const imageElement = visualizationElement.querySelector('.image-op-file');
+
+    let fc = (base64String) =>{
+      const matches = base64String.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64/);
+
+      if (matches && matches.length > 1) {
+        return matches[1];
+      } else {
+        // Default to a generic type if MIME type cannot be determined
+        return 'application/octet-stream';
+      }
+    }
+
+    // const fileId =  this.fileId
+    // Create an invisible anchor element
+    const a = document.createElement('a');
+    a.style.display = 'none';
+
+    const mime = fc(imageElement.src).split("/")[1]
+
+    // Set the download URL and filename
+    a.href = imageElement.src
+    a.download = `result.${mime}`;
+    a.target = "_blank"
+    a.rel = "noopener noreferrer"
+
+    // Append the anchor to the document and trigger a click event
+    document.body.appendChild(a);
+    a.click();
+
+    // Remove the anchor from the document
+    document.body.removeChild(a);
+  }
+
+  async getOutputObject(inputObject) {
+    const data = inputObject["input_1"];
+
+    // Extract file_id from the input file object
+    const fileId = data["file_id"];
+
+    // Create the request body for the API call
+    const requestBody = {
+      "width": 2048,
+      "image": fileId,
+      "engine_id": "ESRGAN_V1X2",
+    };
+
+    let apiResponse;
+
+    try {
+      // Make the API request
+      apiResponse = await requestInterceptor(imageUpscaler, requestBody);
+    } catch(error) {
+      console.log(error);
+      throw new Error("API request failed");
+    }
+
+    console.log(apiResponse);
+
+    const imageElement = this.getVisualProperties("image-op-file");
+    imageElement.src = apiResponse["url"];
+
+    return {
+
+    }
+
+    // if (data["type"] === "image") {
+    //
+    //   if (data["url"] !== "") {
+    //     const imageElement = this.getVisualProperties("image-op-file");
+    //     imageElement.src = data["url"];
+    //   } else if (data["file"] !== null) {
+    //     const imageElement = this.getVisualProperties("image-op-file");
+    //     const reader = new FileReader();
+    //
+    //     reader.onload = function(e) {
+    //       imageElement.src = e.target.result;
+    //     };
+    //
+    //     reader.readAsDataURL(data["file"]);
+    //   } else {
+    //     throw new Error("Unable to utilize data");
+    //   }
+    //
+    //   this._image_set = true;
+    //   return {};
+    // } else {
+    //   throw new Error("Can only work with image data");
+    // }
+  }
 
 }
 

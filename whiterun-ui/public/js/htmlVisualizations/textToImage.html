@@ -3,10 +3,10 @@
         <div class="txt-to-img-name">textToImage</div>
         <div class="text-to-img-divider">
             <label class="txt-to-img-height-title">Height:
-                <input class="txt-to-img-height" type="number" disabled/>
+                <input class="txt-to-img-height" type="number" value="512" disabled/>
             </label>
             <label class="txt-to-img-width-title">Width:
-                <input class="txt-to-img-width" type="number" disabled/>
+                <input class="txt-to-img-width" type="number" value="896" disabled/>
             </label>
         </div>
         <div class="text-to-img-divider">
@@ -18,7 +18,6 @@
                     <option value="cinematic">cinematic</option>
                     <option value="comic-book">comic-book</option>
                     <option value="digital-art">digital-art</option>
-                    <option value="SLOWEST">SLOWEST</option>
                     <option value="enhance">enhance</option>
                     <option value="fantasy-art">fantasy-art</option>
                     <option value="isometric">isometric</option>
@@ -34,15 +33,13 @@
             </label>
             <label class="txt-to-img-engine-title">Engine:
                 <select class="txt-to-img-engine" disabled>
-                    <option value="SDXL Beta">SDXL Beta</option>
-                    <option value="SDXL v0.9">SDXL v0.9</option>
-                    <option value="mercedes">SDXL v1.0</option>
-                    <option value="SD v1.6">SD v1.6</option>
+                    <option value="SDXL_Beta">SDXL_Beta</option>
+                    <option value="SDXL_v0.9">SDXL_v0.9</option>
+                    <option value="SDXL_v1.0">SDXL_v1.0</option>
+                    <option value="SD_v1.6">SD_v1.6</option>
+                    <option value="SD_v2.1">SD_v2.1</option>
                 </select>
             </label>
-        </div>
-        <div class=text-to-img-prompt-divider>Prompt:
-            <textarea class="txt-to-img-prompt" readonly> </textarea>
         </div>
         <div class="text-to-img-divider">
             <label class="txt-to-img-clip-title">Clip Guidance:
@@ -58,7 +55,6 @@
             </label>
             <label class="txt-to-img-sampler-title">Sampler:
                 <select class="txt-to-img-sampler" disabled>
-                    <option value=""></option>
                     <option value="DDIM">DDIM</option>
                     <option value="DDPM">DDPM</option>
                     <option value="K_DPMPP_2M">K_DPMPP_2M</option>

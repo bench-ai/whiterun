@@ -84,6 +84,13 @@ export async function collectOperatorMetaData(name){
       operatorLogo = "assets/palette-logo.svg";
       break;
 
+    case "imageUpscaler":
+      viz = await fetchHTML("imageUpscaler");
+      dataList = await fetchJSON("image_upscaler");
+      operatorTitle = "Image Upscaler";
+      operatorLogo = "assets/upscale-logo.svg";
+      break;
+
 
     case "imageDisplay":
       viz = await fetchHTML("imageDisplay");

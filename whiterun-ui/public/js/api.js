@@ -61,6 +61,48 @@ export async function saveWorkflow(body) {
 
 }
 
+export async function textToImage(body) {
+    const url = 'http://localhost:8080/api/stability/text-to-image';
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        console.log("in here")
+        console.log(response)
+        throw new Error(`status code is: ${response.status}`);
+    }
+
+    return response.json()
+}
+
+export async function imageUpscaler(body) {
+    const url = 'http://localhost:8080/api/stability/image-to-image/upscale';
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        console.log("in here")
+        console.log(response)
+        throw new Error(`status code is: ${response.status}`);
+    }
+
+    return response.json()
+}
+
 
 export async function getWorkflow(id){
     const response = await fetch(`http://localhost:8080/api/workflows?id=${id}`, {
