@@ -204,6 +204,13 @@ const DragAndDrop = () => {
       </i>
     </div>
     
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageToImageMasking">
+      <span class="operator-title">Mask Image to Image Operator</span>
+      <i class="icon">
+        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
+      </i>
+    </div>
+    
     
 
   </div>
