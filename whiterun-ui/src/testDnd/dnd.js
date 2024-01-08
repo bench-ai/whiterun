@@ -204,7 +204,12 @@ const DragAndDrop = () => {
       </i>
     </div>
     
-    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageUpscaler">
+      <span class="operator-title">Image Upscaler</span>
+      <i class="icon">
+        <img class="logo" src="assets/upscale-logo.svg" alt="Icon description" draggable="false">
+      </i>
+    </div>
 
   </div>
 

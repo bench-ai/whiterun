@@ -1,5 +1,5 @@
 import {evaluatePython} from "./pyodide.js";
-import {imageToImage, textToImage, requestInterceptor, uploadImage} from "./api.js";
+import {imageToImage, textToImage, requestInterceptor, uploadImage, imageUpscaler} from "./api.js";
 
 
 class TypeCastingError extends Error {
@@ -33,6 +33,8 @@ export function getOperator(nodeId, editor) {
       return new ImageDisplayHandler(editor,idNode)
     case 'imageToImage':
       return new ImageToImageHandler(editor, idNode)
+    case 'imageUpscaler':
+      return new ImageUpscalerHandler(editor, idNode)
     default:
       throw new ReferenceError("operator does not exist")
   }
@@ -1213,30 +1215,29 @@ export class textToImageHandler extends operatorHandler {
       "steps": step,
     };
 
+    let apiResponse;
+
     try {
-      const apiResponse = await textToImage(requestBody);
-      console.log(apiResponse);
-      console.log("Success");
+      apiResponse = await requestInterceptor(textToImage, requestBody);
     } catch(error) {
       console.log(error);
     }
 
-    return this.checkOutputs({
-      "output_1": {
-        "height": height,
-        "width" : width,
-        "text_prompts": textPrompts,
-        "style_preset": this.getVisualProperties("txt-to-img-style").value,
-        "engine_id": this.getVisualProperties("txt-to-img-engine").value,
-        "clip_guidance_preset": this.getVisualProperties("txt-to-img-clip").value,
-        "sampler": this.getVisualProperties("txt-to-img-sampler").value,
-        "cfg_scale": cfgScale,
-        "seed": seed,
-        "steps": step,
-      }
-    });
-  }
+    console.log(apiResponse);
 
+    let fileId = apiResponse["url"].split("?X-Amz-Algorithm")[0]
+
+    fileId = fileId.split("amazonaws.com/")[1]
+
+    return {
+      "output_1": {
+        "file_id": fileId,
+        "file": "",
+        "url": apiResponse["url"],
+        "type": "image"
+      }
+    };
+  }
 }
 
 export class ImageDisplayHandler extends operatorHandler {
@@ -1488,6 +1489,130 @@ export class ImageToImageHandler extends operatorHandler {
       "type": "image"
     }
   }}
+
+}
+
+export class ImageUpscalerHandler extends operatorHandler {
+
+  constructor(editor, nodeId) {
+    super(editor, nodeId);
+    this._image_set = false
+  }
+
+  setExecVisualizations() {
+    this.deleteField(this.getVisualProperties("download-Button"), "disabled")
+    this.getVisualProperties("download-Button").addEventListener('click', this.downloadImage);
+
+    return super.setExecVisualizations();
+  }
+
+  removeExecVisualizations() {
+    this.setField(this.getVisualProperties("download-Button"), "disabled", "true")
+    this.getVisualProperties("download-Button").removeEventListener('click', this.downloadImage);
+
+    if (this._image_set){
+      console.log("entered here2")
+      this.getVisualProperties("download-Button").removeEventListener('click', this.downloadImage);
+    }
+
+    return super.removeExecVisualizations();
+  }
+
+  downloadImage(event) {
+
+    console.log(event)
+
+    const visualizationElement = event.target.closest('.visualization');
+    const imageElement = visualizationElement.querySelector('.image-op-file');
+
+    let fc = (base64String) =>{
+      const matches = base64String.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64/);
+
+      if (matches && matches.length > 1) {
+        return matches[1];
+      } else {
+        // Default to a generic type if MIME type cannot be determined
+        return 'application/octet-stream';
+      }
+    }
+
+    // const fileId =  this.fileId
+    // Create an invisible anchor element
+    const a = document.createElement('a');
+    a.style.display = 'none';
+
+    const mime = fc(imageElement.src).split("/")[1]
+
+    // Set the download URL and filename
+    a.href = imageElement.src
+    a.download = `result.${mime}`;
+    a.target = "_blank"
+    a.rel = "noopener noreferrer"
+
+    // Append the anchor to the document and trigger a click event
+    document.body.appendChild(a);
+    a.click();
+
+    // Remove the anchor from the document
+    document.body.removeChild(a);
+  }
+
+  async getOutputObject(inputObject) {
+    const data = inputObject["input_1"];
+
+    // Extract file_id from the input file object
+    const fileId = data["file_id"];
+
+    // Create the request body for the API call
+    const requestBody = {
+      "width": 2048,
+      "image": fileId,
+      "engine_id": "ESRGAN_V1X2",
+    };
+
+    let apiResponse;
+
+    try {
+      // Make the API request
+      apiResponse = await requestInterceptor(imageUpscaler, requestBody);
+    } catch(error) {
+      console.log(error);
+      throw new Error("API request failed");
+    }
+
+    console.log(apiResponse);
+
+    const imageElement = this.getVisualProperties("image-op-file");
+    imageElement.src = apiResponse["url"];
+
+    return {
+
+    }
+
+    // if (data["type"] === "image") {
+    //
+    //   if (data["url"] !== "") {
+    //     const imageElement = this.getVisualProperties("image-op-file");
+    //     imageElement.src = data["url"];
+    //   } else if (data["file"] !== null) {
+    //     const imageElement = this.getVisualProperties("image-op-file");
+    //     const reader = new FileReader();
+    //
+    //     reader.onload = function(e) {
+    //       imageElement.src = e.target.result;
+    //     };
+    //
+    //     reader.readAsDataURL(data["file"]);
+    //   } else {
+    //     throw new Error("Unable to utilize data");
+    //   }
+    //
+    //   this._image_set = true;
+    //   return {};
+    // } else {
+    //   throw new Error("Can only work with image data");
+    // }
+  }
 
 }
 
