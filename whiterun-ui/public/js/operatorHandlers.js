@@ -1,4 +1,5 @@
 import {evaluatePython} from "./pyodide.js";
+import {requestInterceptor, uploadImage} from "./api.js";
 
 
 class TypeCastingError extends Error {
@@ -28,6 +29,8 @@ export function getOperator(nodeId, editor) {
       return new promptGrouperHandler(editor, idNode)
     case 'textToImage':
       return new textToImageHandler(editor,idNode)
+    case 'imageDisplay':
+      return new ImageDisplayHandler(editor,idNode)
     default:
       throw new ReferenceError("operator does not exist")
   }
@@ -63,6 +66,13 @@ function checkOperatorTypes(type, value){
           break
         case "object":
           objectType = "object"
+          if(value.hasOwnProperty("file_id") &&
+              value.hasOwnProperty("file") &&
+              value.hasOwnProperty("type") &&
+              value.hasOwnProperty("url")){
+
+            objectType = "file"
+          }
           break;
         default:
           throw new TypeCastingError("unknown", typeof(value).toLowerCase())
@@ -132,6 +142,24 @@ function checkOperatorTypes(type, value){
           throw new TypeCastingError("boolean", "string")
         }
         break;
+      case 'file':
+        try{
+          value = JSON.parse(value)
+        }catch (error){
+          throw new TypeCastingError("object", "string")
+        }
+
+        if(!(value.hasOwnProperty("file_id") &&
+            value.hasOwnProperty("file") &&
+            value.hasOwnProperty("type") &&
+            value.hasOwnProperty("url"))){
+
+          throw new TypeCastingError("file", "object")
+        }
+
+        break;
+      default:
+        throw new TypeCastingError("unknown", typeof(value).toLowerCase())
     }
 
     return value
@@ -566,7 +594,7 @@ export class ImageHandler extends operatorHandler {
     }
   }
 
-  changeInput(event){
+  async changeInput(event){
     if (event.target && event.target.classList.contains('image-input')) {
       const fileInput = event.target;
       const imageElement = fileInput.parentElement.querySelector('.image-op-file');
@@ -581,6 +609,23 @@ export class ImageHandler extends operatorHandler {
         reader.readAsDataURL(fileInput.files[0]);
       }
     }
+  }
+
+  async getOutputObject(inputObject) {
+
+    const fileInput = this.getVisualProperties("image-input")
+    const body = await requestInterceptor(uploadImage, fileInput, true)
+    console.log(body)
+
+    // this.checkOutputs()
+    return this.checkOutputs({
+      "output_1": {
+        "type": "image",
+        "file_id": body["key"],
+        "file":  fileInput.files[0],
+        "url": ""
+      }
+    });
   }
 
   setExecVisualizations() {
@@ -680,9 +725,6 @@ export class JsonDisplayHandler extends operatorHandler {
 
       const output = this.getVisualProperties("json-output")
       let jName = this.getVisualProperties("json-operator-name")
-
-      // output.textContent = jOut
-      // jName.textContent = this.getInputValue(0, "static")
 
       this.setField(output,"textContent", jOut)
       this.setField(jName,"textContent", this.getInputValue(0, "static"))
@@ -811,10 +853,6 @@ export class ImagePromptHandler extends operatorHandler {
   }
 
   removeExecVisualizations() {
-    // this.getVisualProperties("ipo-name").disabled = true;
-    // this.getVisualProperties("ipo-weight").disabled = true;
-    // this.getVisualProperties("ipo-negative").disabled = true;
-    // this.getVisualProperties("ipo-prompt").readOnly = true;
 
     this.setField(this.getVisualProperties("ipo-name"), "disabled", "true")
     this.setField(this.getVisualProperties("ipo-weight"), "disabled", "true")
@@ -891,6 +929,7 @@ export class promptGrouperHandler extends operatorHandler {
   }
 
   async getOutputObject(inputObject) {
+    // inputObject = await super.getOutputObject(inputObject)
     const combinedPrompts = [];
 
     for (let i = 1; i <= 5; i++) {
@@ -898,6 +937,7 @@ export class promptGrouperHandler extends operatorHandler {
 
       // Check if the prompt exists
       if (prompt) {
+
         combinedPrompts.push({
           "weight": prompt.weight,
           "prompt": prompt.prompt,
@@ -921,5 +961,102 @@ export class textToImageHandler extends operatorHandler {
     console.log("entered constructor");
   }
 
+}
+
+export class ImageDisplayHandler extends operatorHandler {
+
+  constructor(editor, nodeId) {
+    super(editor, nodeId);
+    this._image_set = false
+  }
+  setExecVisualizations() {
+
+    this.deleteField(this.getVisualProperties("download-Button"), "disabled")
+    this.getVisualProperties("download-Button").addEventListener('click', this.downloadImage);
+
+    return super.setExecVisualizations();
+  }
+
+  removeExecVisualizations() {
+    this.setField(this.getVisualProperties("download-Button"), "disabled", "true")
+    this.getVisualProperties("download-Button").removeEventListener('click', this.downloadImage);
+
+    if (this._image_set){
+      console.log("entered here2")
+      this.getVisualProperties("download-Button").removeEventListener('click', this.downloadImage);
+    }
+
+    return super.removeExecVisualizations();
+  }
+
+
+  downloadImage(event, fileName) {
+
+    console.log(event)
+
+    const visualizationElement = event.target.closest('.visualization');
+    const imageElement = visualizationElement.querySelector('.image-op-file');
+
+    let fc = (base64String) =>{
+      const matches = base64String.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64/);
+
+      if (matches && matches.length > 1) {
+        return matches[1];
+      } else {
+        // Default to a generic type if MIME type cannot be determined
+        return 'application/octet-stream';
+      }
+    }
+
+    // const fileId =  this.fileId
+    // Create an invisible anchor element
+    const a = document.createElement('a');
+    a.style.display = 'none';
+
+    const mime = fc(imageElement.src).split("/")[1]
+
+    // Set the download URL and filename
+    a.href = imageElement.src
+    a.download = `result.${mime}`;
+
+    // Append the anchor to the document and trigger a click event
+    document.body.appendChild(a);
+    a.click();
+
+    // Remove the anchor from the document
+    document.body.removeChild(a);
+  }
+
+  async getOutputObject(inputObject) {
+    const data = inputObject["input_1"]
+
+    console.log(data)
+
+    if (data["type"] === "image"){
+
+      if(data["url"] !== "") {
+        console.log("here2")
+      } else if (data["file"] !== null){
+
+        const imageElement = this.getVisualProperties("image-op-file")
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+          imageElement.src = e.target.result;
+        };
+
+        reader.readAsDataURL(data["file"]);
+
+      } else{
+        throw new Error("unable to utilize data")
+      }
+
+      this._image_set = true
+      return {}
+    }else{
+      throw new Error("can only work with image data")
+    }
+  }
 }
 
