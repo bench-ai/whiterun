@@ -169,6 +169,13 @@ const DragAndDrop = () => {
       </i>
     </div>
     
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageDisplay">
+      <span class="operator-title">Image Display Operator</span>
+      <i class="icon">
+        <img class="logo" src="assets/image-logo.svg" alt="Icon description" draggable="false">
+      </i>
+    </div>
+    
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="weightedPrompt">
       <span class="operator-title">Image Prompt Operator</span>
       <i class="icon">
@@ -189,6 +196,15 @@ const DragAndDrop = () => {
         <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
       </i>
     </div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageToImage">
+      <span class="operator-title">Image to Image Operator</span>
+      <i class="icon">
+        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
+      </i>
+    </div>
+    
+    
 
   </div>
 

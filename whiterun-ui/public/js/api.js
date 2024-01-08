@@ -77,6 +77,52 @@ export async function getWorkflow(id){
     return response.json()
 }
 
+export async function uploadImage(fileInput){
+
+    const formData = new FormData();
+
+    formData.append('file', fileInput.files[0]);
+
+    console.log(formData.get("file"))
+
+    const response = await fetch(`http://localhost:8080/api/upload/image`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+    });
+
+    if (!response.ok) {
+        throw new Error(`status code is: ${response.status}`);
+    }
+
+    return response.json()
+}
+
+export async function imageToImage(body){
+
+    const url = 'http://localhost:8080/api/stability/image-to-image';
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(body),
+    });
+
+    // console.log(response)
+
+    if (!response.ok) {
+        // console.log("in here")
+        console.log(response)
+        throw new Error(`status code is: ${response.status}`);
+    }
+
+
+    return response.json()
+}
+
 
 export async function requestInterceptor(apiRequest, requestBody, redirect) {
     try {

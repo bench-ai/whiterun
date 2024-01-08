@@ -1,4 +1,5 @@
 import {evaluatePython} from "./pyodide.js";
+import {imageToImage, requestInterceptor, uploadImage} from "./api.js";
 
 
 class TypeCastingError extends Error {
@@ -28,6 +29,10 @@ export function getOperator(nodeId, editor) {
       return new promptGrouperHandler(editor, idNode)
     case 'textToImage':
       return new textToImageHandler(editor,idNode)
+    case 'imageDisplay':
+      return new ImageDisplayHandler(editor,idNode)
+    case 'imageToImage':
+      return new ImageToImageHandler(editor, idNode)
     default:
       throw new ReferenceError("operator does not exist")
   }
@@ -63,6 +68,13 @@ function checkOperatorTypes(type, value){
           break
         case "object":
           objectType = "object"
+          if(value.hasOwnProperty("file_id") &&
+              value.hasOwnProperty("file") &&
+              value.hasOwnProperty("type") &&
+              value.hasOwnProperty("url")){
+
+            objectType = "file"
+          }
           break;
         default:
           throw new TypeCastingError("unknown", typeof(value).toLowerCase())
@@ -132,6 +144,24 @@ function checkOperatorTypes(type, value){
           throw new TypeCastingError("boolean", "string")
         }
         break;
+      case 'file':
+        try{
+          value = JSON.parse(value)
+        }catch (error){
+          throw new TypeCastingError("object", "string")
+        }
+
+        if(!(value.hasOwnProperty("file_id") &&
+            value.hasOwnProperty("file") &&
+            value.hasOwnProperty("type") &&
+            value.hasOwnProperty("url"))){
+
+          throw new TypeCastingError("file", "object")
+        }
+
+        break;
+      default:
+        throw new TypeCastingError("unknown", typeof(value).toLowerCase())
     }
 
     return value
@@ -566,7 +596,7 @@ export class ImageHandler extends operatorHandler {
     }
   }
 
-  changeInput(event){
+  async changeInput(event){
     if (event.target && event.target.classList.contains('image-input')) {
       const fileInput = event.target;
       const imageElement = fileInput.parentElement.querySelector('.image-op-file');
@@ -581,6 +611,23 @@ export class ImageHandler extends operatorHandler {
         reader.readAsDataURL(fileInput.files[0]);
       }
     }
+  }
+
+  async getOutputObject(inputObject) {
+
+    const fileInput = this.getVisualProperties("image-input")
+    const body = await requestInterceptor(uploadImage, fileInput, true)
+    console.log(body)
+
+    // this.checkOutputs()
+    return this.checkOutputs({
+      "output_1": {
+        "type": "image",
+        "file_id": body["key"],
+        "file":  fileInput.files[0],
+        "url": ""
+      }
+    });
   }
 
   setExecVisualizations() {
@@ -680,9 +727,6 @@ export class JsonDisplayHandler extends operatorHandler {
 
       const output = this.getVisualProperties("json-output")
       let jName = this.getVisualProperties("json-operator-name")
-
-      // output.textContent = jOut
-      // jName.textContent = this.getInputValue(0, "static")
 
       this.setField(output,"textContent", jOut)
       this.setField(jName,"textContent", this.getInputValue(0, "static"))
@@ -811,10 +855,6 @@ export class ImagePromptHandler extends operatorHandler {
   }
 
   removeExecVisualizations() {
-    // this.getVisualProperties("ipo-name").disabled = true;
-    // this.getVisualProperties("ipo-weight").disabled = true;
-    // this.getVisualProperties("ipo-negative").disabled = true;
-    // this.getVisualProperties("ipo-prompt").readOnly = true;
 
     this.setField(this.getVisualProperties("ipo-name"), "disabled", "true")
     this.setField(this.getVisualProperties("ipo-weight"), "disabled", "true")
@@ -841,7 +881,7 @@ export class ImagePromptHandler extends operatorHandler {
     return this.checkOutputs({
       "output_1": {
         "weight": finalWeight,
-        "prompt": this.getVisualProperties("ipo-prompt").value,
+        "text": this.getVisualProperties("ipo-prompt").value,
       }
     });
   }
@@ -891,6 +931,7 @@ export class promptGrouperHandler extends operatorHandler {
   }
 
   async getOutputObject(inputObject) {
+    // inputObject = await super.getOutputObject(inputObject)
     const combinedPrompts = [];
 
     for (let i = 1; i <= 5; i++) {
@@ -898,6 +939,7 @@ export class promptGrouperHandler extends operatorHandler {
 
       // Check if the prompt exists
       if (prompt) {
+
         combinedPrompts.push({
           "weight": prompt.weight,
           "prompt": prompt.prompt,
@@ -1074,6 +1116,258 @@ export class textToImageHandler extends operatorHandler {
   }
 
 
+
+}
+
+export class ImageDisplayHandler extends operatorHandler {
+
+  constructor(editor, nodeId) {
+    super(editor, nodeId);
+    this._image_set = false
+  }
+  setExecVisualizations() {
+
+    this.deleteField(this.getVisualProperties("download-Button"), "disabled")
+    this.getVisualProperties("download-Button").addEventListener('click', this.downloadImage);
+
+    return super.setExecVisualizations();
+  }
+
+  removeExecVisualizations() {
+    this.setField(this.getVisualProperties("download-Button"), "disabled", "true")
+    this.getVisualProperties("download-Button").removeEventListener('click', this.downloadImage);
+
+    if (this._image_set){
+      console.log("entered here2")
+      this.getVisualProperties("download-Button").removeEventListener('click', this.downloadImage);
+    }
+
+    return super.removeExecVisualizations();
+  }
+
+
+  downloadImage(event) {
+
+    console.log(event)
+
+    const visualizationElement = event.target.closest('.visualization');
+    const imageElement = visualizationElement.querySelector('.image-op-file');
+
+    let fc = (base64String) =>{
+      const matches = base64String.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64/);
+
+      if (matches && matches.length > 1) {
+        return matches[1];
+      } else {
+        // Default to a generic type if MIME type cannot be determined
+        return 'application/octet-stream';
+      }
+    }
+
+    // const fileId =  this.fileId
+    // Create an invisible anchor element
+    const a = document.createElement('a');
+    a.style.display = 'none';
+
+    const mime = fc(imageElement.src).split("/")[1]
+
+    // Set the download URL and filename
+    a.href = imageElement.src
+    a.download = `result.${mime}`;
+    a.target = "_blank"
+    a.rel = "noopener noreferrer"
+
+    // Append the anchor to the document and trigger a click event
+    document.body.appendChild(a);
+    a.click();
+
+    // Remove the anchor from the document
+    document.body.removeChild(a);
+  }
+
+  async getOutputObject(inputObject) {
+    const data = inputObject["input_1"]
+
+    console.log(data)
+
+    if (data["type"] === "image"){
+
+      if(data["url"] !== "") {
+        const imageElement = this.getVisualProperties("image-op-file")
+        imageElement.src = data["url"]
+
+      } else if (data["file"] !== null){
+
+        const imageElement = this.getVisualProperties("image-op-file")
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+          imageElement.src = e.target.result;
+        };
+
+        reader.readAsDataURL(data["file"]);
+
+      } else{
+        throw new Error("unable to utilize data")
+      }
+
+      this._image_set = true
+      return {}
+    }else{
+      throw new Error("can only work with image data")
+    }
+  }
+}
+
+export class ImageToImageHandler extends operatorHandler {
+
+
+  handleInputChange(event) {
+    const inputValue = event.target.value;
+    event.target.setAttribute("value", inputValue)
+    event.target["value"] = inputValue
+  }
+
+  handleTextChange(event) {
+    const inputValue = event.target.value;
+
+    const targetList = event.target.getElementsByTagName("option")
+
+    const targetObject = {}
+
+    for (let i = 0; i < targetList.length; i++){
+      targetObject[targetList[i].value] = {
+        "number": i,
+        "text": targetList[i].textContent
+      }
+
+      targetList[i].removeAttribute("selected")
+    }
+
+    targetList[targetObject[inputValue]["number"]].setAttribute("selected", "true")
+    targetList[targetObject[inputValue]["number"]]["selected"] = "true"
+
+  }
+
+  setExecVisualizations() {
+    this.deleteField(this.getVisualProperties("txt-to-img-style"), "disabled");
+    this.deleteField(this.getVisualProperties("txt-to-img-engine"), "disabled");
+    this.deleteField(this.getVisualProperties("txt-to-img-clip"), "disabled");
+    this.deleteField(this.getVisualProperties("txt-to-img-sampler"), "disabled");
+    this.deleteField(this.getVisualProperties("txt-to-img-cfg"), "disabled");
+    this.deleteField(this.getVisualProperties("txt-to-img-seed"), "disabled");
+    this.deleteField(this.getVisualProperties("txt-to-img-step"), "disabled");
+    this.deleteField(this.getVisualProperties("txt-to-img-strength"), "disabled");
+
+    this.getVisualProperties("txt-to-img-style")
+        .addEventListener('input',this.handleTextChange);
+
+    this.getVisualProperties("txt-to-img-engine")
+        .addEventListener('input',this.handleTextChange);
+
+    this.getVisualProperties("txt-to-img-clip")
+        .addEventListener('input',this.handleTextChange);
+
+    this.getVisualProperties("txt-to-img-sampler")
+        .addEventListener('input',this.handleTextChange);
+
+    this.getVisualProperties("txt-to-img-cfg")
+        .addEventListener('input',this.handleInputChange);
+
+    this.getVisualProperties("txt-to-img-seed")
+        .addEventListener('input',this.handleInputChange);
+
+    this.getVisualProperties("txt-to-img-step")
+        .addEventListener('input',this.handleInputChange);
+
+    this.getVisualProperties("txt-to-img-strength")
+        .addEventListener('input',this.handleInputChange);
+
+    return super.setExecVisualizations();
+  }
+
+  removeExecVisualizations() {
+    this.setField(this.getVisualProperties("txt-to-img-style"), "disabled", "true")
+    this.setField(this.getVisualProperties("txt-to-img-engine"), "disabled", "true")
+    this.setField(this.getVisualProperties("txt-to-img-clip"), "disabled", "true")
+    this.setField(this.getVisualProperties("txt-to-img-sampler"), "disabled", "true")
+    this.setField(this.getVisualProperties("txt-to-img-cfg"), "disabled", "true")
+    this.setField(this.getVisualProperties("txt-to-img-seed"), "disabled", "true")
+    this.setField(this.getVisualProperties("txt-to-img-step"), "disabled", "true")
+    this.setField(this.getVisualProperties("txt-to-img-strength"), "disabled", "true");
+
+    this.getVisualProperties("txt-to-img-style")
+        .removeEventListener('input',this.handleInputChange);
+
+    this.getVisualProperties("txt-to-img-engine")
+        .removeEventListener('input',this.handleInputChange);
+
+    this.getVisualProperties("txt-to-img-clip")
+        .removeEventListener('input',this.handleInputChange);
+
+    this.getVisualProperties("txt-to-img-sampler")
+        .removeEventListener('input',this.handleInputChange);
+
+    this.getVisualProperties("txt-to-img-cfg")
+        .removeEventListener('input',this.handleInputChange);
+
+    this.getVisualProperties("txt-to-img-seed")
+        .removeEventListener('input',this.handleInputChange);
+
+    this.getVisualProperties("txt-to-img-step")
+        .removeEventListener('input',this.handleInputChange);
+
+    this.getVisualProperties("txt-to-img-strength")
+        .removeEventListener('input',this.handleInputChange);
+
+    return super.setExecVisualizations();
+  }
+
+  async getOutputObject(inputObject) {
+    inputObject = await super.getOutputObject(inputObject)
+
+    console.log(inputObject)
+
+    let prompts = inputObject["input_1"]
+    const imgObject = inputObject["input_2"]
+    if (imgObject["type"] !== "image"){
+      throw TypeCastingError("Image file", imgObject["type"])
+    }
+
+    if(!Array.isArray(prompts)){
+      prompts = [prompts]
+    }
+
+    console.log()
+
+    const requestBody = {
+      "engine_id": this.getVisualProperties("txt-to-img-engine").value,
+      "text_prompts": prompts,
+      "cfg_scale": parseInt(this.getVisualProperties("txt-to-img-cfg").value),
+      "clip_guidance_preset": this.getVisualProperties("txt-to-img-clip").value,
+      "sampler": this.getVisualProperties("txt-to-img-sampler").value,
+      "seed": parseInt(this.getVisualProperties("txt-to-img-seed").value),
+      "steps": parseInt(this.getVisualProperties("txt-to-img-step").value),
+      "style_preset": this.getVisualProperties("txt-to-img-style").value,
+      "init_image": imgObject["file_id"],
+      "init_image_mode": "IMAGE_STRENGTH",
+      "image_strength": parseFloat(this.getVisualProperties("txt-to-img-strength").value)
+    }
+
+    const response = await imageToImage(requestBody)
+
+    let fileId = response["url"].split("?X-Amz-Algorithm")[0]
+
+    fileId = fileId.split("amazonaws.com/")[1]
+
+    return {"output_1": {
+      "file_id": fileId,
+      "file": "",
+      "url": response["url"],
+      "type": "image"
+    }
+  }}
 
 }
 
