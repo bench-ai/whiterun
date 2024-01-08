@@ -551,6 +551,7 @@ body{
   border-bottom: 2px solid #696b6f;
   max-width: 100px;
   margin-top: 10px;
+  color: white;
 }
 
 .text-to-img-divider {
@@ -561,6 +562,7 @@ body{
 
 .text-to-img-prompt-divider {
   margin-top: 15px;
+  color: white;
 }
 .drawflow-node .txt-to-img-prompt {
   border: solid 1px white;
