@@ -12,6 +12,7 @@ body{
   color: white;
   background: #0d1117;
   font-family: Inter;
+  overflow-y: hidden;
 }
 
 .drag-drawflow {
