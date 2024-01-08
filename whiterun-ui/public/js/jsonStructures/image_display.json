@@ -1,0 +1,12 @@
+{
+  "inputs": {
+    "static": [],
+    "dynamic": [
+      {
+        "name": "file",
+        "type": "file"
+      }
+    ]
+  },
+  "outputs": []
+}

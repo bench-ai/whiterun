@@ -544,6 +544,7 @@ body{
 .txt-to-img-sampler,
 .txt-to-img-seed,
 .txt-to-img-step,
+.txt-to-img-strength,
 .txt-to-img-style {
   display: block;
   background: transparent;
