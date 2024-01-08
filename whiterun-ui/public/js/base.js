@@ -57,19 +57,26 @@ async function saveDrawFlow(){
   Object.keys(exported_data["drawflow"]["Home"]["data"]).forEach(k =>{
     const currentNode = exported_data["drawflow"]["Home"]["data"][k]
     const nodeHtml = document.getElementById(`node-${k}`)
-    let saveHtml = nodeHtml.getElementsByClassName("drawflow_content_node")[0]
-    saveHtml = nodeHtml.getElementsByClassName("drawflow_content_node")[0]
 
+    let saveHtml = nodeHtml.getElementsByClassName("drawflow_content_node")[0]
+    saveHtml = saveHtml.cloneNode(true)
+
+    if(saveHtml.getElementsByClassName("image-op-file").length > 0){
+      let el = saveHtml.getElementsByClassName("image-op-file")
+      for (let i = 0; i < el.length; i++){
+        el[i].src = "./assets/image-logo.svg"
+      }
+    }
+
+    currentNode["html"] = saveHtml.innerHTML
     console.log(saveHtml)
-    // currentNode["html"] = saveHtml
-    // console.log(currentNode["html"])
   })
   const body = {
     "structure": exported_data,
     "id": parseUrl()
   }
 
-  // await saveWorkflow(body)
+  await requestInterceptor(saveWorkflow, body, true)
 }
 
 window.saveDrawFlow = saveDrawFlow;

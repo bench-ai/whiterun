@@ -187,6 +187,8 @@ class operatorHandler {
         }
       }
       nodeArrMap[i]["default_value"] = inputFields.item(i).value
+      this.setField( inputFields.item(i), "value", inputFields.item(i).value)
+      // inputFields.item(i).setAttribute("value", inputFields.item(i).value)
     }
     return [nodeArrMap, lastInputs]
   }
@@ -242,8 +244,11 @@ class operatorHandler {
     if (field.disabled) {
       return false
     } else {
-      field.value = "supplied by operator {opName}".replace("{opName}", operator2.name)
-      field.disabled = true
+      // field.value = "supplied by operator {opName}".replace("{opName}", operator2.name)
+      // field.disabled = true
+      this.setField(field, "value", `supplied by operator ${operator2.name}`)
+      // field.setAttribute("value", `supplied by operator ${operator2.name}`)
+      this.setField(field, "disabled","true")
       return true
     }
   }
@@ -253,8 +258,13 @@ class operatorHandler {
     const inputFields = this._operatorDoc.getElementsByClassName("insert-field-dynamic")
     const field = inputFields.item(num)
 
-    field.value = substitute_value
-    field.disabled = false
+    // field.value = substitute_value
+    // field.disabled = false
+    // field.setAttribute("value", substitute_value)
+    // field.setAttribute("disabled", "false")
+
+    this.deleteField(field, "disabled")
+    this.setField(field, "value", substitute_value)
 
     this.getUpdatedNodeData()
 
@@ -262,8 +272,11 @@ class operatorHandler {
       this.saveNodeData(editor)
       return true;
     } else {
+      console.log("here")
       this.resetInputFields()
       field.disabled = true;
+      this.deleteField(field, "disabled")
+      // field.setAttribute("disabled", "true")
       return false
     }
   }
@@ -271,13 +284,24 @@ class operatorHandler {
   _resetField(cls) {
     const inputFields = this._operatorDoc.getElementsByClassName(`insert-field-${cls}`)
     for (let i = 0; i < inputFields.length; i++) {
-      inputFields.item(i).value = this._lastInputs[cls][i]
+      // inputFields.item(i).value = this._lastInputs[cls][i]
+      // inputFields.item(i).setAttribute("value", this._lastInputs[cls][i])
+      this.setField(inputFields.item(i), "value", this._lastInputs[cls][i])
     }
   }
 
   resetInputFields() {
     this._resetField("static")
     this._resetField("dynamic")
+  }
+
+  setField(field, attribute, value){
+    field.setAttribute(attribute, value)
+    field[attribute] = value
+  }
+
+  deleteField(field, attribute){
+    field.removeAttribute(attribute)
   }
 
   saveNodeData(editor) {
@@ -319,6 +343,7 @@ class operatorHandler {
 
       for (let i = 0; i < inputFields.length; i++) {
         inputFields.item(i).disabled = true;
+        inputFields.item(i).setAttribute("disabled", "true")
       }
     }
 
@@ -334,6 +359,9 @@ class operatorHandler {
       for (let i = 0; i < inputFields.length; i++) {
         if(!notIndexArr.includes(i)){
           inputFields.item(i).disabled = false;
+          // console.log("here")
+          this.deleteField(inputFields.item(i), "disabled")
+          // inputFields.item(i).removeAttribute("disabled")
         }
       }
     }
@@ -428,11 +456,21 @@ export class SliderHandler extends operatorHandler {
       const cond2 = ((sliderValue < sliderMin) || (sliderValue > sliderMax))
 
       if (!(cond1 || cond2)) {
-        sliderOut.textContent = sliderValue.toString()
-        sliderName.textContent = this.getInputValue(0, "static")
-        slider.min = sliderMin.toString()
-        slider.max = sliderMax.toString()
-        slider.value = sliderValue.toString()
+        // sliderOut.textContent = sliderValue.toString()
+        this.setField(sliderOut, "textContent", sliderValue.toString())
+
+        // sliderName.textContent = this.getInputValue(0, "static")
+        this.setField(sliderName, "textContent", this.getInputValue(0, "static"))
+
+        // slider.min = sliderMin.toString()
+        this.setField(slider, "min", sliderMin.toString())
+
+        // slider.max = sliderMax.toString()
+        this.setField(slider, "max", sliderMax.toString())
+
+        // slider.value = sliderValue.toString()
+        this.setField(slider, "value", sliderValue.toString())
+
         return super.updateVisualizations()
       } else {
         return false
@@ -451,12 +489,16 @@ export class SliderHandler extends operatorHandler {
 
       const outputElement = event.target.parentElement.querySelector('.slider-operator-output');
       outputElement.textContent = event.target.value;
+
+      outputElement.setAttribute("textContent", event.target.value)
+      event.target.setAttribute("value", event.target.value)
     }
   }
 
   setExecVisualizations() {
     const slider = this.getVisualProperties("slider-operator")
-    slider.disabled = false;
+    // slider.disabled = false;
+    this.deleteField(slider, "disabled")
 
     this.getVisualizations().addEventListener('input', this.changeSlider);
     return super.setExecVisualizations()
@@ -464,7 +506,10 @@ export class SliderHandler extends operatorHandler {
 
   removeExecVisualizations() {
     const slider = this.getVisualProperties("slider-operator")
-    slider.disabled = true;
+    // slider.disabled = true;
+    // slider.setAttribute("disabled", "true")
+
+    this.setField(slider, "disabled", "true")
 
     this.getVisualizations().removeEventListener('input', this.changeSlider)
     return super.removeExecVisualizations();
@@ -505,6 +550,8 @@ export class ImageHandler extends operatorHandler {
     const name = this.getVisualProperties("image-operator-name")
     name.textContent = this.getInputValue(1, "static")
 
+    this.setField(name, "textContent", this.getInputValue(1, "static"))
+
     try {
       let js = JSON.parse(this.getInputValue(0, "static"))
       if (typeof (js) !== "object") {
@@ -536,14 +583,16 @@ export class ImageHandler extends operatorHandler {
 
   setExecVisualizations() {
     const imageButton = this.getVisualProperties("image-input")
-    imageButton.disabled = false;
+    // imageButton.disabled = false;
+    this.deleteField(imageButton,"disabled")
     this.getVisualizations().addEventListener('change', this.changeInput);
     return super.setExecVisualizations();
   }
 
   removeExecVisualizations() {
     const imageButton = this.getVisualProperties("image-input")
-    imageButton.disabled = true;
+    // imageButton.disabled = true;
+    this.setField(imageButton,"disabled", "true")
     this.getVisualizations().removeEventListener('change', this.changeInput)
     return super.removeExecVisualizations();
   }
@@ -557,25 +606,46 @@ export class TextHandler extends operatorHandler {
   updateVisualizations() {
     let name = this.getVisualProperties("text-operator-name")
     let content = this.getVisualProperties("text-input")
-    content.textContent = this.getInputValue(1, "static")
-    name.textContent = this.getInputValue(0, "static")
+    // content.textContent = this.getInputValue(1, "static")
+    // name.textContent = this.getInputValue(0, "static")
+
+    this.setField(content, "textContent", this.getInputValue(1, "static"))
+    this.setField(name,"textContent", this.getInputValue(0, "static"))
     return super.updateVisualizations()
+  }
+
+  changeText(event){
+    if (event.target && event.target.classList.contains('text-input')) {
+
+      // const outputElement = event.target.parentElement.querySelector('.slider-operator-output');
+      // outputElement.textContent = event.target.value;
+
+      console.log(event.target.textContent)
+
+      event.target.setAttribute("value", event.target.value)
+      event.target.textContent = event.target.value
+    }
   }
 
   setExecVisualizations() {
     const imageButton = this.getVisualProperties("text-input")
-    imageButton.readOnly = false;
+    // imageButton.readOnly = false;
+    this.deleteField(imageButton,"readOnly")
+    imageButton.addEventListener('input', this.changeText)
     return super.setExecVisualizations();
   }
 
   removeExecVisualizations() {
     const imageButton = this.getVisualProperties("text-input")
-    imageButton.readOnly = true;
+    // imageButton.readOnly = true;
+    this.setField(imageButton,"readOnly", "true")
+    imageButton.removeEventListener('input', this.changeText)
     return super.removeExecVisualizations();
   }
 }
 
 export class JsonDisplayHandler extends operatorHandler {
+
   constructor(editor, nodeId) {
     super(editor, nodeId);
   }
@@ -593,7 +663,8 @@ export class JsonDisplayHandler extends operatorHandler {
     }
 
     const output = this.getVisualProperties("json-output")
-    output.textContent = jOut
+    // output.textContent = jOut
+    this.setField(output,"textContent", jOut)
   }
 
   updateVisualizations() {
@@ -607,8 +678,12 @@ export class JsonDisplayHandler extends operatorHandler {
 
       const output = this.getVisualProperties("json-output")
       let jName = this.getVisualProperties("json-operator-name")
-      output.textContent = jOut
-      jName.textContent = this.getInputValue(0, "static")
+
+      // output.textContent = jOut
+      // jName.textContent = this.getInputValue(0, "static")
+
+      this.setField(output,"textContent", jOut)
+      this.setField(jName,"textContent", this.getInputValue(0, "static"))
 
       return super.updateVisualizations()
 
@@ -646,7 +721,8 @@ export class ImagePromptHandler extends operatorHandler {
     const negative = this.getInputValue(2, "static").toLowerCase();
     let weight;
 
-    this.getVisualProperties("ipo-name").textContent = name;
+    // this.getVisualProperties("ipo-name").textContent = name;
+    this.setField(this.getVisualProperties("ipo-name"), "textContent", name)
 
     try{
       weight = this.getIntInputValue(3);
@@ -655,22 +731,32 @@ export class ImagePromptHandler extends operatorHandler {
     }
 
     if ((0 <= weight) && (weight <= 2)) {
-      this.getVisualProperties("ipo-weight").value = weight;
-      this.getVisualProperties("ipo-weight-display").textContent = weight;
+      // this.getVisualProperties("ipo-weight").value = weight;
+      // this.getVisualProperties("ipo-weight-display").textContent = weight;
+
+      this.setField(this.getVisualProperties("ipo-weight"), "value", weight)
+      this.setField(this.getVisualProperties("ipo-weight-display"), "textContent", weight)
+
+
     } else {
       return false;
     }
 
     const isNegative = negative === "true";
 
-    this.getVisualProperties("ipo-negative").checked = isNegative;
+    // this.getVisualProperties("ipo-negative").checked = isNegative;
+    this.setField(this.getVisualProperties("ipo-negative"), "checked", isNegative)
 
     if (isNegative) {
       weight = weight * -1;
-      this.getVisualProperties("ipo-weight").value = weight * -1;
-      this.getVisualProperties("ipo-weight-display").textContent = weight;
+      // this.getVisualProperties("ipo-weight").value = weight * -1;
+      // this.getVisualProperties("ipo-weight-display").textContent = weight;
+
+      this.setField(this.getVisualProperties("ipo-weight"), "value", weight * -1)
+      this.setField(this.getVisualProperties("ipo-weight-display"), "textContent", weight)
     }
-    this.getVisualProperties("ipo-prompt").textContent = prompt;
+    // this.getVisualProperties("ipo-prompt").textContent = prompt;
+    this.setField(this.getVisualProperties("ipo-prompt"), "textContent", prompt)
 
 
     return super.updateVisualizations();
@@ -688,6 +774,8 @@ export class ImagePromptHandler extends operatorHandler {
       }
 
       outputElement.textContent = weight;
+      event.target.setAttribute("value", Math.abs(weight))
+      outputElement.setAttribute("textContent", weight)
     }
   }
 
@@ -701,7 +789,8 @@ export class ImagePromptHandler extends operatorHandler {
       weight *= -1;
     }
 
-    outputElement.textContent = weight;
+    // outputElement.textContent = weight;
+    this.setField(outputElement, "textContent", weight)
   }
 
   setExecVisualizations() {
@@ -710,7 +799,8 @@ export class ImagePromptHandler extends operatorHandler {
     this.getVisualProperties("ipo-prompt").readOnly = false;
 
     const negativeCheckbox = this.getVisualProperties("ipo-negative");
-    negativeCheckbox.disabled = false;
+    // negativeCheckbox.disabled = false;
+    this.deleteField(negativeCheckbox, "disabled")
 
     this.getVisualizations().addEventListener('input', this.changeWeightSlider);
     negativeCheckbox.addEventListener('change', () => this.changeSign());
@@ -719,10 +809,15 @@ export class ImagePromptHandler extends operatorHandler {
   }
 
   removeExecVisualizations() {
-    this.getVisualProperties("ipo-name").disabled = true;
-    this.getVisualProperties("ipo-weight").disabled = true;
-    this.getVisualProperties("ipo-negative").disabled = true;
-    this.getVisualProperties("ipo-prompt").readOnly = true;
+    // this.getVisualProperties("ipo-name").disabled = true;
+    // this.getVisualProperties("ipo-weight").disabled = true;
+    // this.getVisualProperties("ipo-negative").disabled = true;
+    // this.getVisualProperties("ipo-prompt").readOnly = true;
+
+    this.setField(this.getVisualProperties("ipo-name"), "disabled", "true")
+    this.setField(this.getVisualProperties("ipo-weight"), "disabled", "true")
+    this.setField(this.getVisualProperties("ipo-negative"), "disabled", "true")
+    this.setField(this.getVisualProperties("ipo-prompt"), "readOnly", "true")
 
     this.getVisualizations().removeEventListener('input', this.changeWeightSlider)
 
@@ -753,13 +848,13 @@ export class ImagePromptHandler extends operatorHandler {
 export class promptGrouperHandler extends operatorHandler {
   constructor(editor, nodeId) {
     super(editor, nodeId);
-    console.log("entered constructor");
   }
 
   updateVisualizations() {
 
     let name = this.getVisualProperties("prompt-group-name");
-    name.textContent = this.getInputValue(0, "static");
+    // name.textContent = this.getInputValue(0, "static");
+    this.setField(name, "textContent", this.getInputValue(0, "static"))
     let prompts = [];
 
     for (let i = 0; i < 5; i++) {
@@ -777,7 +872,8 @@ export class promptGrouperHandler extends operatorHandler {
     prompts = prompts.filter((prompt) => prompt !== undefined);
 
     const output = this.getVisualProperties("prompt-group-display");
-    output.textContent = JSON.stringify(prompts, null, 3);
+    // output.textContent = JSON.stringify(prompts, null, 3);
+    this.setField(output, "textContent", JSON.stringify(prompts, null, 3))
 
     return super.updateVisualizations();
   }
@@ -788,7 +884,8 @@ export class promptGrouperHandler extends operatorHandler {
     }
 
     const output = this.getVisualProperties("prompt-group-display")
-    output.textContent = jOut
+    // output.textContent = jOut
+    this.setField(output, "textContent", jOut)
   }
 
   async getOutputObject(inputObject) {
