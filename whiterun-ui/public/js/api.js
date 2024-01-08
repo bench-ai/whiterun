@@ -98,6 +98,31 @@ export async function uploadImage(fileInput){
     return response.json()
 }
 
+export async function imageToImage(body){
+
+    const url = 'http://localhost:8080/api/stability/image-to-image';
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(body),
+    });
+
+    // console.log(response)
+
+    if (!response.ok) {
+        // console.log("in here")
+        console.log(response)
+        throw new Error(`status code is: ${response.status}`);
+    }
+
+
+    return response.json()
+}
+
 
 export async function requestInterceptor(apiRequest, requestBody, redirect) {
     try {

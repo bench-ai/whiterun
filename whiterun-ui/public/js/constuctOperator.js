@@ -92,6 +92,13 @@ export async function collectOperatorMetaData(name){
       operatorLogo = "assets/image-logo.svg";
       break;
 
+    case "imageToImage":
+      viz = await fetchHTML("imageToImage");
+      dataList = await fetchJSON("image_to_image");
+      operatorTitle = "Image to Image";
+      operatorLogo = "assets/image-logo.svg";
+      break;
+
     default:
       throw new Error("invalid name")
   }
