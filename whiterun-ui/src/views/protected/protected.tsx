@@ -4,13 +4,13 @@ import {useAuth} from "../../auth/auth_context";
 
 const Protected = () => {
     const [content] = useState("logged in");
-    const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
+    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
     const { user } = useAuth();
 
     useEffect(() => {
         (async () => {
             try {
-                await axios.post(`http://localhost:${port}/api/auth/test`, {}, {
+                await axios.post(`${baseURL}/auth/test`, {}, {
                     withCredentials: true,
                 });
                 console.log(user);
@@ -18,7 +18,7 @@ const Protected = () => {
                 console.log(e);
             }
         })();
-    }, [port]);
+    }, [baseURL]);
 
     return (
         <div>

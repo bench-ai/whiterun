@@ -20,7 +20,7 @@ const Home = () => {
     const [workflows, setWorkflows] = useState<Record<string, Workflow> | null>(null);
     const [, setErrorMessage] = useState('');
     const [loading, setLoading] = useState(false);
-    const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
+    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -34,7 +34,7 @@ const Home = () => {
         (async () => {
             try {
                 const response = await axios.get(
-                    `http://localhost:${port}/api/user/details`, {
+                    `${baseURL}/user/details`, {
                         withCredentials: true,
                     }
                 );
@@ -46,13 +46,13 @@ const Home = () => {
                 console.log(e);
             }
         })();
-    }, [port]);
+    }, [baseURL]);
 
     const submit = async () => {
         setLoading(true);
         try {
             await axios.post(
-                `http://localhost:${port}/api/workflows/new`,
+                `${baseURL}/workflows/new`,
                 {
                     name,
                 },
