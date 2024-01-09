@@ -1,1 +1,1 @@
-docker run -d -p 3000:3000 --name whiterun_container --network bench_network whiterun:latest
+docker run -p 3000:3000 --name whiterun_container --network=bench_network --ip=172.20.0.10 whiterun:latest
