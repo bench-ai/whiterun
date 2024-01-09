@@ -19,7 +19,7 @@ const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : '';
+    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
 
     const submit = async () => {
         try {

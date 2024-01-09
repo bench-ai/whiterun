@@ -4,7 +4,7 @@ import {useAuth} from "../../auth/auth_context";
 
 const Protected = () => {
     const [content] = useState("logged in");
-    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : '';
+    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
     const { user } = useAuth();
 
     useEffect(() => {

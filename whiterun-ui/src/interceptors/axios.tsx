@@ -1,8 +1,8 @@
 import axios from "axios";
 import globalRouter from "../globalRouter";
 
-const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : '';
-axios.defaults.baseURL = `${baseURL}/api/`;
+const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
+axios.defaults.baseURL = `${baseURL}/`;
 
 let isRefreshing = false;
 

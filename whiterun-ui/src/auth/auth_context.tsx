@@ -35,7 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     const [user, setUser] = useState<User | null>(null);
     const [workflows, setWorkflows] = useState<Record<string, Workflow> | null>(null);
 
-    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : '';
+    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');

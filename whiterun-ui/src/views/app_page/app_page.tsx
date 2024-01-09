@@ -24,7 +24,7 @@ const AppPage = () => {
     const [popoverVisible, setPopoverVisible] = useState(false);
     const [signOutLoading, setSignOutLoading] = useState(false);
     const [redirect, setRedirect] = useState(false);
-    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : '';
+    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {

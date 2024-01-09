@@ -30,7 +30,7 @@ const Register = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [username, setUsername] = useState('');
-    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : '';
+    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
     const [redirect, setRedirect] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [, setMessage] = useState('');
