@@ -12,7 +12,6 @@ body{
   color: white;
   background: #0d1117;
   font-family: Inter;
-  overflow-y: hidden;
 }
 
 .drag-drawflow {
@@ -89,15 +88,19 @@ body{
 }
 
 .btn-lock{
+  display: flex;
+  align-items: start;
   position: relative;
+  height: 40px;
   top: 20px;
   right: -20px;
 }
 
-.btn-lock .lock-logo{
-  position: fixed;
+.lock-logo{
+  position: relative;
   height: 40px;
   z-index: 1000;
+  margin-right: 20px;
 }
 
 /*-------------------------------------------------------------------------------*/
@@ -281,7 +284,6 @@ body{
   display: inline-block;
   margin-top: -17px;
   font-size: 15px;
-  position: fixed;
   color: white;
 }
 
@@ -337,16 +339,12 @@ body{
 /*----------------------------Play Button-----------------------------*/
 .play-button {
   background: none;
-  position: fixed;
+  position: relative;
   color: white;
-  padding: 10px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   font-size: 15px;
-  top: 92px;
-  left: 350px;
-  display: block;
   z-index: 1000;
 }
 
@@ -368,7 +366,6 @@ body{
 .image-operator-name{
   margin-top: 20px;
   /*border: 1px solid white;*/
-  position: fixed;
   font-size: 15px;
   color: white;
 }
@@ -392,7 +389,6 @@ body{
 
 .text-operator-name{
   margin-top: 18px;
-  position: fixed;
   color: white;
   font-size: 15px;
 }
@@ -589,17 +585,18 @@ body{
   color: white;
   font-size: 15px;
   margin-top: 15px;
-  position: fixed;
 }
 /*-------------Play Button--------------*/
 
 .save-button{
-  margin-top: 15px;
-  position: fixed;
   background: none;
+  position: relative;
+  color: white;
   border: none;
-  top: 86px;
-  right: 100px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 15px;
+  z-index: 1000;
   display: none;
 }
 
@@ -686,6 +683,9 @@ body{
   color: red;
   -webkit-box-shadow: 0 2px 20px 2px red;
   box-shadow: 0 2px 20px 2px red;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .drawflow-node .title-box {

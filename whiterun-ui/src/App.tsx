@@ -6,7 +6,6 @@ import Register from "./views/register/register";
 import globalRouter from "./globalRouter";
 import AppPage from "./views/app_page/app_page";
 import {ConfigProvider, theme} from "antd";
-import DragAndDrop from "./testDnd/dnd";
 import Navbar from "./components/navbar/navbar";
 import {AuthProvider} from "./auth/auth_context";
 import Home from "./views/home/home";
@@ -26,7 +25,9 @@ const App = () => {
                         "colorPrimary": "#3fb950",
                         "colorBgBase": "#0d1117",
                         "colorBgContainer": "#12181f"
+
                     },
+
                 }}
             >
                 <AuthProvider>
@@ -35,7 +36,7 @@ const App = () => {
                         {/*<Route element={<ProtectedRoutes/>}>*/}
                             {/*<Route path={"/browse"} element={<AppPage/>}/>*/}
                         {/*</Route>*/}
-                        <Route path={"/browse"} element={<AppPage/>}/>
+                        {/*<Route path={"/browse"} element={<AppPage/>}/>*/}
                         {/*<Route path={"/protected"} element={<Protected/>}/>*/}
                         <Route path="/workbench" element={<Workbench />} />
                         <Route path={"/home"} element={<Home/>}/>
