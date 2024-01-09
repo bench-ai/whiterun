@@ -52,7 +52,7 @@ const Home = () => {
         setLoading(true);
         try {
             await axios.post(
-                `${baseURL}/api/workflows/new`,
+                `${baseURL}/workflows/new`,
                 {
                     name,
                 },

@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     const onLoad = async () => {
         try {
             const response = await axios.get(
-                `${baseURL}/api/user/details`, {
+                `${baseURL}/user/details`, {
                     withCredentials: true,
                 }
             );

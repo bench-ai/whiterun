@@ -42,7 +42,7 @@ const AppPage = () => {
     const onRequest = async () => {
         setSignOutLoading(true);
         try {
-            await axios.post(`${baseURL}/api/auth/logout`, {}, {withCredentials: true,});
+            await axios.post(`${baseURL}/auth/logout`, {}, {withCredentials: true,});
 
             setRedirect(true);
         } catch (error) {

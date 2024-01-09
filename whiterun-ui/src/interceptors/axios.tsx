@@ -26,7 +26,7 @@ axios.interceptors.response.use(
             } catch (refreshError) {
                 // If token refresh fails, navigate to the login page
                 if (globalRouter && globalRouter.navigate) {
-                    await axios.post(`${baseURL}/api/auth/logout`, {}, { withCredentials: true });
+                    await axios.post(`${baseURL}/auth/logout`, {}, { withCredentials: true });
                     globalRouter.navigate("/login");
                 }
 

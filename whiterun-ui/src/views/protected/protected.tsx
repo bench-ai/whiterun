@@ -10,7 +10,7 @@ const Protected = () => {
     useEffect(() => {
         (async () => {
             try {
-                await axios.post(`${baseURL}/api/auth/test`, {}, {
+                await axios.post(`${baseURL}/auth/test`, {}, {
                     withCredentials: true,
                 });
                 console.log(user);
