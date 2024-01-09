@@ -30,7 +30,7 @@ const Register = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [username, setUsername] = useState('');
-    const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
+    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : '';
     const [redirect, setRedirect] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [, setMessage] = useState('');
@@ -105,7 +105,7 @@ const Register = () => {
     const submit = async () => {
         if (checkForm()) {
             try {
-                await axios.post(`http://localhost:${port}/api/auth/signup`, {
+                await axios.post(`${baseURL}/auth/signup`, {
                     email,
                     password,
                     username,

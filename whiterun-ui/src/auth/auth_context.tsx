@@ -35,7 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     const [user, setUser] = useState<User | null>(null);
     const [workflows, setWorkflows] = useState<Record<string, Workflow> | null>(null);
 
-    const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
+    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : '';
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     const onLoad = async () => {
         try {
             const response = await axios.get(
-                `http://localhost:${port}/api/user/details`, {
+                `${baseURL}/api/user/details`, {
                     withCredentials: true,
                 }
             );

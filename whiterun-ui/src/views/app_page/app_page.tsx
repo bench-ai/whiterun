@@ -24,7 +24,7 @@ const AppPage = () => {
     const [popoverVisible, setPopoverVisible] = useState(false);
     const [signOutLoading, setSignOutLoading] = useState(false);
     const [redirect, setRedirect] = useState(false);
-    const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
+    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : '';
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
@@ -42,7 +42,7 @@ const AppPage = () => {
     const onRequest = async () => {
         setSignOutLoading(true);
         try {
-            await axios.post(`http://localhost:${port}/api/auth/logout`, {}, {withCredentials: true,});
+            await axios.post(`${baseURL}/api/auth/logout`, {}, {withCredentials: true,});
 
             setRedirect(true);
         } catch (error) {

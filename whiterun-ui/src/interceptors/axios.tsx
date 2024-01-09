@@ -1,8 +1,8 @@
 import axios from "axios";
 import globalRouter from "../globalRouter";
 
-const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
-axios.defaults.baseURL = `http://localhost:${port}/api/`;
+const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : '';
+axios.defaults.baseURL = `${baseURL}/api/`;
 
 let isRefreshing = false;
 
@@ -26,7 +26,7 @@ axios.interceptors.response.use(
             } catch (refreshError) {
                 // If token refresh fails, navigate to the login page
                 if (globalRouter && globalRouter.navigate) {
-                    await axios.post(`http://localhost:${port}/api/auth/logout`, {}, { withCredentials: true });
+                    await axios.post(`${baseURL}/api/auth/logout`, {}, { withCredentials: true });
                     globalRouter.navigate("/login");
                 }
 
