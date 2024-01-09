@@ -9,4 +9,5 @@ type Workflow struct {
 	CreatedAt   time.Time              `bson:"created_at" json:"created_at"`
 	UpdatedAt   time.Time              `bson:"updated_at" json:"updated_at"`
 	Structure   map[string]interface{} `bson:"structure" json:"structure"`
+	IsUniversal bool                   `bson:"is_universal" json:"-"`
 }

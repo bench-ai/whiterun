@@ -93,7 +93,11 @@ const Workbench = () => {
                                         <Title level={4} style={{marginTop: 0}}>Alpha Notice</Title>
                                         <Paragraph>Currently, this software is in alpha phase so bugs and missing
                                             features are to be expected. Any feedback is greatly appreciated in helping us
-                                            better your experience.</Paragraph>
+                                            better your experience.
+
+                                            Users get 10 requests per day, while not being logged in. To get unlimited
+                                            requests simply login.
+                                        </Paragraph>
                                     </Card>
                                 </TutorialCardList>
                             </Panel>

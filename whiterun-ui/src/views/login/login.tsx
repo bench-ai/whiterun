@@ -22,9 +22,11 @@ const Login = () => {
     const navigate = useNavigate();
 
     const submit = async () => {
+
+        console.log("in here")
         try {
             const {data} = await axios.post(
-                `http://localhost:${port}/api/auth/login`,
+                `https://app.bench-ai.com/api/auth/login`,
                 {
                     email,
                     password,

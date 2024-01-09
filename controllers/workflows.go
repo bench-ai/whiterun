@@ -6,6 +6,7 @@ import (
 	"ApiExecutor/models"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -173,10 +174,22 @@ func SaveWorkflow(c *gin.Context) {
 func GetWorkFlow(c *gin.Context) {
 	id := c.Query("id")
 
+	fmt.Println("here")
+
 	client, err := db.GetDatabaseClient()
 
 	if err != nil {
 		panic(err)
+	}
+
+	var pUser *middleware.JwtToken
+	var valid bool
+
+	if attr, ok := c.Get("accessToken"); ok {
+		pUser, valid = attr.(*middleware.JwtToken)
+		if !valid {
+			panic("user is not of type token")
+		}
 	}
 
 	workFlowsCollection := client.Collection("workflow")
@@ -192,7 +205,15 @@ func GetWorkFlow(c *gin.Context) {
 			c.String(http.StatusInternalServerError, "could not get workflow")
 		}
 	} else {
-		result.OwnersEmail = ""
-		c.JSON(http.StatusOK, result)
+		if result.IsUniversal {
+			c.JSON(http.StatusOK, result)
+			return
+		} else if pUser != nil {
+			if result.OwnersEmail == pUser.Email {
+				c.JSON(http.StatusOK, result)
+				return
+			}
+		}
+		c.String(http.StatusNotFound, "workflow not found")
 	}
 }

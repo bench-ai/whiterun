@@ -120,6 +120,8 @@ func Signup(c *gin.Context) {
 		Username string
 	}
 
+	fmt.Println(body)
+
 	if c.Bind(&body) != nil {
 		c.String(http.StatusBadRequest, "Failed to read body")
 		return
@@ -174,6 +176,8 @@ func signup(email string, username string, password string) (string, string, err
 
 	client, err := db.GetDatabaseClient()
 
+	fmt.Println(err)
+
 	if err != nil {
 		return "", "", err, http.StatusPreconditionFailed, nil
 	}
@@ -225,6 +229,8 @@ func signup(email string, username string, password string) (string, string, err
 
 	_, err = userCollection.InsertOne(context.TODO(), newUser)
 
+	fmt.Println(err)
+
 	return accessToken, refreshToken, nil, http.StatusOK, &newUser
 }
 
@@ -252,6 +258,7 @@ func Login(c *gin.Context) {
 	if er != nil {
 		c.String(status, er.Error())
 	} else {
+		c.SetSameSite(http.SameSiteNoneMode)
 		c.SetCookie("refresh", refresh, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 		c.SetCookie("access", access, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 
