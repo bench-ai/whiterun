@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {AlertContainer, LoginContainer, LoginForm} from './login.styles';
@@ -20,6 +20,10 @@ const Login = () => {
     const navigate = useNavigate();
 
     const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
+
+    useEffect(() => {
+        document.title = 'Sign In - Bench AI';
+    })
 
     const submit = async () => {
         try {
