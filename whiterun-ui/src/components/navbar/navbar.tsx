@@ -10,9 +10,9 @@ const NavbarGlobal = () => {
     return (
         <Header>
             <LeftOptions>
-                <StyledLink to="/login">
+                <a href="https://www.bench-ai.com/" target="_blank" rel="noopener noreferrer">
                     <img src={BenchLogo} alt="Bench Logo" style={{width: '150px'}}/>
-                </StyledLink>
+                </a>
             </LeftOptions>
             <RightOptions>
                 <StyledLink to="/login">
@@ -56,7 +56,7 @@ const NavbarProtected = () => {
     return (
         <Header>
             <LeftOptions>
-                <StyledLink to="/home">
+                <StyledLink to="/">
                     <img src={BenchLogo} alt="Bench Logo" style={{width: '150px'}}/>
                 </StyledLink>
             </LeftOptions>
