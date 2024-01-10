@@ -31,6 +31,10 @@ const Home = () => {
     };
 
     useEffect(() => {
+        document.title = 'Home - Bench AI';
+    })
+
+    useEffect(() => {
         (async () => {
             try {
                 const response = await axios.get(

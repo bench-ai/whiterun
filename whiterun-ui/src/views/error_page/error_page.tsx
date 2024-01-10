@@ -1,8 +1,12 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Button, Layout, Result} from "antd";
 import {Link} from "react-router-dom";
 
 const ErrorPage = () => {
+
+    useEffect(() => {
+        document.title = 'Error - Bench AI';
+    })
 
     return (
         <div>

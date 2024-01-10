@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Link, Navigate} from "react-router-dom";
 import axios from "axios";
 import {Alert, Button, Col, Form, Input, Layout, Row, Typography} from "antd";
@@ -42,6 +42,10 @@ const Register = () => {
     const lowercaseRegex = /[a-z]/;
     const uppercaseRegex = /[A-Z]/;
     const symbolRegex = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/;
+
+    useEffect(() => {
+        document.title = 'Create an Account - Bench AI';
+    })
 
     const checkForm = (): boolean => {
         if (password !== confirmPassword) {
@@ -157,7 +161,7 @@ const Register = () => {
                                     label="Username"
                                     rules={[{required: true, message: 'Username field is required'}]}
                                 >
-                                    <Input size="large" prefix={<PersonOutlined/>} placeholder="Enter a password"
+                                    <Input size="large" prefix={<PersonOutlined/>} placeholder="Enter a username"
                                            onChange={(e) => setUsername(e.target.value)}/>
                                 </Form.Item>
                                 <Form.Item
@@ -183,7 +187,7 @@ const Register = () => {
                                 <Form.Item
                                     name="confirmPassword"
                                     label="Confirm Password"
-                                    rules={[{required: true, message: 'Confirming password is required'}]}
+                                    rules={[{required: true, message: 'Confirming your password is required'}]}
                                 >
                                     <Input.Password size="large" prefix={<LockOutlined/>} placeholder="Confirm your Password"
                                                     onChange={(e) => setConfirmPassword(e.target.value)}/>
