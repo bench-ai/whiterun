@@ -102,6 +102,8 @@ func validateEmail(email string) error {
 func validateUsername(username string) error {
 	letters := "qwertyuiopasdfghjklzxcvbnm"
 
+	username = strings.ToLower(username)
+
 	if !strings.ContainsAny(letters, string(username[0])) {
 		return errors.New("username must start with letter")
 	}
@@ -155,6 +157,9 @@ func Signup(c *gin.Context) {
 	if er != nil {
 		c.String(status, er.Error())
 	} else {
+		if os.Getenv("DEV") == "false" {
+			c.SetSameSite(http.SameSiteNoneMode)
+		}
 		c.SetCookie("refresh", refresh, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 		c.SetCookie("access", access, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 		c.JSON(http.StatusOK, gin.H{
@@ -258,7 +263,9 @@ func Login(c *gin.Context) {
 	if er != nil {
 		c.String(status, er.Error())
 	} else {
-		c.SetSameSite(http.SameSiteNoneMode)
+		if os.Getenv("DEV") == "false" {
+			c.SetSameSite(http.SameSiteNoneMode)
+		}
 		c.SetCookie("refresh", refresh, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 		c.SetCookie("access", access, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 
@@ -425,6 +432,9 @@ func RefreshToken(c *gin.Context) {
 		httpOnly, err := strconv.ParseBool(os.Getenv("HTTP_ONLY"))
 		if err != nil {
 			panic(err)
+		}
+		if os.Getenv("DEV") == "false" {
+			c.SetSameSite(http.SameSiteNoneMode)
 		}
 		c.SetCookie("access", newAccessString, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 		//c.JSON(status, gin.H{

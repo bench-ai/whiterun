@@ -31,7 +31,7 @@ const NavbarGlobal = () => {
 const NavbarProtected = () => {
 
     const [signOutLoading, setSignOutLoading] = useState(false);
-    const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
+    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : '';
 
     const { logout } = useAuth();
     const navigate = useNavigate();
@@ -41,7 +41,7 @@ const NavbarProtected = () => {
         console.log("Signing out")
         setSignOutLoading(true);
         try {
-            await axios.post(`http://localhost:${port}/api/auth/logout`, {}, {withCredentials: true,});
+            await axios.post(`${baseURL}/auth/logout`, {}, {withCredentials: true,});
             logout();
             console.log("Success")
             navigate("/login");

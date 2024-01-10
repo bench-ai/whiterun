@@ -14,19 +14,20 @@ const Login = () => {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const port = process.env.REACT_APP_DEV === 'true' ? process.env.REACT_APP_D_BACKEND_PORT : process.env.REACT_APP_P_BACKEND_PORT;
     const [errorMessage, setErrorMessage] = useState('');
     const [error, setError] = useState(false);
-
     const { login } = useAuth();
     const navigate = useNavigate();
+
+    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
 
     const submit = async () => {
 
         console.log("in here")
         try {
+            console.log(baseURL);
             const {data} = await axios.post(
-                `https://app.bench-ai.com/api/auth/login`,
+                `${baseURL}/auth/login`,
                 {
                     email,
                     password,
