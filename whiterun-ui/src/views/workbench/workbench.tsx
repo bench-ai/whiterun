@@ -75,7 +75,7 @@ const Workbench = () => {
                                             If you need assistance or have feedback, feel free to reach out:
                                             <ul style={{marginTop: "5px"}}>
                                                 <li>
-                                                    <a href="https://discord.com/your-discord-link" target="_blank"
+                                                    <a href="https://discord.gg/e7hkE656" target="_blank"
                                                        rel="noopener noreferrer">Discord Server</a>
                                                 </li>
                                                 <li>

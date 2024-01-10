@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
-import {AlertContainer, Container, LoginContainer, LoginForm} from './login.styles';
-import {Button, Form, Input, Alert, Typography, Col, Row} from 'antd';
+import {AlertContainer, LoginContainer, LoginForm} from './login.styles';
+import {Button, Form, Input, Alert, Typography, Col, Row, Layout} from 'antd';
 import {EmailOutlined, LockOutlined} from "@mui/icons-material";
 import BenchLogo from "../../assets/benchLogo.svg";
 import Title from "antd/es/typography/Title";
@@ -37,7 +37,7 @@ const Login = () => {
 
             axios.defaults.headers.common['Authorization'] = `Bearer ${data['access']}`;
             login();
-            navigate("/home");
+            navigate("/");
         } catch (error) {
             setErrorMessage('Failed to log in. Please check your credentials.');
             setError(true);
@@ -46,7 +46,7 @@ const Login = () => {
 
     return (
 
-        <Container>
+        <Layout style={{height: '100vh'}}>
             <Row justify="center" align="middle" style={{minHeight: '100vh', width: '100%'}}>
                 {/*Left section: Register container */}
                 <Col xs={24} md={14}>
@@ -65,9 +65,9 @@ const Login = () => {
                         }
                         </AlertContainer>
                         <LoginContainer>
-                            <Link to="/login">
-                                <img width={50} src={BenchLogo} alt="Bench Logo" />
-                            </Link>
+                            <a href="https://www.bench-ai.com/" target="_blank" rel="noopener noreferrer">
+                                <img width={50} src={BenchLogo} alt="Bench Logo"/>
+                            </a>
                             <Title level={3} style={{marginBottom: '10px'}}>Log in to your Account</Title>
                             <LoginForm name="login_form"
                                        initialValues={{remember: true}}
@@ -115,7 +115,7 @@ const Login = () => {
                     </div>
                 </BackgroundGradient>
             </Row>
-        </Container>
+        </Layout>
     );
 };
 

@@ -39,9 +39,10 @@ const App = () => {
                         {/*<Route path={"/browse"} element={<AppPage/>}/>*/}
                         {/*<Route path={"/protected"} element={<Protected/>}/>*/}
                         <Route path="/workbench" element={<Workbench />} />
-                        <Route path={"/home"} element={<Home/>}/>
+                        <Route path={"/"} element={<Home/>}/>
                         <Route path={"/login"} element={<Login/>}/>
                         <Route path={"/register"} element={<Register/>}/>
+                        <Route path={"/error"} element={<ErrorPage/>} />
                         <Route path="*" element={<ErrorPage />} />
                     </Routes>
                 </AuthProvider>
