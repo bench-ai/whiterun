@@ -11,6 +11,10 @@ const Workbench = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        document.title = 'Workbench - Bench AI';
+    })
+
+    useEffect(() => {
         const artificialLoadingTimeout = setTimeout(() => {
             setLoading(false);
         }, 1000);
