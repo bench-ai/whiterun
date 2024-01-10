@@ -207,10 +207,10 @@ export async function requestInterceptor(apiRequest, requestBody, redirect) {
 
         if (number === 401){
             if (redirect){
-                alert("This api is protected, you may have used up your anonymous limit. If you wish to continue using this api please login")
+                alert("This workflow is protected, you may have used up your anonymous limit. If you wish to continue using this api please login")
                 window.location.replace("https://app.bench-ai.com/login");
             }else{
-                alert("This api is protected, you may have used up your anonymous limit. If you wish to continue using this api please login")
+                alert("This workflow is protected, You will get ten usages a day. After which If you wish to continue using this workflow please login")
                 throw new Error("unauthorized to use api")
             }
         }else{

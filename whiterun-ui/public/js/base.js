@@ -85,7 +85,7 @@ async function loadEditor(){
   const workflow = await workflowPromise
 
   if (workflow === undefined){
-    window.location.replace("https://app.bench-ai.com");
+    window.location.replace("https://app.bench-ai.com/error");
   }
 
   if (workflow["structure"] !== null){
