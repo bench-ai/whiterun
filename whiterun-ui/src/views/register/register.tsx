@@ -1,11 +1,10 @@
 import React, {useState} from 'react';
 import {Link, Navigate} from "react-router-dom";
 import axios from "axios";
-import {Alert, Button, Col, Form, Input, Row, Typography} from "antd";
+import {Alert, Button, Col, Form, Input, Layout, Row, Typography} from "antd";
 import {
     AlertContainer,
     BackgroundGradient,
-    Container,
     PasswordList,
     PasswordListFormat, RegisterForm,
     RequirementsContainer,
@@ -123,7 +122,7 @@ const Register = () => {
     }
 
     return (
-        <Container>
+        <Layout>
             <Row justify="center" align="middle" style={{ minHeight: '100vh', width: '100%'}}>
                 {/*Left section: Register container */}
                 <Col xs={24} md={14}>
@@ -142,9 +141,9 @@ const Register = () => {
                             }
                         </AlertContainer>
                         <SignUpContainer>
-                            <Link to="/login">
-                                <img width={50} src={BenchLogo} alt="Bench Logo" />
-                            </Link>
+                            <a href="https://www.bench-ai.com/" target="_blank" rel="noopener noreferrer">
+                                <img width={50} src={BenchLogo} alt="Bench Logo"/>
+                            </a>
                             <Title level={3} style={{marginBottom: '10px'}}>Register for an Account</Title>
                             <RegisterForm
                                 name="signup_form"
@@ -229,7 +228,7 @@ const Register = () => {
                     </div>
                 </BackgroundGradient>
             </Row>
-        </Container>
+        </Layout>
     );
 };
 
