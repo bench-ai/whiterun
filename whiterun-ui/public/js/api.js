@@ -1,6 +1,11 @@
+
+// const urlPrefix = "https://app.bench-ai.com"
+const urlPrefix = "http://localhost:8080"
+
+
 export async function getUser(body) {
 
-    const response = await fetch('http://localhost:8080/api/user/details', {
+    const response = await fetch(`${urlPrefix}/api/user/details`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -9,7 +14,8 @@ export async function getUser(body) {
     });
 
     if (!response.ok) {
-        throw new Error(`status code is: ${response.status}`);
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
     }
 
     // Parse the response body as JSON
@@ -19,7 +25,7 @@ export async function getUser(body) {
 
 export async function refresh(body) {
 
-    const url = 'http://localhost:8080/api/auth/refresh';
+    const url = `${urlPrefix}/api/auth/refresh`;
 
     const response = await fetch(url, {
         method: 'POST',
@@ -29,12 +35,9 @@ export async function refresh(body) {
         credentials: 'include',
     });
 
-    console.log(response)
-
     if (!response.ok) {
-        console.log("in here")
-        console.log(response)
-        throw new Error(`status code is: ${response.status}`);
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
     }
 
 }
@@ -42,7 +45,7 @@ export async function refresh(body) {
 
 export async function saveWorkflow(body) {
 
-    const url = 'http://localhost:8080/api/workflows/save';
+    const url = `${urlPrefix}/api/workflows/save`;
 
     const response = await fetch(url, {
         method: 'PATCH',
@@ -54,15 +57,14 @@ export async function saveWorkflow(body) {
     });
 
     if (!response.ok) {
-        console.log("in here")
-        console.log(response)
-        throw new Error(`status code is: ${response.status}`);
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
     }
 
 }
 
 export async function textToImage(body) {
-    const url = 'http://localhost:8080/api/stability/text-to-image';
+    const url = `${urlPrefix}/api/stability/text-to-image`;
 
     const response = await fetch(url, {
         method: 'POST',
@@ -74,16 +76,15 @@ export async function textToImage(body) {
     });
 
     if (!response.ok) {
-        console.log("in here")
-        console.log(response)
-        throw new Error(`status code is: ${response.status}`);
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
     }
 
     return response.json()
 }
 
 export async function imageUpscaler(body) {
-    const url = 'http://localhost:8080/api/stability/image-to-image/upscale';
+    const url = `${urlPrefix}/api/stability/image-to-image/upscale`;
 
     const response = await fetch(url, {
         method: 'POST',
@@ -95,9 +96,8 @@ export async function imageUpscaler(body) {
     });
 
     if (!response.ok) {
-        console.log("in here")
-        console.log(response)
-        throw new Error(`status code is: ${response.status}`);
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
     }
 
     return response.json()
@@ -105,15 +105,17 @@ export async function imageUpscaler(body) {
 
 
 export async function getWorkflow(id){
-    const response = await fetch(`http://localhost:8080/api/workflows?id=${id}`, {
+    const response = await fetch(`${urlPrefix}/api/workflows?id=${id}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include',
     });
 
     if (!response.ok) {
-        throw new Error(`status code is: ${response.status}`);
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
     }
 
     return response.json()
@@ -125,16 +127,16 @@ export async function uploadImage(fileInput){
 
     formData.append('file', fileInput.files[0]);
 
-    console.log(formData.get("file"))
 
-    const response = await fetch(`http://localhost:8080/api/upload/image`, {
+    const response = await fetch(`${urlPrefix}/api/upload/image`, {
         method: 'POST',
         body: formData,
         credentials: 'include',
     });
 
     if (!response.ok) {
-        throw new Error(`status code is: ${response.status}`);
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
     }
 
     return response.json()
@@ -142,7 +144,7 @@ export async function uploadImage(fileInput){
 
 export async function imageToImage(body){
 
-    const url = 'http://localhost:8080/api/stability/image-to-image';
+    const url = `${urlPrefix}/api/stability/image-to-image`;
 
     const response = await fetch(url, {
         method: 'POST',
@@ -153,12 +155,10 @@ export async function imageToImage(body){
         body: JSON.stringify(body),
     });
 
-    // console.log(response)
 
     if (!response.ok) {
-        // console.log("in here")
-        console.log(response)
-        throw new Error(`status code is: ${response.status}`);
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
     }
 
 
@@ -168,7 +168,7 @@ export async function imageToImage(body){
 
 export async function imageToImageMask(body){
 
-    const url = 'http://localhost:8080/api/stability/image-to-image/mask';
+    const url = `${urlPrefix}/api/stability/image-to-image/mask`;
 
     const response = await fetch(url, {
         method: 'POST',
@@ -179,12 +179,10 @@ export async function imageToImageMask(body){
         body: JSON.stringify(body),
     });
 
-    // console.log(response)
 
     if (!response.ok) {
-        // console.log("in here")
-        console.log(response)
-        throw new Error(`status code is: ${response.status}`);
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
     }
 
 
@@ -193,33 +191,64 @@ export async function imageToImageMask(body){
 
 
 export async function requestInterceptor(apiRequest, requestBody, redirect) {
+
     try {
+        await refresh()
+    }catch (error){
+        console.log("unable to refresh token")
+    }
 
+    try{
         return await apiRequest(requestBody)
-
-    } catch (error) {
+    }catch (error){
+        console.log(error)
         const errorList = error.toString().split(": ")
         const number = parseInt(errorList[errorList.length - 1])
 
-        if(number === 401){
-            try{
-                console.log("here1")
-                await refresh()
-                console.log("here2")
-                const data = await apiRequest(requestBody)
-                console.log(data)
-                return data
-            }catch (error){
-                if (redirect){
-                    window.location.replace("http://localhost:3000/login");
-                }else{
-                    console.log("in exception")
-                    console.log("the error is", error)
-                    throw new Error("could not refresh access token")
-                }
+        if (number === 401){
+            if (redirect){
+                alert("This workflow is protected, you may have used up your anonymous limit. If you wish to continue using this api please login")
+                window.location.replace("https://app.bench-ai.com/login");
+            }else{
+                alert("This workflow is protected, You will get ten usages a day. After which If you wish to continue using this workflow please login")
+                throw new Error("unauthorized to use api")
             }
+        }else{
+            alert(error)
+            throw new Error(`status code is: ${number}`)
         }
-
-        throw new Error(`status code is: ${number}`)
     }
+
+    // try {
+    //     return await apiRequest(requestBody)
+    // } catch (error) {
+    //     const errorList = error.toString().split(": ")
+    //     const number = parseInt(errorList[errorList.length - 1])
+    //
+    //     if(number === 401){
+    //
+    //         try{
+    //             await refresh()
+    //         }catch (error){
+    //             if (redirect){
+    //                 window.location.replace("https://app.bench-ai.com/login");
+    //             }else{
+    //                 throw new Error("could not refresh access token")
+    //             }
+    //         }
+    //
+    //         try{
+    //             const data = await apiRequest(requestBody)
+    //             console.log(data)
+    //             return data
+    //         }catch (error){
+    //             console.log(error)
+    //             throw new Error(`status code is: ${number}`)
+    //         }
+    //
+    //     }else{
+    //         console.log(error)
+    //         throw new Error(`status code is: ${number}`)
+    //     }
+    // }
 }

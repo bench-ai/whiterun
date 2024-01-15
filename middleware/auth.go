@@ -54,6 +54,15 @@ func CheckExecutionAccess(c *gin.Context) {
 	c.Next()
 }
 
+func CheckWorkflowAccess(c *gin.Context) {
+	fmt.Println("in workflow access")
+	token, err := getAccessToken(c)
+	if err == nil {
+		c.Set("accessToken", token)
+	}
+	c.Next()
+}
+
 func getAccessToken(c *gin.Context) (*JwtToken, error) {
 
 	accessString, err := c.Cookie("access")

@@ -307,7 +307,6 @@ class operatorHandler {
       this.saveNodeData(editor)
       return true;
     } else {
-      console.log("here")
       this.resetInputFields()
       field.disabled = true;
       this.deleteField(field, "disabled")
@@ -394,9 +393,7 @@ class operatorHandler {
       for (let i = 0; i < inputFields.length; i++) {
         if(!notIndexArr.includes(i)){
           inputFields.item(i).disabled = false;
-          // console.log("here")
           this.deleteField(inputFields.item(i), "disabled")
-          // inputFields.item(i).removeAttribute("disabled")
         }
       }
     }
@@ -565,7 +562,6 @@ export class PythonHandler extends operatorHandler {
 
   async getOutputObject(inputObject) {
     inputObject = await super.getOutputObject(inputObject)
-    console.log(inputObject)
     const python = this.getVisualProperties("python-text").textContent
     const ret = await evaluatePython(python, inputObject)
 
@@ -620,7 +616,6 @@ export class ImageHandler extends operatorHandler {
 
     const fileInput = this.getVisualProperties("image-input")
     const body = await requestInterceptor(uploadImage, fileInput, true)
-    console.log(body)
 
     // this.checkOutputs()
     return this.checkOutputs({
@@ -672,7 +667,6 @@ export class TextHandler extends operatorHandler {
       // const outputElement = event.target.parentElement.querySelector('.slider-operator-output');
       // outputElement.textContent = event.target.value;
 
-      console.log(event.target.textContent)
 
       event.target.setAttribute("value", event.target.value)
       event.target.textContent = event.target.value
@@ -976,7 +970,6 @@ export class textToImageHandler extends operatorHandler {
       case "SDXL_Beta":
         heightInput.value = 512;
         widthInput.value = 896;
-        console.log(heightInput.value);
         break;
       case "SDXL_v0.9":
         heightInput.value = 832;
@@ -1190,7 +1183,6 @@ export class textToImageHandler extends operatorHandler {
     const step = parseFloat(this.getVisualProperties("txt-to-img-step").value);
 
     let textPrompts = inputObject["input_1"]
-    console.log(textPrompts)
 
     if (textPrompts) {
       if (Array.isArray(textPrompts)) {
@@ -1224,7 +1216,6 @@ export class textToImageHandler extends operatorHandler {
       console.log(error);
     }
 
-    console.log(apiResponse);
 
     let fileId = apiResponse["url"].split("?X-Amz-Algorithm")[0]
 
@@ -1260,7 +1251,6 @@ export class ImageDisplayHandler extends operatorHandler {
     this.getVisualProperties("download-Button").removeEventListener('click', this.downloadImage);
 
     if (this._image_set){
-      console.log("entered here2")
       this.getVisualProperties("download-Button").removeEventListener('click', this.downloadImage);
     }
 
@@ -1270,7 +1260,6 @@ export class ImageDisplayHandler extends operatorHandler {
 
   downloadImage(event) {
 
-    console.log(event)
 
     const visualizationElement = event.target.closest('.visualization');
     const imageElement = visualizationElement.querySelector('.image-op-file');
@@ -1310,7 +1299,6 @@ export class ImageDisplayHandler extends operatorHandler {
   async getOutputObject(inputObject) {
     const data = inputObject["input_1"]
 
-    console.log(data)
 
     if (data["type"] === "image"){
 
@@ -1508,7 +1496,6 @@ export class ImageUpscalerHandler extends operatorHandler {
     this.getVisualProperties("download-Button").removeEventListener('click', this.downloadImage);
 
     if (this._image_set){
-      console.log("entered here2")
       this.getVisualProperties("download-Button").removeEventListener('click', this.downloadImage);
     }
 
@@ -1517,7 +1504,6 @@ export class ImageUpscalerHandler extends operatorHandler {
 
   downloadImage(event) {
 
-    console.log(event)
 
     const visualizationElement = event.target.closest('.visualization');
     const imageElement = visualizationElement.querySelector('.image-op-file');
@@ -1577,7 +1563,6 @@ export class ImageUpscalerHandler extends operatorHandler {
       throw new Error("API request failed");
     }
 
-    console.log(apiResponse);
 
     const imageElement = this.getVisualProperties("image-op-file");
     imageElement.src = apiResponse["url"];
@@ -1748,7 +1733,6 @@ export class ImageToImageMaskHandler extends operatorHandler {
       "mask_source": this.getVisualProperties("txt-to-img-mask-source").value
     }
 
-    console.log(requestBody)
 
     const response = await requestInterceptor(imageToImageMask,requestBody)
 

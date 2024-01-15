@@ -102,6 +102,8 @@ func validateEmail(email string) error {
 func validateUsername(username string) error {
 	letters := "qwertyuiopasdfghjklzxcvbnm"
 
+	username = strings.ToLower(username)
+
 	if !strings.ContainsAny(letters, string(username[0])) {
 		return errors.New("username must start with letter")
 	}
@@ -119,6 +121,8 @@ func Signup(c *gin.Context) {
 		Password string
 		Username string
 	}
+
+	fmt.Println(body)
 
 	if c.Bind(&body) != nil {
 		c.String(http.StatusBadRequest, "Failed to read body")
@@ -153,6 +157,9 @@ func Signup(c *gin.Context) {
 	if er != nil {
 		c.String(status, er.Error())
 	} else {
+		if os.Getenv("DEV") == "false" {
+			c.SetSameSite(http.SameSiteNoneMode)
+		}
 		c.SetCookie("refresh", refresh, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 		c.SetCookie("access", access, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 		c.JSON(http.StatusOK, gin.H{
@@ -173,6 +180,8 @@ func signup(email string, username string, password string) (string, string, err
 	}()
 
 	client, err := db.GetDatabaseClient()
+
+	fmt.Println(err)
 
 	if err != nil {
 		return "", "", err, http.StatusPreconditionFailed, nil
@@ -225,6 +234,8 @@ func signup(email string, username string, password string) (string, string, err
 
 	_, err = userCollection.InsertOne(context.TODO(), newUser)
 
+	fmt.Println(err)
+
 	return accessToken, refreshToken, nil, http.StatusOK, &newUser
 }
 
@@ -252,6 +263,9 @@ func Login(c *gin.Context) {
 	if er != nil {
 		c.String(status, er.Error())
 	} else {
+		if os.Getenv("DEV") == "false" {
+			c.SetSameSite(http.SameSiteNoneMode)
+		}
 		c.SetCookie("refresh", refresh, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 		c.SetCookie("access", access, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 
@@ -418,6 +432,9 @@ func RefreshToken(c *gin.Context) {
 		httpOnly, err := strconv.ParseBool(os.Getenv("HTTP_ONLY"))
 		if err != nil {
 			panic(err)
+		}
+		if os.Getenv("DEV") == "false" {
+			c.SetSameSite(http.SameSiteNoneMode)
 		}
 		c.SetCookie("access", newAccessString, lifetime, "/", os.Getenv("DOMAIN"), secure, httpOnly)
 		//c.JSON(status, gin.H{

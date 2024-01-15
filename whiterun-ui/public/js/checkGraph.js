@@ -44,8 +44,6 @@ export class ExecutionGraph{
       const connectionObject = collectConnections(node)
       const inputObject = {}
 
-      console.log(node)
-
       for (const connection of Object.keys(connectionObject)){
 
         let breakOut = false;
@@ -54,6 +52,7 @@ export class ExecutionGraph{
 
         if(requiredInput !== undefined){
           if(outputObject.hasOwnProperty(requiredInput["node"])){
+
             if(outputObject[requiredInput["node"]].hasOwnProperty(requiredInput["input"])){
               inputObject[connection] = outputObject[requiredInput["node"]][requiredInput["input"]];
             }else{
@@ -66,6 +65,11 @@ export class ExecutionGraph{
           if (breakOut){
             const returnDict = await data(nodeMap[requiredInput["node"]], nodeMap)
             inputObject[connection] = returnDict[requiredInput["input"]]
+
+            // added this
+            outputObject[requiredInput["node"]] = {
+              [requiredInput["input"]]: returnDict[requiredInput["input"]]
+            }
           }
         }
       }

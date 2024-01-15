@@ -31,7 +31,7 @@ async function userLoader(){
 async function workflowLoader(){
   const queryId = parseUrl()
   try{
-    return await getWorkflow(queryId)
+    return await requestInterceptor(getWorkflow, queryId, false)
   }catch (error){
     return undefined
   }
@@ -69,7 +69,6 @@ async function saveDrawFlow(){
     }
 
     currentNode["html"] = saveHtml.innerHTML
-    console.log(saveHtml)
   })
   const body = {
     "structure": exported_data,
@@ -86,15 +85,22 @@ async function loadEditor(){
   const workflow = await workflowPromise
 
   if (workflow === undefined){
-    window.location.replace("http://localhost:3000/");
-  }
-  if (workflow["structure"] !== null){
-    editor.import(workflow["structure"])
-    console.log("here", document.getElementById("node-2"))
-    console.log(workflow["structure"])
+    window.location.replace("https://app.bench-ai.com/error");
   }
 
-  console.log(workflow)
+  if (workflow["structure"] !== null){
+    editor.import(workflow["structure"])
+
+    let xport = editor.export()["drawflow"]["Home"]["data"];
+    let xportKeys = Object.keys(xport);
+
+    xportKeys.forEach((element) => {
+      const op = getOperator(element, editor);
+      op.lockInputFields();
+      op.setExecVisualizations();
+    })
+  }
+
 }
 
 loadEditor().then(r => {})
@@ -198,7 +204,6 @@ async function displayInputPopup() {
 
 
 editor.on("connectionRemoved", async function (dataDict) {
-  console.log("now I am here");
   if (connectionRemovalReason === ""){
     const value = await displayInputPopup()
     let inputNode = getOperator(dataDict["input_id"], editor);

@@ -37,6 +37,7 @@ const Home = () => {
     useEffect(() => {
         (async () => {
             try {
+                console.log(`${baseURL}/user/details`);
                 const response = await axios.get(
                     `${baseURL}/user/details`, {
                         withCredentials: true,

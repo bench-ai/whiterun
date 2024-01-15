@@ -58,16 +58,27 @@ func main() {
 	var backend string
 	var address string
 
+	config := cors.DefaultConfig()
+
 	if mode == "true" {
-		config := cors.DefaultConfig()
+		fmt.Println("In Development mode")
 		config.AllowOrigins = []string{"http://localhost:3000"} // Replace with your frontend URL
-		config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"}
-		config.AllowCredentials = true
-		config.AllowHeaders = append(config.AllowHeaders, "Authorization")
-		r.Use(cors.New(config))
+		//config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"}
+		//config.AllowCredentials = true
+		//config.AllowHeaders = append(config.AllowHeaders, "Authorization")
+		//r.Use(cors.New(config))
 		backend = os.Getenv("D_BACKEND_PORT")
-		address = ":%s"
+		//address = ":%s"
 	} else {
+		fmt.Println("In Production mode")
+		//config.AllowOrigins = []string{"https://whiterun-7rbzwjesa-edgar-villanuevas-projects.vercel.app",
+		//	"https://lionfish-app-o5ayc.ondigitalocean.app"} // Replace with your frontend URL
+
+		config.AllowOrigins = []string{
+			"https://app.bench-ai.com/",
+			"https://whiterun-6hke4.ondigitalocean.app",
+		}
+
 		backend = os.Getenv("P_BACKEND_PORT")
 		r.Use(static.Serve("/", static.LocalFile("./whiterun-ui/build", true)))
 		r.NoRoute(func(c *gin.Context) {
@@ -76,8 +87,16 @@ func main() {
 			}
 			//default 404 page not found
 		})
-		address = "0.0.0.0:%s"
 	}
+
+	address = ":%s"
+
+	fmt.Println(address)
+
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"}
+	config.AllowCredentials = true
+	config.AllowHeaders = append(config.AllowHeaders, "Authorization")
+	r.Use(cors.New(config))
 
 	address = fmt.Sprintf(address, backend)
 
@@ -103,10 +122,10 @@ func main() {
 	// workflows
 	r.POST("api/workflows/new", middleware.CheckAccess, controllers.CreateWorkflow)
 	r.PATCH("api/workflows/save", middleware.CheckAccess, controllers.SaveWorkflow)
-	r.GET("api/workflows", controllers.GetWorkFlow)
+	r.GET("api/workflows", middleware.CheckWorkflowAccess, controllers.GetWorkFlow)
 
 	// upload
-	r.POST("api/upload/image", middleware.CheckAccess, controllers.UploadImageFile)
+	r.POST("api/upload/image", middleware.CheckExecutionAccess, controllers.UploadImageFile)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")

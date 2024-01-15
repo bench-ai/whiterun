@@ -21,11 +21,17 @@ func InitMongoClient() {
 		panic(err)
 	}
 
-	username := os.Getenv("MONGO_USERNAME")
-	password := os.Getenv("MONGO_PASSWORD")
-	port := os.Getenv("MONGO_PORT")
-	uri := os.Getenv("MONGO_URI")
-	connectionUri := fmt.Sprintf(uri, username, password, port)
+	var connectionUri string
+
+	if os.Getenv("DEV") == "true" {
+		username := os.Getenv("MONGO_USERNAME")
+		password := os.Getenv("MONGO_PASSWORD")
+		port := os.Getenv("MONGO_PORT")
+		uri := os.Getenv("MONGO_URI")
+		connectionUri = fmt.Sprintf(uri, username, password, port)
+	} else {
+		connectionUri = os.Getenv("MONGO_URI")
+	}
 
 	var err error
 	client, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(connectionUri))
@@ -42,7 +48,6 @@ func InitMongoClient() {
 	}
 
 	initialized = true
-
 }
 
 func GetDatabaseClient() (*mongo.Database, error) {
