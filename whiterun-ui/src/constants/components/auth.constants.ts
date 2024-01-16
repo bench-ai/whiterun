@@ -1,4 +1,4 @@
-export const PasswordRequirementsKeys = ['LENGTH', 'LOWER', 'UPPER', 'SPECIAL'] as const
+export const PasswordRequirementsKeys = ['LENGTH', 'LOWER', 'UPPER', 'SPECIAL', 'NUMBER'] as const
 export type PasswordRequirement = typeof PasswordRequirementsKeys[number];
 
 export const PasswordRequirementsValues = {
@@ -6,4 +6,5 @@ export const PasswordRequirementsValues = {
     "LOWER": "Contain at least one lowercase letter",
     "UPPER": "Contain at least one uppercase letter",
     "SPECIAL": "Contain at least one special symbol",
+    "NUMBER": "Contains at least one number",
 }

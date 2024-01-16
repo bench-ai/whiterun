@@ -42,6 +42,7 @@ const Register = () => {
     const lowercaseRegex = /[a-z]/;
     const uppercaseRegex = /[A-Z]/;
     const symbolRegex = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/;
+    const numberRegex = /\d/;
 
     useEffect(() => {
         document.title = 'Create an Account - Bench AI';
@@ -79,6 +80,14 @@ const Register = () => {
             setValidPassword(false);
             return false;
         }
+
+        if (!numberRegex.test(password)) {
+            setMessage(PasswordRequirementsValues["NUMBER"]);
+            setError(true);
+            setValidPassword(false);
+            return false;
+        }
+
         form.resetFields();
         setValidPassword(true);
         return true;
@@ -90,6 +99,7 @@ const Register = () => {
             !lowercaseRegex.test(value) && PasswordRequirementsValues["LOWER"],
             !uppercaseRegex.test(value) && PasswordRequirementsValues["UPPER"],
             !symbolRegex.test(value) && PasswordRequirementsValues["SPECIAL"],
+            !numberRegex.test(value) && PasswordRequirementsValues["NUMBER"],
         ].filter(Boolean) as string[];
 
         const keysOfRequirements = Object.keys(PasswordRequirementsValues) as PasswordRequirement[];
