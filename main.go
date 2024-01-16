@@ -63,17 +63,9 @@ func main() {
 	if mode == "true" {
 		fmt.Println("In Development mode")
 		config.AllowOrigins = []string{"http://localhost:3000"} // Replace with your frontend URL
-		//config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"}
-		//config.AllowCredentials = true
-		//config.AllowHeaders = append(config.AllowHeaders, "Authorization")
-		//r.Use(cors.New(config))
 		backend = os.Getenv("D_BACKEND_PORT")
-		//address = ":%s"
 	} else {
 		fmt.Println("In Production mode")
-		//config.AllowOrigins = []string{"https://whiterun-7rbzwjesa-edgar-villanuevas-projects.vercel.app",
-		//	"https://lionfish-app-o5ayc.ondigitalocean.app"} // Replace with your frontend URL
-
 		config.AllowOrigins = []string{
 			"https://app.bench-ai.com/",
 			"https://whiterun-6hke4.ondigitalocean.app",
@@ -85,7 +77,6 @@ func main() {
 			if !strings.HasPrefix(c.Request.RequestURI, "/api") {
 				c.File("./whiterun-ui/build/index.html")
 			}
-			//default 404 page not found
 		})
 	}
 

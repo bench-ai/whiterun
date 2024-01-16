@@ -207,10 +207,10 @@ export async function requestInterceptor(apiRequest, requestBody, redirect) {
 
         if (number === 401){
             if (redirect){
-                alert("This workflow is protected, you may have used up your anonymous limit. If you wish to continue using this api please login")
+                alert("Signup / login the product is completely free")
                 window.location.replace("https://app.bench-ai.com/login");
             }else{
-                alert("This workflow is protected, You will get ten usages a day. After which If you wish to continue using this workflow please login")
+                // alert("This workflow is protected, You will get ten usages a day. After which If you wish to continue using this workflow please login")
                 throw new Error("unauthorized to use api")
             }
         }else{
@@ -218,37 +218,4 @@ export async function requestInterceptor(apiRequest, requestBody, redirect) {
             throw new Error(`status code is: ${number}`)
         }
     }
-
-    // try {
-    //     return await apiRequest(requestBody)
-    // } catch (error) {
-    //     const errorList = error.toString().split(": ")
-    //     const number = parseInt(errorList[errorList.length - 1])
-    //
-    //     if(number === 401){
-    //
-    //         try{
-    //             await refresh()
-    //         }catch (error){
-    //             if (redirect){
-    //                 window.location.replace("https://app.bench-ai.com/login");
-    //             }else{
-    //                 throw new Error("could not refresh access token")
-    //             }
-    //         }
-    //
-    //         try{
-    //             const data = await apiRequest(requestBody)
-    //             console.log(data)
-    //             return data
-    //         }catch (error){
-    //             console.log(error)
-    //             throw new Error(`status code is: ${number}`)
-    //         }
-    //
-    //     }else{
-    //         console.log(error)
-    //         throw new Error(`status code is: ${number}`)
-    //     }
-    // }
 }

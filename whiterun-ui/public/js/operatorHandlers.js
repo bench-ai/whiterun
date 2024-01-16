@@ -760,48 +760,7 @@ export class ImagePromptHandler extends operatorHandler {
 
   updateVisualizations() {
     let name = this.getInputValue(0, "static");
-    const prompt = this.getInputValue(1, "static");
-    const negative = this.getInputValue(2, "static").toLowerCase();
-    let weight;
-
-    // this.getVisualProperties("ipo-name").textContent = name;
     this.setField(this.getVisualProperties("ipo-name"), "textContent", name)
-
-    try{
-      weight = this.getIntInputValue(3);
-    }catch (error){
-      return false
-    }
-
-    if ((0 <= weight) && (weight <= 2)) {
-      // this.getVisualProperties("ipo-weight").value = weight;
-      // this.getVisualProperties("ipo-weight-display").textContent = weight;
-
-      this.setField(this.getVisualProperties("ipo-weight"), "value", weight)
-      this.setField(this.getVisualProperties("ipo-weight-display"), "textContent", weight)
-
-
-    } else {
-      return false;
-    }
-
-    const isNegative = negative === "true";
-
-    // this.getVisualProperties("ipo-negative").checked = isNegative;
-    this.setField(this.getVisualProperties("ipo-negative"), "checked", isNegative)
-
-    if (isNegative) {
-      weight = weight * -1;
-      // this.getVisualProperties("ipo-weight").value = weight * -1;
-      // this.getVisualProperties("ipo-weight-display").textContent = weight;
-
-      this.setField(this.getVisualProperties("ipo-weight"), "value", weight * -1)
-      this.setField(this.getVisualProperties("ipo-weight-display"), "textContent", weight)
-    }
-    // this.getVisualProperties("ipo-prompt").textContent = prompt;
-    this.setField(this.getVisualProperties("ipo-prompt"), "textContent", prompt)
-
-
     return super.updateVisualizations();
   }
 
@@ -822,10 +781,24 @@ export class ImagePromptHandler extends operatorHandler {
     }
   }
 
+  checkPrompt(event) {
+    const inputValue = event.target.value;
+    event.target.setAttribute("value", inputValue)
+    event.target["value"] = inputValue
+    event.target.setAttribute("textContent", inputValue)
+    event.target["textContent"] = inputValue
+  }
+
   changeSign() {
     const weightSlider = this.getVisualProperties("ipo-weight");
     const outputElement = weightSlider.parentElement.querySelector('.ipo-weight-display');
     const isNegative = this.getVisualProperties("ipo-negative").checked;
+
+    if (isNegative){
+      this.setField(this.getVisualProperties("ipo-negative"), "checked", isNegative)
+    }else{
+      this.deleteField(this.getVisualProperties("ipo-negative"), "checked")
+    }
     let weight = parseFloat(weightSlider.value);
 
     if (isNegative) {
@@ -846,6 +819,7 @@ export class ImagePromptHandler extends operatorHandler {
     this.deleteField(negativeCheckbox, "disabled")
 
     this.getVisualizations().addEventListener('input', this.changeWeightSlider);
+    this.getVisualizations().addEventListener('input', this.checkPrompt);
     negativeCheckbox.addEventListener('change', () => this.changeSign());
 
     return super.setExecVisualizations();
@@ -862,6 +836,7 @@ export class ImagePromptHandler extends operatorHandler {
 
     const negativeCheckbox = this.getVisualProperties("ipo-negative");
     negativeCheckbox.removeEventListener('change', () => this.changeSign());
+    this.getVisualizations().removeEventListener('input', this.checkPrompt);
 
     return super.removeExecVisualizations();
   }
@@ -1567,35 +1542,8 @@ export class ImageUpscalerHandler extends operatorHandler {
     const imageElement = this.getVisualProperties("image-op-file");
     imageElement.src = apiResponse["url"];
 
-    return {
-
-    }
-
-    // if (data["type"] === "image") {
-    //
-    //   if (data["url"] !== "") {
-    //     const imageElement = this.getVisualProperties("image-op-file");
-    //     imageElement.src = data["url"];
-    //   } else if (data["file"] !== null) {
-    //     const imageElement = this.getVisualProperties("image-op-file");
-    //     const reader = new FileReader();
-    //
-    //     reader.onload = function(e) {
-    //       imageElement.src = e.target.result;
-    //     };
-    //
-    //     reader.readAsDataURL(data["file"]);
-    //   } else {
-    //     throw new Error("Unable to utilize data");
-    //   }
-    //
-    //   this._image_set = true;
-    //   return {};
-    // } else {
-    //   throw new Error("Can only work with image data");
-    // }
+    return {}
   }
-
 }
 
 export class ImageToImageMaskHandler extends operatorHandler {
