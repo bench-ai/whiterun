@@ -1,6 +1,6 @@
 import React, {FC} from 'react';
 import {Card} from "antd";
-import {Link, useNavigate} from "react-router-dom";
+import {Link} from "react-router-dom";
 
 interface Workflow {
     id: string,
@@ -8,7 +8,6 @@ interface Workflow {
 }
 
 export const WorkflowCard: FC<Workflow> = ({ id, name }) => {
-    const navigate = useNavigate();
 
     return (
         <Link reloadDocument to={`/workbench?id=${id}`}>

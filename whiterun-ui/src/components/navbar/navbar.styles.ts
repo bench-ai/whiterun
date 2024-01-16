@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import {Button, Divider} from "antd";
+import {Button} from "antd";
 import {Link} from "react-router-dom";
 
 export const Header = styled.div`
