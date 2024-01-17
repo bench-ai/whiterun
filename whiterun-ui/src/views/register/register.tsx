@@ -20,6 +20,7 @@ import {
 import {PasswordRequirement, PasswordRequirementsValues} from "../../constants/components/auth.constants";
 import BenchLogo from "../../assets/benchLogo.svg";
 import BenchLogoBig from "../../assets/bench.svg";
+import mixpanel from 'mixpanel-browser';
 
 import Title from "antd/es/typography/Title";
 
@@ -46,6 +47,7 @@ const Register = () => {
 
     useEffect(() => {
         document.title = 'Create an Account - Bench AI';
+        mixpanel.track("Register Page Viewed");
     })
 
     const checkForm = (): boolean => {
@@ -123,6 +125,10 @@ const Register = () => {
                     password,
                     username,
                 });
+                mixpanel.track('Signed Up');
+                mixpanel.identify(email);
+                mixpanel.people.set({"$name": username, "$email": email} )
+
                 setRedirect(true);
             } catch (error) {
                 setErrorMessage('Failed to sign up. Please try again.');
