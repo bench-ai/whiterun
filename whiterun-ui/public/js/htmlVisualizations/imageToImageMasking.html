@@ -3,7 +3,7 @@
         <div class="txt-to-img-name">imgToImage</div>
         <div class="text-to-img-divider">
             <label class="txt-to-img-style-title">Style:
-                <select class="txt-to-img-style" disabled>
+                <select class="txt-to-img-style">
                     <option value="3d-model">3d-model</option>
                     <option value="analog-film">analog-film</option>
                     <option value="anime">anime</option>
@@ -24,7 +24,7 @@
                 </select>
             </label>
             <label class="txt-to-img-engine-title">Engine:
-                <select class="txt-to-img-engine" disabled>
+                <select class="txt-to-img-engine">
                     <option value="SDXL_Beta">SDXL Beta</option>
                     <option value="SDXL_v0.9">SDXL v0.9</option>
                     <option value="SDXL_v1.0">SDXL v1.0</option>
@@ -35,10 +35,10 @@
         </div>
         <div class="text-to-img-divider">
             <label class="txt-to-img-clip-title">Clip Guidance:
-                <select class="txt-to-img-clip" disabled>
+                <select class="txt-to-img-clip">
                     <option value="NONE">NONE</option>
                     <option value="FAST_BLUE">FAST_BLUE</option>
-                    <option value="FAST_GREEN">SDXL v0.9</option>
+                    <option value="FAST_GREEN">FAST_GREEN</option>
                     <option value="SIMPLE">SIMPLE</option>
                     <option value="SLOW">SLOW</option>
                     <option value="SLOWER">SLOWER</option>
@@ -46,7 +46,7 @@
                 </select>
             </label>
             <label class="txt-to-img-sampler-title">Sampler:
-                <select class="txt-to-img-sampler" disabled>
+                <select class="txt-to-img-sampler">
                     <option value="DDIM">DDIM</option>
                     <option value="DDPM">DDPM</option>
                     <option value="K_DPMPP_2M">K_DPMPP_2M</option>
@@ -62,7 +62,7 @@
         </div>
         <div class="text-to-img-divider">
             <label class="txt-to-img-sampler-title">Mask Source:
-                <select class="txt-to-img-mask-source" disabled>
+                <select class="txt-to-img-mask-source">
                     <option value="MASK_IMAGE_BLACK">MASK_IMAGE_BLACK</option>
                     <option value="MASK_IMAGE_WHITE">MASK_IMAGE_WHITE</option>
                 </select>
@@ -70,15 +70,15 @@
         </div>
         <div class="text-to-img-divider">
             <label class="txt-to-img-cfg-title">CFG Scale:
-                <input onKeyDown="return false" class="txt-to-img-cfg" type="number" value="7" min="0" max="35" disabled/>
+                <input onKeyDown="return false" class="txt-to-img-cfg" type="number" value="7" min="0" max="35"/>
             </label>
             <label class="txt-to-img-seed-title">Seed:
-                <input onKeyDown="return false" class="txt-to-img-seed" type="number" value="0" min="0" max="4294967295" disabled/>
+                <input onKeyDown="return false" class="txt-to-img-seed" type="number" value="0" min="0" max="4294967295"/>
             </label>
         </div>
         <div class ="text-img-divider">
             <label class="txt-to-img-step-title">Steps:
-                <input onKeyDown="return false" class="txt-to-img-step" type="number" value="30" min="10" max="50" disabled/>
+                <input onKeyDown="return false" class="txt-to-img-step" type="number" value="30" min="10" max="50"/>
             </label>
         </div>
     </div>

@@ -12,8 +12,6 @@ export function getOperator(nodeId, editor) {
   const op = new operatorHandler(editor, idNode);
 
   switch (op.name) {
-    case 'slider':
-      return new SliderHandler(editor, idNode)
     case 'text':
       return new TextHandler(editor, idNode)
     case 'python':
@@ -200,6 +198,7 @@ class operatorHandler {
     this._lastInputs = {}
     this.getUpdatedNodeData()
     this.name = this._node.name
+
   }
 
   _updateMap(cssClass) {
@@ -223,7 +222,6 @@ class operatorHandler {
       }
       nodeArrMap[i]["default_value"] = inputFields.item(i).value
       this.setField( inputFields.item(i), "value", inputFields.item(i).value)
-      // inputFields.item(i).setAttribute("value", inputFields.item(i).value)
     }
     return [nodeArrMap, lastInputs]
   }
@@ -276,50 +274,26 @@ class operatorHandler {
       return false
     }
 
-    if (field.disabled) {
+    if (field.value !== "") {
       return false
     } else {
-      // field.value = "supplied by operator {opName}".replace("{opName}", operator2.name)
-      // field.disabled = true
       this.setField(field, "value", `supplied by operator ${operator2.name}`)
-      // field.setAttribute("value", `supplied by operator ${operator2.name}`)
       this.setField(field, "disabled","true")
       return true
     }
   }
 
-  disconnectOperator(inputNumber, substitute_value, editor) {
+  disconnectOperator(inputNumber) {
     const num = parseInt(inputNumber.match(/\d+/)[0], 10) - 1
     const inputFields = this._operatorDoc.getElementsByClassName("insert-field-dynamic")
     const field = inputFields.item(num)
 
-    // field.value = substitute_value
-    // field.disabled = false
-    // field.setAttribute("value", substitute_value)
-    // field.setAttribute("disabled", "false")
-
-    this.deleteField(field, "disabled")
-    this.setField(field, "value", substitute_value)
-
-    this.getUpdatedNodeData()
-
-    if (this.updateVisualizations()) {
-      this.saveNodeData(editor)
-      return true;
-    } else {
-      this.resetInputFields()
-      field.disabled = true;
-      this.deleteField(field, "disabled")
-      // field.setAttribute("disabled", "true")
-      return false
-    }
+    this.setField(field, "value", "")
   }
 
   _resetField(cls) {
     const inputFields = this._operatorDoc.getElementsByClassName(`insert-field-${cls}`)
     for (let i = 0; i < inputFields.length; i++) {
-      // inputFields.item(i).value = this._lastInputs[cls][i]
-      // inputFields.item(i).setAttribute("value", this._lastInputs[cls][i])
       this.setField(inputFields.item(i), "value", this._lastInputs[cls][i])
     }
   }
@@ -459,109 +433,13 @@ class operatorHandler {
 }
 
 
-export class SliderHandler extends operatorHandler {
-  constructor(editor, nodeId) {
-    super(editor, nodeId);
-  }
-
-  getIntInputValue(fieldNumber) {
-    const val = parseInt(this.getInputValue(fieldNumber, "static"))
-    if (isNaN(val)) {
-      throw new TypeCastingError("int", "string")
-    } else {
-      return val
-    }
-  }
-
-  updateVisualizations() {
-
-    const sliderOut = this.getVisualProperties("slider-operator-output")
-    const sliderName = this.getVisualProperties("slider-operator-name")
-    const slider = this.getVisualProperties("slider-operator")
-
-    try {
-      const sliderMin = this.getIntInputValue(1)
-      const sliderMax = this.getIntInputValue(2)
-      const sliderValue = this.getIntInputValue(3)
-
-      const cond1 = (sliderMin >= sliderMax)
-      const cond2 = ((sliderValue < sliderMin) || (sliderValue > sliderMax))
-
-      if (!(cond1 || cond2)) {
-        // sliderOut.textContent = sliderValue.toString()
-        this.setField(sliderOut, "textContent", sliderValue.toString())
-
-        // sliderName.textContent = this.getInputValue(0, "static")
-        this.setField(sliderName, "textContent", this.getInputValue(0, "static"))
-
-        // slider.min = sliderMin.toString()
-        this.setField(slider, "min", sliderMin.toString())
-
-        // slider.max = sliderMax.toString()
-        this.setField(slider, "max", sliderMax.toString())
-
-        // slider.value = sliderValue.toString()
-        this.setField(slider, "value", sliderValue.toString())
-
-        return super.updateVisualizations()
-      } else {
-        return false
-      }
-    } catch (error) {
-      if (error instanceof TypeCastingError) {
-        console.log("improperTypeProvided")
-      }
-
-      return false
-    }
-  }
-
-  changeSlider(event){
-    if (event.target && event.target.classList.contains('slider-operator')) {
-
-      const outputElement = event.target.parentElement.querySelector('.slider-operator-output');
-      outputElement.textContent = event.target.value;
-
-      outputElement.setAttribute("textContent", event.target.value)
-      event.target.setAttribute("value", event.target.value)
-    }
-  }
-
-  setExecVisualizations() {
-    const slider = this.getVisualProperties("slider-operator")
-    // slider.disabled = false;
-    this.deleteField(slider, "disabled")
-
-    this.getVisualizations().addEventListener('input', this.changeSlider);
-    return super.setExecVisualizations()
-  }
-
-  removeExecVisualizations() {
-    const slider = this.getVisualProperties("slider-operator")
-    // slider.disabled = true;
-    // slider.setAttribute("disabled", "true")
-
-    this.setField(slider, "disabled", "true")
-
-    this.getVisualizations().removeEventListener('input', this.changeSlider)
-    return super.removeExecVisualizations();
-  }
-
-  async getOutputObject(inputObject) {
-    return this.checkOutputs({
-      "output_1": parseInt(this.getVisualProperties("slider-operator").value)
-    })
-  }
-}
-
-
 export class PythonHandler extends operatorHandler {
   constructor(editor, nodeId) {
     super(editor, nodeId);
   }
 
   async getOutputObject(inputObject) {
-    inputObject = await super.getOutputObject(inputObject)
+    // inputObject = await super.getOutputObject(inputObject)
     const python = this.getVisualProperties("python-text").textContent
     const ret = await evaluatePython(python, inputObject)
 
@@ -579,20 +457,9 @@ export class ImageHandler extends operatorHandler {
   updateVisualizations() {
 
     const name = this.getVisualProperties("image-operator-name")
-    name.textContent = this.getInputValue(1, "static")
+    name.textContent = this.getInputValue(0, "static")
 
-    this.setField(name, "textContent", this.getInputValue(1, "static"))
-
-    try {
-      let js = JSON.parse(this.getInputValue(0, "static"))
-      if (typeof (js) !== "object") {
-        return false
-      } else {
-        return super.updateVisualizations()
-      }
-    } catch (exception) {
-      return false
-    }
+    this.setField(name, "textContent", this.getInputValue(0, "static"))
   }
 
   async changeInput(event){
@@ -617,7 +484,6 @@ export class ImageHandler extends operatorHandler {
     const fileInput = this.getVisualProperties("image-input")
     const body = await requestInterceptor(uploadImage, fileInput, true)
 
-    // this.checkOutputs()
     return this.checkOutputs({
       "output_1": {
         "type": "image",
@@ -630,17 +496,15 @@ export class ImageHandler extends operatorHandler {
 
   setExecVisualizations() {
     const imageButton = this.getVisualProperties("image-input")
-    // imageButton.disabled = false;
-    this.deleteField(imageButton,"disabled")
-    this.getVisualizations().addEventListener('change', this.changeInput);
+    // this.deleteField(imageButton,"disabled")
+    imageButton.addEventListener('change', this.changeInput);
     return super.setExecVisualizations();
   }
 
   removeExecVisualizations() {
     const imageButton = this.getVisualProperties("image-input")
-    // imageButton.disabled = true;
-    this.setField(imageButton,"disabled", "true")
-    this.getVisualizations().removeEventListener('change', this.changeInput)
+    // this.setField(imageButton,"disabled", "true")
+    imageButton.removeEventListener('change', this.changeInput)
     return super.removeExecVisualizations();
   }
 }
@@ -709,27 +573,14 @@ export class JsonDisplayHandler extends operatorHandler {
     }
 
     const output = this.getVisualProperties("json-output")
-    // output.textContent = jOut
     this.setField(output,"textContent", jOut)
   }
 
   updateVisualizations() {
     try {
-      let jOut = this.getInputValue(0, "dynamic")
-
-      if (jOut.startsWith("{") || jOut.startsWith("[")) {
-        jOut = JSON.parse(jOut)
-        jOut = JSON.stringify(jOut, null, 3);
-      }
-
-      const output = this.getVisualProperties("json-output")
       let jName = this.getVisualProperties("json-operator-name")
-
-      this.setField(output,"textContent", jOut)
       this.setField(jName,"textContent", this.getInputValue(0, "static"))
-
       return super.updateVisualizations()
-
     } catch (error) {
       return false
     }
@@ -749,66 +600,16 @@ export class ImagePromptHandler extends operatorHandler {
     super(editor, nodeId);
   }
 
-  getIntInputValue(fieldNumber) {
-    const val = parseFloat(this.getInputValue(fieldNumber, "static"))
-    if (isNaN(val)) {
-      throw new TypeCastingError("int", "string")
-    } else {
-      return val
-    }
-  }
-
   updateVisualizations() {
     let name = this.getInputValue(0, "static");
-    const prompt = this.getInputValue(1, "static");
-    const negative = this.getInputValue(2, "static").toLowerCase();
-    let weight;
-
-    // this.getVisualProperties("ipo-name").textContent = name;
     this.setField(this.getVisualProperties("ipo-name"), "textContent", name)
-
-    try{
-      weight = this.getIntInputValue(3);
-    }catch (error){
-      return false
-    }
-
-    if ((0 <= weight) && (weight <= 2)) {
-      // this.getVisualProperties("ipo-weight").value = weight;
-      // this.getVisualProperties("ipo-weight-display").textContent = weight;
-
-      this.setField(this.getVisualProperties("ipo-weight"), "value", weight)
-      this.setField(this.getVisualProperties("ipo-weight-display"), "textContent", weight)
-
-
-    } else {
-      return false;
-    }
-
-    const isNegative = negative === "true";
-
-    // this.getVisualProperties("ipo-negative").checked = isNegative;
-    this.setField(this.getVisualProperties("ipo-negative"), "checked", isNegative)
-
-    if (isNegative) {
-      weight = weight * -1;
-      // this.getVisualProperties("ipo-weight").value = weight * -1;
-      // this.getVisualProperties("ipo-weight-display").textContent = weight;
-
-      this.setField(this.getVisualProperties("ipo-weight"), "value", weight * -1)
-      this.setField(this.getVisualProperties("ipo-weight-display"), "textContent", weight)
-    }
-    // this.getVisualProperties("ipo-prompt").textContent = prompt;
-    this.setField(this.getVisualProperties("ipo-prompt"), "textContent", prompt)
-
-
     return super.updateVisualizations();
   }
 
   changeWeightSlider(event) {
     if (event.target && event.target.classList.contains('ipo-weight')) {
       const outputElement = event.target.parentElement.querySelector('.ipo-weight-display');
-      const negativeCheckbox = document.querySelector('.ipo-negative');
+      const negativeCheckbox = event.target.parentElement.querySelector('.ipo-negative');
       const isNegative = negativeCheckbox ? negativeCheckbox.checked : false;
       let weight = parseFloat(event.target.value);
 
@@ -822,30 +623,41 @@ export class ImagePromptHandler extends operatorHandler {
     }
   }
 
+  checkPrompt(event) {
+    const inputValue = event.target.value;
+    event.target.setAttribute("value", inputValue)
+    event.target["value"] = inputValue
+    event.target.setAttribute("textContent", inputValue)
+    event.target["textContent"] = inputValue
+  }
+
   changeSign() {
     const weightSlider = this.getVisualProperties("ipo-weight");
     const outputElement = weightSlider.parentElement.querySelector('.ipo-weight-display');
     const isNegative = this.getVisualProperties("ipo-negative").checked;
+
+    if (isNegative){
+      this.setField(this.getVisualProperties("ipo-negative"), "checked", isNegative)
+    }else{
+      this.deleteField(this.getVisualProperties("ipo-negative"), "checked")
+    }
     let weight = parseFloat(weightSlider.value);
 
     if (isNegative) {
       weight *= -1;
     }
 
-    // outputElement.textContent = weight;
     this.setField(outputElement, "textContent", weight)
   }
 
   setExecVisualizations() {
-    this.getVisualProperties("ipo-name").disabled = false;
-    this.getVisualProperties("ipo-weight").disabled = false;
-    this.getVisualProperties("ipo-prompt").readOnly = false;
 
     const negativeCheckbox = this.getVisualProperties("ipo-negative");
-    // negativeCheckbox.disabled = false;
-    this.deleteField(negativeCheckbox, "disabled")
+    const prompt = this.getVisualProperties("ipo-prompt");
+    const weight = this.getVisualProperties("ipo-weight");
 
-    this.getVisualizations().addEventListener('input', this.changeWeightSlider);
+    weight.addEventListener('input', this.changeWeightSlider);
+    prompt.addEventListener('input', this.checkPrompt);
     negativeCheckbox.addEventListener('change', () => this.changeSign());
 
     return super.setExecVisualizations();
@@ -853,14 +665,12 @@ export class ImagePromptHandler extends operatorHandler {
 
   removeExecVisualizations() {
 
-    this.setField(this.getVisualProperties("ipo-name"), "disabled", "true")
-    this.setField(this.getVisualProperties("ipo-weight"), "disabled", "true")
-    this.setField(this.getVisualProperties("ipo-negative"), "disabled", "true")
-    this.setField(this.getVisualProperties("ipo-prompt"), "readOnly", "true")
-
-    this.getVisualizations().removeEventListener('input', this.changeWeightSlider)
-
     const negativeCheckbox = this.getVisualProperties("ipo-negative");
+    const prompt = this.getVisualProperties("ipo-prompt");
+    const weight = this.getVisualProperties("ipo-weight");
+
+    weight.removeEventListener('input', this.changeWeightSlider);
+    prompt.removeEventListener('input', this.checkPrompt);
     negativeCheckbox.removeEventListener('change', () => this.changeSign());
 
     return super.removeExecVisualizations();
@@ -885,6 +695,7 @@ export class ImagePromptHandler extends operatorHandler {
 }
 
 export class promptGrouperHandler extends operatorHandler {
+
   constructor(editor, nodeId) {
     super(editor, nodeId);
   }
@@ -892,27 +703,8 @@ export class promptGrouperHandler extends operatorHandler {
   updateVisualizations() {
 
     let name = this.getVisualProperties("prompt-group-name");
-    // name.textContent = this.getInputValue(0, "static");
+    name.textContent = this.getInputValue(0, "static");
     this.setField(name, "textContent", this.getInputValue(0, "static"))
-    let prompts = [];
-
-    for (let i = 0; i < 5; i++) {
-      let prompt = this.getInputValue(i, "dynamic");
-
-      if (prompt.startsWith("{") || prompt.startsWith("[")) {
-        prompt = JSON.parse(prompt);
-        prompt = JSON.stringify(prompt, null, 3);
-      }
-
-      prompts.push(prompt);
-    }
-
-    // Filter out undefined prompts
-    prompts = prompts.filter((prompt) => prompt !== undefined);
-
-    const output = this.getVisualProperties("prompt-group-display");
-    // output.textContent = JSON.stringify(prompts, null, 3);
-    this.setField(output, "textContent", JSON.stringify(prompts, null, 3))
 
     return super.updateVisualizations();
   }
@@ -923,12 +715,10 @@ export class promptGrouperHandler extends operatorHandler {
     }
 
     const output = this.getVisualProperties("prompt-group-display")
-    // output.textContent = jOut
     this.setField(output, "textContent", jOut)
   }
 
   async getOutputObject(inputObject) {
-    // inputObject = await super.getOutputObject(inputObject)
     const combinedPrompts = [];
 
     for (let i = 1; i <= 5; i++) {
@@ -960,9 +750,13 @@ export class textToImageHandler extends operatorHandler {
   }
 
   updateHeightAndWidth(event) {
-    const engineSelect = document.querySelector('.txt-to-img-engine');
-    const heightInput = document.querySelector('.txt-to-img-height');
-    const widthInput = document.querySelector('.txt-to-img-width');
+
+    const outerParent = event.target.parentElement.parentElement.parentElement
+
+    const engineSelect = event.target.parentElement.querySelector('.txt-to-img-engine');
+    const heightInput = outerParent.querySelector('.txt-to-img-height');
+    const widthInput = outerParent.querySelector('.txt-to-img-width');
+
 
     const engineValue = engineSelect.value;
 
@@ -1070,32 +864,9 @@ export class textToImageHandler extends operatorHandler {
 
   }
 
-  getIntInputValue(fieldNumber) {
-    const val = parseFloat(this.getInputValue(fieldNumber, "static"))
-    if (isNaN(val)) {
-      throw new TypeCastingError("int", "string")
-    } else {
-      return val
-    }
-  }
-
   updateVisualizations() {
     let name = this.getVisualProperties("txt-to-img-name");
-    let seed;
-
     this.setField(name, "textContent", this.getInputValue(0, "static"))
-
-    try {
-      seed = this.getIntInputValue(1)
-    } catch (error) {
-      return false
-    }
-
-    if ((0 <= seed) && (seed <= 4294967295)) {
-      this.setField(this.getVisualProperties("txt-to-img-seed"), "value", seed)
-    } else {
-      return false;
-    }
 
     try {
 
@@ -1208,6 +979,8 @@ export class textToImageHandler extends operatorHandler {
       "steps": step,
     };
 
+    console.log(requestBody)
+
     let apiResponse;
 
     try {
@@ -1229,6 +1002,7 @@ export class textToImageHandler extends operatorHandler {
         "type": "image"
       }
     };
+
   }
 }
 
@@ -1435,7 +1209,9 @@ export class ImageToImageHandler extends operatorHandler {
   }
 
   async getOutputObject(inputObject) {
-    inputObject = await super.getOutputObject(inputObject)
+    // inputObject = await super.getOutputObject(inputObject)
+
+    console.log(inputObject)
 
     let prompts = inputObject["input_1"]
     const imgObject = inputObject["input_2"]
@@ -1567,35 +1343,8 @@ export class ImageUpscalerHandler extends operatorHandler {
     const imageElement = this.getVisualProperties("image-op-file");
     imageElement.src = apiResponse["url"];
 
-    return {
-
-    }
-
-    // if (data["type"] === "image") {
-    //
-    //   if (data["url"] !== "") {
-    //     const imageElement = this.getVisualProperties("image-op-file");
-    //     imageElement.src = data["url"];
-    //   } else if (data["file"] !== null) {
-    //     const imageElement = this.getVisualProperties("image-op-file");
-    //     const reader = new FileReader();
-    //
-    //     reader.onload = function(e) {
-    //       imageElement.src = e.target.result;
-    //     };
-    //
-    //     reader.readAsDataURL(data["file"]);
-    //   } else {
-    //     throw new Error("Unable to utilize data");
-    //   }
-    //
-    //   this._image_set = true;
-    //   return {};
-    // } else {
-    //   throw new Error("Can only work with image data");
-    // }
+    return {}
   }
-
 }
 
 export class ImageToImageMaskHandler extends operatorHandler {

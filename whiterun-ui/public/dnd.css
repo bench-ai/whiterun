@@ -63,19 +63,15 @@ body{
 }
 
 #drawflow {
-  /*position: fixed;*/
   width: calc(98vw - 300px);;
   height: calc(85vh);
   border-color: #696B6F;
   border-style: solid;
   border-radius: 30px;
-  /*left: 300px;*/
-  /*top: 20px;*/
   margin-left: 20px;
-  background-image: none;
-  /*background-image:*/
-  /*  radial-gradient(circle, #696B6F 4px, transparent 4px),*/
-  /*  radial-gradient(circle, #606060 0px, transparent 0px);*/
+  background-image:
+    radial-gradient(circle, #696B6F 4px, transparent 4px),
+    radial-gradient(circle, #606060 0px, transparent 0px);
   background-size: 45px 75px; /* Adjust the size of the dots */
   background-position: 0 0, 12.5px 12.5px;
   border-width: 1px;

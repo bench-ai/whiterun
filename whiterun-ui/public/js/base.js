@@ -14,11 +14,11 @@ function parseUrl(){
 
 async function userLoader(){
   try{
-    const lock = document.getElementById(`lock`)
+    const save = document.getElementsByClassName(`save-button`)[0]
     const userObject = await requestInterceptor(getUser,{}, false)
 
     if (userObject["work_flows"].hasOwnProperty(parseUrl())){
-      lock.style.display = "block"
+      save.style.display = "block"
       return [userObject, true]
     }
 
@@ -43,7 +43,7 @@ let workflowPromise = workflowLoader()
 let pythonOutputTable;
 let pythonInputTable;
 let selectedNode;
-let mode = "execute";
+
 let connectionRemovalReason = "";
 var id = document.getElementById("drawflow");
 const editor = new Drawflowoverride(id);
@@ -96,7 +96,7 @@ async function loadEditor(){
 
     xportKeys.forEach((element) => {
       const op = getOperator(element, editor);
-      op.lockInputFields();
+      // op.lockInputFields();
       op.setExecVisualizations();
     })
   }
@@ -121,15 +121,17 @@ editor.on("mouseMove", function (data) {
   mousePosition = data;
 })
 
+editor.on("nodeBeforeRemoved", function (nodeId){
+  const match = nodeId.match(/\d+/);
+  const node_number = parseInt(match[0], 10)
+  const op = getOperator(node_number, editor);
+  op.removeExecVisualizations()
+  console.log("here")
+  editor.removeConnectionNodeId(nodeId)
+  return true
+})
+
 editor.on("connectionCreated", function (dataDict) {
-  if (mode !== "editor"){
-    connectionRemovalReason = "rejectedOnCreation";
-    editor.removeSingleConnection(dataDict["output_id"],
-      dataDict["input_id"],
-      dataDict["output_class"],
-      dataDict["input_class"]);
-    throw new Error("Connection Error")
-  }
 
   const g = new ExecutionGraph(editor.export()["drawflow"]["Home"]["data"])
 
@@ -159,78 +161,25 @@ editor.on("connectionCreated", function (dataDict) {
   }
 });
 
-function waitForKeyPress() {
-  return new Promise(resolve => {
-    function handleKeyPress(event) {
-      if (event.key === "Enter") {
-        document.removeEventListener('keydown', handleKeyPress);
-        document.getElementById("overlay").style.display = "none"
-        let popup = document.getElementsByClassName("conn-removed-pu")
-
-        popup = popup[0];
-        const modalValue = popup.getElementsByClassName("insert-field-dynamic")[0].value
-        popup.style.display = "none"
-        resolve(modalValue);
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyPress);
-  });
-}
-
-
-async function displayInputPopup() {
-
-  const modal = document.createElement("div");
-  modal.classList.add("conn-removed-pu");
-
-  modal.innerHTML = `
-        Enter Replacement Value
-        <input class="insert-field-dynamic" type="text" name="" value="Type here...">
-  `;
-
-  modal.style.left = `${mousePosition.x}px`;
-  modal.style.top = `${mousePosition.y}px`;
-
-  document.body.appendChild(modal);
-
-  document.getElementById("overlay").style.display = "block"
-  modal.style.display = "block"
-
-  const keyPressValue = await waitForKeyPress()
-  modal.remove()
-  return keyPressValue
-}
-
-
 editor.on("connectionRemoved", async function (dataDict) {
   if (connectionRemovalReason === ""){
-    const value = await displayInputPopup()
     let inputNode = getOperator(dataDict["input_id"], editor);
-    if (!inputNode.disconnectOperator(dataDict["input_class"], value, editor)) {
-      editor.addConnection(dataDict["output_id"], dataDict["input_id"], dataDict["output_class"], dataDict["input_class"])
-    }
+    inputNode.disconnectOperator(dataDict["input_class"]);
   }else{
     connectionRemovalReason = "";
   }
 });
 
-editor.on("connectionBeforeRemoved", ({output_id, input_id, output_class, input_class}) => {
-  return mode === "editor";
-})
-
 editor.on('nodeUnselected', function (update) {
 
-  if(mode === "editor"){
-    if (update) {
-      const node = getOperator(selectedNode, editor)
-      const update = node.updateVisualizations()
+  if (update) {
+    const node = getOperator(selectedNode, editor)
+    const update = node.updateVisualizations()
 
-      if (update) {
-        node.saveNodeData(editor)
-      } else {
-        node.resetInputFields()
-      }
+    if (update) {
+      node.saveNodeData(editor)
+    } else {
+      node.resetInputFields()
     }
   }
 })
@@ -373,10 +322,6 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     return false;
   }
 
-  if (mode === 'execute') {
-    return false;
-  }
-
   let inputs;
   let outputs;
   let visualization;
@@ -413,6 +358,18 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     nodeDiv = nodeDiv.replace("{viz}", visualization)
     const nodeMap = {"inputs": inputs, "outputs": outputs}
     editor.addNode(name, inputs["dynamic"].length, outputs.length, pos_x, pos_y, name, nodeMap, nodeDiv);
+
+    let xport = editor.export()["drawflow"]["Home"]["data"];
+
+    const dataArr = []
+
+    Object.keys(xport).forEach( numb => {
+      dataArr.push(parseInt(numb))
+    })
+
+    const nodeId = Math.max(...dataArr)
+    const op = getOperator(nodeId.toString(), editor);
+    op.setExecVisualizations()
   }
 }
 
@@ -436,61 +393,3 @@ async function executeGraph(){
   playButton.style.display = "block"
 }
 window.executeGraph = executeGraph;
-
-async function changeMode(option) {
-  const lock = document.getElementById(`lock`)
-  const unlock = document.getElementById(`unlock`)
-  const save = document.getElementsByClassName(`save-button`)[0]
-  const drawflowContainer = document.getElementById('drawflow');
-  const playButton = document.getElementById('enabled-play-button');
-  let xport = editor.export()["drawflow"]["Home"]["data"];
-  let xportKeys = Object.keys(xport);
-
-  const up = await userPromise
-
-  const hasProp = up[1]
-
-  // const id = parseUrl()
-
-  if (hasProp){
-
-    if (option === 'unlock') {
-      mode = "editor"
-      lock.style.display = 'none';
-      unlock.style.display = 'block';
-      playButton.style.display = 'none'
-      save.style.display = "block"
-
-      drawflowContainer.style.backgroundImage = `
-      radial-gradient(circle, #696B6F 4px, transparent 4px),
-      radial-gradient(circle, #606060 0px, transparent 0px)
-    `;
-
-      xportKeys.forEach((element) => {
-        const op = getOperator(element, editor);
-        op.unlockInputFields()
-        op.removeExecVisualizations();
-      })
-
-    } else {
-      mode = "execute"
-      lock.style.display = 'block';
-      unlock.style.display = 'none';
-      playButton.style.display = 'block'
-      save.style.display = "none"
-
-      drawflowContainer.style.backgroundImage = 'none';
-
-      xportKeys.forEach((element) => {
-        const op = getOperator(element, editor);
-        op.lockInputFields();
-        op.setExecVisualizations();
-      })
-    }
-
-  }
-  // let e = new ExecutionGraph(xport)
-  // e.getGraphExecutionOrder(editor)
-}
-
-window.changeMode = changeMode;

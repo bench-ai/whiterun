@@ -11,7 +11,7 @@
       {
         "name": "displayValue",
         "type": "text | number | boolean | list | object | null",
-        "default_value": "\"Hello World\""
+        "default_value": ""
       }
     ]
   },
