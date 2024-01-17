@@ -43,15 +43,12 @@ const NavbarProtected = () => {
         try {
             await axios.post(`${baseURL}/auth/logout`, {}, {withCredentials: true,});
             logout();
-            console.log("Success")
             navigate("/login");
         } catch (error) {
             console.error('Error during logout:', error);
         }
         setSignOutLoading(false);
     }
-
-
 
     return (
         <Header>

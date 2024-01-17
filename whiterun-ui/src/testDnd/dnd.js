@@ -1,6 +1,13 @@
 import React, {useEffect} from 'react';
+import mixpanel from "mixpanel-browser";
 
 const DragAndDrop = () => {
+
+    function parseUrl(){
+        const queryString = window.location.search;
+        const queryParams = new URLSearchParams(queryString);
+        return queryParams.get('id')
+    }
 
     useEffect(() => {
         const loadScripts = async () => {
@@ -80,6 +87,10 @@ const DragAndDrop = () => {
 
         loadScripts();
     }, []);
+
+    window.handlePlayButtonClick = () => {
+        mixpanel.track('Workflow Play Button Clicked', {'Workflow Name': parseUrl()});
+    };
 
     return (
         <div dangerouslySetInnerHTML={{
@@ -235,14 +246,18 @@ const DragAndDrop = () => {
 <!--          <img class="lock-logo" src="assets/unlock-logo.svg" alt="Icon description" draggable="false">-->
 <!--        </i>-->
         
-        <button class="play-button" id="enabled-play-button">
-            <img src="assets/play-button-logo.svg" alt="Play Button" onclick="executeGraph()">
-        </button>
+<!--        <button class="play-button" id="enabled-play-button">-->
+<!--            <img src="assets/play-button-logo.svg" alt="Play Button" onclick="executeGraph()">-->
+<!--        </button>-->
    
         <button class="play-button" id="disabled-play-button">
           <img src="assets/play-button-disabled-logo.svg" alt="Play Button" style="display:none;">
         </button>
-
+        
+        <button class="play-button" id="enabled-play-button" onclick="handlePlayButtonClick()">
+            <img src="assets/play-button-logo.svg" alt="Play Button" onclick="executeGraph()">
+        </button>
+        
         <button class="save-button">
           <img src="assets/save-logo.svg" alt="Save Button" onclick="saveDrawFlow()">
         </button>

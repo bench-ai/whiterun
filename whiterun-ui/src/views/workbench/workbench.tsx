@@ -4,14 +4,22 @@ import Title from 'antd/es/typography/Title';
 import React, {useEffect, useState} from 'react';
 import DragAndDrop from '../../testDnd/dnd';
 import {TutorialCardList} from "./workbench.styles";
+import mixpanel from "mixpanel-browser";
 
 const {Panel} = Collapse;
 
 const Workbench = () => {
     const [loading, setLoading] = useState(true);
 
+    function parseUrl(){
+        const queryString = window.location.search;
+        const queryParams = new URLSearchParams(queryString);
+        return queryParams.get('id')
+    }
+
     useEffect(() => {
         document.title = 'Workbench - Bench AI';
+        mixpanel.track("Workflow Viewed", {'Workflow Name': parseUrl()});
     })
 
     useEffect(() => {

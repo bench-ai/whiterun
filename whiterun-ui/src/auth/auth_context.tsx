@@ -1,6 +1,6 @@
 import React, {createContext, useContext, useState, ReactNode, useEffect} from 'react';
 import axios from "axios";
-
+import mixpanel from "mixpanel-browser";
 
 interface Workflow {
     name: string;
@@ -58,9 +58,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
                     withCredentials: true,
                 }
             );
-            // console.log(response.data);
             const userData = response.data;
-            console.log(userData);
+
+            mixpanel.track('Logged In');
+            mixpanel.identify(userData.email);
+            mixpanel.people.set_once({"$name": userData.username});
 
             // Save user details in local storage
             localStorage.setItem('user', JSON.stringify(userData));
@@ -83,6 +85,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
     const logout = () => {
         setIsLoggedIn(false);
+        mixpanel.reset();
         setUser(null); // Clear user data on logout
         localStorage.removeItem('user');
     };
