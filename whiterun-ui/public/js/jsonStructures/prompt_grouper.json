@@ -10,28 +10,23 @@
     "dynamic": [
       {
         "name": "promptOne",
-        "type": "object",
-        "default_value": null
+        "type": "object"
       },
       {
         "name": "promptTwo",
-        "type": "object",
-        "default_value": null
+        "type": "object"
       },
       {
         "name": "promptTwo",
-        "type": "object",
-        "default_value": null
+        "type": "object"
       },
       {
         "name": "promptTwo",
-        "type": "object",
-        "default_value": null
+        "type": "object"
       },
       {
         "name": "promptTwo",
-        "type": "object",
-        "default_value": null
+        "type": "object"
       }
     ]
   },

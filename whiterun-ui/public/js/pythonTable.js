@@ -11,15 +11,15 @@ export class PythonTable {
           <option value="boolean">boolean</option>
         </select>`;
 
-  constructor(tableId, hasDefault) {
+  constructor(tableId, hasName) {
 
     this.table = document.getElementById(tableId).getElementsByTagName('table')[0];
     this.tableBody = this.table.getElementsByTagName('tbody')[0];
 
     this.colLimit = 1
 
-    if (hasDefault) {
-      this.colLimit += 2
+    if (hasName) {
+      this.colLimit += 1
     }
 
     this.reset()
@@ -61,9 +61,8 @@ export class PythonTable {
         }
       }
 
-      if (this.colLimit === 3) {
+      if (this.colLimit === 2) {
         newRow.cells[0].innerHTML = '<input type="text" name="name[]" value="">';
-        newRow.cells[1].innerHTML = '<input type="text" name="value[]" value="">';
       }
 
       for (let i = this.colLimit - 1; i < this.colCount; i++) {

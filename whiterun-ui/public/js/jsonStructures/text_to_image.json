@@ -5,18 +5,12 @@
         "name": "name",
         "type": "text",
         "default_value": "textToImage"
-      },
-      {
-        "name": "seed",
-        "type": "number",
-        "default_value": "0"
       }
     ],
     "dynamic": [
       {
         "name": "prompts",
-        "type": "object | list",
-        "default_value": null
+        "type": "object | list"
       }
     ]
   },

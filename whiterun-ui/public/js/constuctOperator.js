@@ -49,13 +49,6 @@ export async function collectOperatorMetaData(name){
       operatorLogo = "assets/json-logo.svg";
       break;
 
-    case "slider":
-      viz = await fetchHTML("slider");
-      dataList = await fetchJSON("slider");
-      operatorTitle = "Slider Operator";
-      operatorLogo = "assets/slider-logo.svg";
-      break;
-
     case "text":
       viz = await fetchHTML("text");
       dataList = await fetchJSON("text");
@@ -147,11 +140,22 @@ function getPropertyDiv(dataArr, isStatic){
                      </div>`.replace('{name}', currentMap["name"]).replace('{type}', currentMap["type"])
 
     if (currentMap.hasOwnProperty("default_value")){
-      inputField += `<input class="${className}" type="text" name={value_name} value={default_value}>
+      if (isStatic){
+        inputField += `<input class="${className}" type="text" name={value_name} value={default_value}>
         `.replace('{default_value}', def).replace('{value_name}',currentMap["name"])
+      }else{
+        inputField += `<input disabled class="${className}" type="text" name={value_name} value={default_value}>
+        `.replace('{default_value}', def).replace('{value_name}',currentMap["name"])
+      }
     }else{
-      inputField += `<input class="${className}" type="text" name={value_name}>
+      console.log("in this part")
+      if (isStatic){
+        inputField += `<input class="${className}" type="text" name={value_name}>
         `.replace('{value_name}',currentMap["name"])
+      }else{
+        inputField += `<input disabled class="${className}" type="text" name={value_name}>
+        `.replace('{value_name}',currentMap["name"])
+      }
     }
     inputField += "</div>"
     wholeInput += inputField

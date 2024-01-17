@@ -2,15 +2,6 @@
   "inputs": {
     "static": [
       {
-        "name": "acceptedFileTypes",
-        "type": "list",
-        "default_value": [
-          ".jpg",
-          ".jpeg",
-          ".png"
-        ]
-      },
-      {
         "name": "name",
         "type": "text",
         "default_value": "image"
