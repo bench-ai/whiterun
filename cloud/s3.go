@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"io"
 	"mime/multipart"
+	"net/http"
 	"os"
 	"time"
 )
@@ -125,4 +127,34 @@ func DownloadFromS3(objectKey string) ([]byte, error) {
 	}
 
 	return fileContent, nil
+}
+
+func downloadUrlToBase64(downloadUrl string) (error, string) {
+	response, err := http.Get(downloadUrl)
+	if err != nil {
+		return err, ""
+	}
+
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to download image, status code: %d", response.StatusCode), ""
+	}
+
+	data, err := io.ReadAll(response.Body)
+	if err != nil {
+		return err, ""
+	}
+
+	return nil, base64.StdEncoding.EncodeToString(data)
+}
+
+func UploadUrlToS3(fileUrl, s3ObjectKey string) error {
+	err, base64Str := downloadUrlToBase64(fileUrl)
+
+	if err != nil {
+		return err
+	}
+
+	return UploadToS3fromBase64(base64Str, s3ObjectKey)
 }

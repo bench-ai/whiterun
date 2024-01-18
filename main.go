@@ -3,6 +3,7 @@ package main
 import (
 	"ApiExecutor/cloud"
 	"ApiExecutor/controllers"
+	"ApiExecutor/controllers/dalle"
 	"ApiExecutor/controllers/stability"
 	"ApiExecutor/db"
 	"ApiExecutor/middleware"
@@ -117,6 +118,7 @@ func main() {
 
 	// upload
 	r.POST("api/upload/image", middleware.CheckExecutionAccess, controllers.UploadImageFile)
+	r.POST("api/dall-e/text-to-image", middleware.CheckExecutionAccess, dalle.TextToImage)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")
