@@ -212,16 +212,6 @@ type apiParameters struct {
 	MaskImage          string   `json:"mask_image"`
 }
 
-//type image struct {
-//	Base64       string `json:"base64"`
-//	Seed         uint32 `json:"seed"`
-//	FinishReason string `json:"finishReason"`
-//}
-
-//type apiResponse struct {
-//	Images []image `json:"artifacts"`
-//}
-
 func (tti apiParameters) getEngine() engine {
 	var eng engine
 

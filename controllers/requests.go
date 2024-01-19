@@ -41,7 +41,9 @@ func ExecuteImageRequest(
 		return er, ""
 	}
 
-	if pResponse.StatusCode != 200 {
+	if (pResponse.StatusCode != 200) && (pResponse.StatusCode != 201) {
+
+		fmt.Println(pResponse.StatusCode)
 
 		pFailed := responseStruct.Failure(pResponse)
 
