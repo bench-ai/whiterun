@@ -566,6 +566,52 @@ body{
   height: 100px;
 }
 
+/*--------DALL-E Text to Image------------*/
+.dalle-txt-to-img-name {
+  padding-top: 15px;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+}
+
+.dalle-text-to-img-divider {
+  display: flex;
+  border: 0;
+  margin-top: 15px;
+}
+
+.dalle-txt-to-img-style-title,
+.dalle-txt-to-img-resolution-title,
+.dalle-txt-to-img-prompt-title,
+.dalle-txt-to-img-quality-title {
+  font-size: 13px;
+  color: white;
+  flex: 1;
+  margin-bottom: 5px;
+  margin-right: 9px;
+}
+
+.dalle-txt-to-img-style,
+.dalle-txt-to-img-resolution,
+.dalle-txt-to-img-quality {
+  display: block;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #696b6f;
+  max-width: 100px;
+  margin-top: 10px;
+  color: white;
+}
+
+.drawflow-node .dalle-txt-to-img-prompt {
+  border: solid 1px white;
+  background:  var(--background-color);
+  font-size: 14px;
+  line-height: 1.4;
+  height: 100px;
+  margin-top: 10px;
+}
+
 /*------------------------------*/
 .drawflow-node .json-output{
   background:  var(--background-color);

@@ -1,6 +1,6 @@
 
-const urlPrefix = "https://app.bench-ai.com"
-// const urlPrefix = "http://localhost:8080"
+// const urlPrefix = "https://app.bench-ai.com"
+const urlPrefix = "http://localhost:8080"
 
 
 export async function getUser(body) {
@@ -65,6 +65,26 @@ export async function saveWorkflow(body) {
 
 export async function textToImage(body) {
     const url = `${urlPrefix}/api/stability/text-to-image`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
+    }
+
+    return response.json()
+}
+
+export async function dalleTextToImage(body) {
+    const url = `${urlPrefix}/api/dall-e/text-to-image`;
 
     const response = await fetch(url, {
         method: 'POST',

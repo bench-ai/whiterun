@@ -229,6 +229,13 @@ const DragAndDrop = () => {
       </i>
     </div>
     
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="dalleTextToImage">
+      <span class="operator-title">Dall-E Text to Image</span>
+      <i class="icon">
+        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
+      </i>
+    </div>
+   
 
   </div>
 

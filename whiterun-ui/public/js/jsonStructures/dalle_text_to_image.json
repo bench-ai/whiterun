@@ -1,0 +1,17 @@
+{
+  "inputs": {
+    "static": [
+      {
+        "name": "name",
+        "type": "text",
+        "default_value": "dalleTextToImage"
+      }
+    ],
+    "dynamic": []
+  },
+  "outputs": [
+    {
+      "type": "file"
+    }
+  ]
+}
