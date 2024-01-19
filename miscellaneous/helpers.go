@@ -68,3 +68,22 @@ func Sum[T constraints.Integer](slice []T) T {
 
 	return s
 }
+
+func InRange[T constraints.Ordered](value, lowest, highest T, lowestEqual, highestEqual bool) bool {
+	var greaterThan bool
+	var lessThan bool
+
+	if lowestEqual {
+		greaterThan = lowest <= value
+	} else {
+		greaterThan = lowest < value
+	}
+
+	if highestEqual {
+		lessThan = highest >= value
+	} else {
+		lessThan = highest > value
+	}
+
+	return greaterThan && lessThan
+}
