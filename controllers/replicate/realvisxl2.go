@@ -132,29 +132,25 @@ type extendedResponse interface {
 
 type responseSuccess struct{}
 
-func (r *responseSuccess) Failure(response *http.Response) *controllers.Failed {
+func replicateFailure(response *http.Response) *controllers.Failed {
 	var body struct {
 		Detail string
 		Title  string
 		Status string
 	}
 
-	fmt.Println("here")
-
 	if err := json.NewDecoder(response.Body).Decode(&body); err != nil {
-		fmt.Println(body)
-	} else {
-		fmt.Println(err)
+		return nil
 	}
 
-	return &controllers.Failed{}
+	return &controllers.Failed{
+		Id:      body.Title,
+		Message: body.Detail,
+		Name:    body.Title,
+	}
 }
 
-func (r *responseSuccess) Success(
-	pResponse *http.Response,
-	channel chan map[string]string,
-	fileName string) {
-
+func replicateSuccess(pResponse *http.Response, channel chan map[string]string) {
 	channelMap := map[string]string{
 		"type":  "upload",
 		"url":   "",
@@ -191,6 +187,17 @@ func (r *responseSuccess) Success(
 		channelMap["url"] = continueUrl
 		channel <- channelMap
 	}
+}
+
+func (r *responseSuccess) Failure(response *http.Response) *controllers.Failed {
+	return replicateFailure(response)
+}
+
+func (r *responseSuccess) Success(
+	pResponse *http.Response,
+	channel chan map[string]string,
+	fileName string) {
+	replicateSuccess(pResponse, channel)
 }
 
 func RealVizTextToImage(c *gin.Context) {

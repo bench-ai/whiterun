@@ -123,9 +123,14 @@ func main() {
 	// Dall E
 	r.POST("api/dall-e/text-to-image", middleware.CheckExecutionAccess, dalle.TextToImage)
 
+	//Replicate
+	r.GET("api/replicate/", replicate.CollectReplicateImage)
+
 	// Realistic Vision
 	r.POST("api/replicate/realvisxl2/text-to-image", middleware.CheckExecutionAccess, replicate.RealVizTextToImage)
-	r.GET("api/replicate/", replicate.CollectReplicateImage)
+
+	// high-resolution-controlnet-tile
+	r.POST("api/replicate/hrcnettile11/upscale", middleware.CheckExecutionAccess, replicate.UpscaleControlNetTile11)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")
