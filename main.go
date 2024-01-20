@@ -125,7 +125,7 @@ func main() {
 
 	// Realistic Vision
 	r.POST("api/replicate/realvisxl2/text-to-image", middleware.CheckExecutionAccess, replicate.RealVizTextToImage)
-	r.GET("api/replicate/", replicate.CollectReplicateImage)
+	r.GET("api/replicate", replicate.CollectReplicateImage)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")

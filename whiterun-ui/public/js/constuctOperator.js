@@ -113,6 +113,13 @@ export async function collectOperatorMetaData(name){
       operatorLogo = "assets/palette-logo.svg";
       break;
 
+    case "realVisXLTextToImage":
+      viz = await fetchHTML("realVisTextToImage");
+      dataList = await fetchJSON("real_vis_text_to_image");
+      operatorTitle = "RealVisXL Text to Image";
+      operatorLogo = "assets/palette-logo.svg";
+      break;
+
     default:
       throw new Error("invalid name")
   }

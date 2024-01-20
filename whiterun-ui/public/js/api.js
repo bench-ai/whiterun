@@ -209,6 +209,58 @@ export async function imageToImageMask(body){
     return response.json()
 }
 
+async function processReplicateRequest(responseData) {
+    let status;
+
+    do {
+        const response = await fetch(responseData.url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+        });
+
+        if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`${errorMessage}: ${response.status}`);
+        }
+
+        status = response.status;
+
+        if (status === 202) {
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        } else if (status === 200) {
+            return await response.json();
+        }
+
+    } while (status === 202);
+
+    throw new Error(`Unexpected processing status: ${status}`);
+}
+
+export async function realVisXLTextToImage(body) {
+    const url = `${urlPrefix}/api/replicate/realvisxl2/text-to-image`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
+    }
+
+    const initialResponseData = await response.json();
+
+    return await processReplicateRequest(initialResponseData);
+}
+
 
 export async function requestInterceptor(apiRequest, requestBody, redirect) {
 
