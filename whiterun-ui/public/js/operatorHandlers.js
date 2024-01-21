@@ -1729,6 +1729,16 @@ export class RealVisXLTextToImageHandler extends operatorHandler {
     event.target["textContent"] = inputValue
   }
 
+  updateFilter() {
+    const filterDisabled = this.getVisualProperties("real-vis-txt-to-img-safety").checked;
+
+    if (filterDisabled){
+      this.setField(this.getVisualProperties("real-vis-txt-to-img-safety"), "checked", filterDisabled)
+    } else{
+      this.deleteField(this.getVisualProperties("real-vis-txt-to-img-safety"), "checked")
+    }
+  }
+
   updateVisualizations() {
     let name = this.getVisualProperties("real-vis-txt-to-img-name");
     this.setField(name, "textContent", this.getInputValue(0, "static"))
@@ -1760,6 +1770,9 @@ export class RealVisXLTextToImageHandler extends operatorHandler {
     this.deleteField(seed, "disabled")
     seed.addEventListener('input', this.updateRealSeed);
 
+    const disabledFilter = this.getVisualProperties("real-vis-txt-to-img-safety");
+    disabledFilter.addEventListener('change', () => this.updateFilter());
+
     const positivePrompt = this.getVisualProperties("real-vis-txt-to-img-prompt");
     positivePrompt.addEventListener('input', this.checkPrompt);
 
@@ -1774,6 +1787,9 @@ export class RealVisXLTextToImageHandler extends operatorHandler {
     this.setField(this.getVisualProperties("real-vis-txt-to-img-steps"), "disabled", "true")
     this.setField(this.getVisualProperties("real-vis-txt-to-img-guidance"), "disabled", "true")
     this.setField(this.getVisualProperties("real-vis-txt-to-img-seed"), "disabled", "true")
+
+    const disableFilter = this.getVisualProperties("real-vis-txt-to-img-safety");
+    disableFilter.removeEventListener('change', () => this.updateFilter());
 
     const steps = this.getVisualProperties("real-vis-txt-to-img-steps")
     steps.removeEventListener('input', this.updateRealStep);
@@ -1805,6 +1821,7 @@ export class RealVisXLTextToImageHandler extends operatorHandler {
     const seed = parseFloat(this.getVisualProperties("real-vis-txt-to-img-seed").value);
     const positivePrompt = this.getVisualProperties("real-vis-txt-to-img-prompt").value;
     const negativePrompt = this.getVisualProperties("real-vis-txt-to-img-prompt-2").value;
+    const disableFilter = this.getVisualProperties("real-vis-txt-to-img-safety").checked;
 
     const requestBody = {
       "prompt": positivePrompt,
@@ -1812,6 +1829,7 @@ export class RealVisXLTextToImageHandler extends operatorHandler {
       "scheduler": sampler,
       "guidance_scale": guidance,
       "num_inference_steps": steps,
+      "disable_safety_checker": disableFilter
     };
 
     if (!isNaN(seed)) {

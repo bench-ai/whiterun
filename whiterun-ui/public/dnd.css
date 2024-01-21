@@ -629,7 +629,7 @@ body{
 .real-vis-txt-to-img-guidance-title,
 .real-vis-txt-to-img-seed-title,
 .real-vis-txt-to-img-sampler-title,
-.real-vis-txt-to-img-prompt-title{
+.real-vis-txt-to-img-prompt-title {
   font-size: 13px;
   color: white;
   flex: 1;
@@ -648,6 +648,15 @@ body{
   max-width: 100px;
   margin-top: 10px;
   color: white;
+}
+
+.real-vis-txt-to-img-safety-title {
+  font-size: 13px;
+  color: white;
+}
+
+.real-vis-txt-to-img-safety {
+  margin-bottom: 10px;
 }
 
 .drawflow-node .real-vis-txt-to-img-prompt {
