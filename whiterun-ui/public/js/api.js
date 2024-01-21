@@ -245,9 +245,7 @@ async function processReplicateRequest(responseData) {
     throw new Error(`Unexpected processing status: ${status}`);
 }
 
-export async function realVisXLTextToImage(body) {
-    const url = `${urlPrefix}/api/replicate/realvisxl2/text-to-image`;
-
+export async function runReplicateAPI(url, body){
     const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -296,4 +294,16 @@ export async function requestInterceptor(apiRequest, requestBody, redirect) {
             throw new Error(`status code is: ${number}`)
         }
     }
+}
+
+
+export async function realVisXLTextToImage(body) {
+    const url = `${urlPrefix}/api/replicate/realvisxl2/text-to-image`;
+    return await runReplicateAPI(url, body)
+}
+
+
+export async function controlNetTileUpscaler(body) {
+    const url = `${urlPrefix}/api/replicate/hrcnettile11/upscale`;
+    return await runReplicateAPI(url, body)
 }

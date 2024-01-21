@@ -7,7 +7,8 @@ import {
   requestInterceptor,
   uploadImage,
   dalleTextToImage,
-  realVisXLTextToImage
+  realVisXLTextToImage,
+  controlNetTileUpscaler
 } from "./api.js";
 
 class TypeCastingError extends Error {
@@ -1902,7 +1903,7 @@ export class TileUpscaleHandler extends operatorHandler {
       "resemblance": parseFloat(this.getVisualProperties("slider-resemblance")
           .getElementsByClassName("upscaler-slider")[0].value),
 
-      "cfg": parseFloat(this.getVisualProperties("slider-cfg-scale")
+      "guidance_scale": parseFloat(this.getVisualProperties("slider-cfg-scale")
           .getElementsByClassName("upscaler-slider")[0].value),
 
       "hdr": parseFloat(this.getVisualProperties("slider-hdr")
@@ -1911,9 +1912,9 @@ export class TileUpscaleHandler extends operatorHandler {
       "creativity": parseFloat(this.getVisualProperties("slider-creativity")
           .getElementsByClassName("upscaler-slider")[0].value),
 
-      "sampler": this.getVisualProperties("upscaler-sampler").value,
+      "scheduler": this.getVisualProperties("upscaler-sampler").value,
       "resolution": parseInt(this.getVisualProperties("upscaler-resolution").value),
-      "step": parseInt(this.getVisualProperties("upscaler-step").value),
+      "steps": parseInt(this.getVisualProperties("upscaler-step").value),
       "guess_mode": this.getVisualProperties("guess").checked
     }
 
@@ -1921,9 +1922,11 @@ export class TileUpscaleHandler extends operatorHandler {
       retObject["seed"] = parseInt(this.getVisualProperties("upscaler-seed").value)
     }
 
-    // if (!inputObject.hasOwnProperty("input_1")){
-    //   throw new Error("missing file")
-    // }
+    if (!inputObject.hasOwnProperty("input_1")){
+      throw new Error("missing file")
+    }else{
+      retObject["image"] = inputObject["input_1"]["file_id"]
+    }
 
     if (inputObject.hasOwnProperty("input_2")){
       if (typeof inputObject["input_2"] == "object"){
@@ -1941,9 +1944,28 @@ export class TileUpscaleHandler extends operatorHandler {
       }
     }
 
-    return {
-      "output_1":retObject
+    console.log(retObject)
+
+    let apiResponse
+
+    try {
+      apiResponse = await requestInterceptor(controlNetTileUpscaler, retObject);
+    } catch(error) {
+      console.log(error);
     }
+
+    let fileId = apiResponse["url"].split("?X-Amz-Algorithm")[0]
+
+    fileId = fileId.split("amazonaws.com/")[1]
+
+    return {
+      "output_1": {
+        "file_id": fileId,
+        "file": "",
+        "url": apiResponse["url"],
+        "type": "image"
+      }
+    };
   }
 
   handleInputChange(event) {
