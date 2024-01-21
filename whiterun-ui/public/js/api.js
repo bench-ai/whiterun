@@ -211,6 +211,7 @@ export async function imageToImageMask(body){
 
 async function processReplicateRequest(responseData) {
     let status;
+    const startTime = Date.now();
 
     do {
         const response = await fetch(responseData.url, {
@@ -229,6 +230,11 @@ async function processReplicateRequest(responseData) {
         status = response.status;
 
         if (status === 202) {
+            const elapsedTime = Date.now() - startTime;
+            if (elapsedTime >= 300000) { // 5 minutes in milliseconds
+                throw new Error('Timeout: Request took longer than 5 minutes');
+            }
+
             await new Promise(resolve => setTimeout(resolve, 5000));
         } else if (status === 200) {
             return await response.json();
