@@ -1,0 +1,24 @@
+{
+  "inputs": {
+    "static": [],
+    "dynamic": [
+      {
+        "name": "inputImage",
+        "type": "file"
+      },
+      {
+        "name": "positivePrompt",
+        "type": "object | text"
+      },
+      {
+        "name": "negativePrompt",
+        "type": "object | text"
+      }
+    ]
+  },
+  "outputs": [
+    {
+      "type": "object"
+    }
+  ]
+}

@@ -413,7 +413,8 @@ body{
   margin: 10px 0 10px 0;
 }
 
-.ipo-weight {
+.ipo-weight,
+.upscaler-slider {
   -webkit-appearance: none;
   margin-top: 15px;
   width: 98%;
@@ -433,6 +434,7 @@ body{
   border-radius: 1px;
 }
 
+.upscaler-slider::-webkit-slider-thumb,
 .ipo-weight::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 15px;
@@ -450,11 +452,13 @@ body{
 
 .label-left,
 .label-right,
+.slider-weight-display,
 .ipo-weight-display {
   flex: 1;
   text-align: center;
 }
 
+.slider-weight-display,
 .ipo-weight-display {
   border: 1px solid white;
   border-radius: 5px;
@@ -520,6 +524,7 @@ body{
 .txt-to-img-sampler-title,
 .txt-to-img-seed-title,
 .txt-to-img-step-title,
+.upscaler-title,
 .txt-to-img-style-title {
   font-size: 13px;
   color: white;
@@ -537,7 +542,11 @@ body{
 .txt-to-img-mask-source,
 .txt-to-img-seed,
 .txt-to-img-step,
+.upscaler-seed,
+.upscaler-step,
 .txt-to-img-strength,
+.upscaler-sampler,
+.upscaler-resolution,
 .txt-to-img-style {
   display: block;
   background: transparent;

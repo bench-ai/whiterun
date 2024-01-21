@@ -106,6 +106,13 @@ export async function collectOperatorMetaData(name){
       operatorLogo = "assets/image-logo.svg";
       break;
 
+    case "upscaleTile":
+      viz = await fetchHTML("controlNetTile");
+      dataList = await fetchJSON("controlnet_tile");
+      operatorTitle = "Controlnet Tile Upscaler";
+      operatorLogo = "assets/upscale-tile-logo.svg";
+      break;
+
     default:
       throw new Error("invalid name")
   }

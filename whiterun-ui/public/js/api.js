@@ -1,6 +1,6 @@
 
-const urlPrefix = "https://app.bench-ai.com"
-// const urlPrefix = "http://localhost:8080"
+// const urlPrefix = "https://app.bench-ai.com"
+const urlPrefix = "http://localhost:8080"
 
 
 export async function getUser(body) {

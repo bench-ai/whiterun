@@ -107,29 +107,15 @@ const DragAndDrop = () => {
         content="Simple library for flow programming. Drawflow allows you to create data flows easily and quickly.">
 </head>
 <body>
-<!--<script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/gh/jerosoler/Drawflow/dist/drawflow.min.js"></script>-->
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js"-->
-<!--        integrity="sha256-KzZiKy0DWYsnwMF+X1DvQngQ2/FxF7MF3Ff72XcpuPs=" crossorigin="anonymous"></script>-->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jerosoler/Drawflow@0.0.48/dist/drawflow.min.css">
 <link href='https://fonts.googleapis.com/css?family=Inter' rel='stylesheet'>
 <link rel="stylesheet" type="text/css" href="dnd.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"
       integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ=" crossorigin="anonymous"/>
 <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-<!--<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>-->
-<!--<script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>-->
-<!--<script type="module" src="./js/base.js"></script>-->
 
 <div class="wrapper">
   <div class="col">
-
-<!--    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="slider">-->
-<!--      <span class="operator-title">Slider Operator</span>-->
-<!--      <i class="icon">-->
-<!--        <img class="logo" src="assets/slider-logo.svg" alt="Icon description" draggable="false">-->
-<!--      </i>-->
-<!--    </div>-->
 
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="image">
       <span class="operator-title">Image Operator</span>
@@ -138,40 +124,12 @@ const DragAndDrop = () => {
       </i>
     </div>
 
-<!--    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="text">-->
-<!--      <span class="operator-title">Text Operator</span>-->
-<!--      <i class="icon">-->
-<!--        <img class="logo" src="assets/text-logo.svg" alt="Icon description" draggable="false">-->
-<!--      </i>-->
-<!--    </div>-->
-
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="python">
       <span class="operator-title">Python Operator</span>
       <i class="icon">
         <img class="logo" src="assets/python-logo.svg" alt="Icon description" draggable="false">
       </i>
     </div>
-
-<!--    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="internet">-->
-<!--      <span class="operator-title">Internet Operator</span>-->
-<!--      <i class="icon">-->
-<!--        <img class="logo" src="assets/web-logo.svg" alt="Icon description" draggable="false">-->
-<!--      </i>-->
-<!--    </div>-->
-
-<!--    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="diffusion">-->
-<!--      <span class="operator-title">Diffus. Operator</span>-->
-<!--      <i class="icon">-->
-<!--        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">-->
-<!--      </i>-->
-<!--    </div>-->
-
-<!--    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="internet">-->
-<!--      <span class="operator-title">Chat Operator</span>-->
-<!--      <i class="icon">-->
-<!--        <img class="logo" src="assets/chat-logo.svg" alt="Icon description" draggable="false">-->
-<!--      </i>-->
-<!--    </div>-->
 
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="jsonDisplay">
       <span class="operator-title">Display Operator</span>
@@ -229,6 +187,13 @@ const DragAndDrop = () => {
       </i>
     </div>
     
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="upscaleTile">
+      <span class="operator-title">Controlnet tile Upscaler</span>
+      <i class="icon">
+        <img class="logo" src="assets/upscale-tile-logo.svg" alt="Icon description" draggable="false">
+      </i>
+    </div>
+    
 
   </div>
 
@@ -237,18 +202,6 @@ const DragAndDrop = () => {
     <div id="drawflow" ondrop="drop(event)" ondragover="allowDrop(event)">
 
       <div class="btn-lock">
-
-<!--        <i id="lock" class="icon" onclick="changeMode('unlock')" style="display:none;">-->
-<!--          <img class="lock-logo" src="assets/lock-logo.svg" alt="Icon description" draggable="false">-->
-<!--        </i>-->
-
-<!--        <i id="unlock" class="icon" onclick="changeMode('lock');" style="display:none;">-->
-<!--          <img class="lock-logo" src="assets/unlock-logo.svg" alt="Icon description" draggable="false">-->
-<!--        </i>-->
-        
-<!--        <button class="play-button" id="enabled-play-button">-->
-<!--            <img src="assets/play-button-logo.svg" alt="Play Button" onclick="executeGraph()">-->
-<!--        </button>-->
    
         <button class="play-button" id="disabled-play-button">
           <img src="assets/play-button-disabled-logo.svg" alt="Play Button" style="display:none;">
