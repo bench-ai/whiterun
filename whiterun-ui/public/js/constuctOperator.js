@@ -113,6 +113,20 @@ export async function collectOperatorMetaData(name){
       operatorLogo = "assets/upscale-tile-logo.svg";
       break;
 
+    case "dalleTextToImage":
+      viz = await fetchHTML("dalleTextToImage");
+      dataList = await fetchJSON("dalle_text_to_image");
+      operatorTitle = "Dall-E Text to Image";
+      operatorLogo = "assets/palette-logo.svg";
+      break;
+
+    case "realVisXLTextToImage":
+      viz = await fetchHTML("realVisTextToImage");
+      dataList = await fetchJSON("real_vis_text_to_image");
+      operatorTitle = "RealVisXL Text to Image";
+      operatorLogo = "assets/palette-logo.svg";
+      break;
+
     default:
       throw new Error("invalid name")
   }

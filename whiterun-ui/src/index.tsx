@@ -16,7 +16,7 @@ const mixpanelProjectToken = process.env.REACT_APP_DEV === 'true'
     : process.env.REACT_APP_MIXPANEL_PROD_PROJECT_TOKEN;
 
 if (mixpanelProjectToken) {
-    mixpanel.init(mixpanelProjectToken, {debug: true, track_pageview: true, persistence: 'localStorage'});
+    mixpanel.init(mixpanelProjectToken, {track_pageview: true, persistence: 'localStorage'});
 }
 
 root.render(

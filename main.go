@@ -131,6 +131,7 @@ func main() {
 
 	// high-resolution-controlnet-tile
 	r.POST("api/replicate/hrcnettile11/upscale", middleware.CheckExecutionAccess, replicate.UpscaleControlNetTile11)
+	r.GET("api/replicate", replicate.CollectReplicateImage)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")

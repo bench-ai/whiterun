@@ -173,6 +173,7 @@ func TextToImage(c *gin.Context) {
 			"quality":         body.Quality,
 			"response_format": body.ResponseFormat,
 			"style":           body.Style,
+			"size":            body.Size,
 		},
 		"header": map[string]interface{}{
 			"Content-Type":  "application/json",
