@@ -84,7 +84,6 @@ export async function collectOperatorMetaData(name){
       operatorLogo = "assets/upscale-logo.svg";
       break;
 
-
     case "imageDisplay":
       viz = await fetchHTML("imageDisplay");
       dataList = await fetchJSON("image_display");
@@ -104,6 +103,27 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("image_to_image_masking");
       operatorTitle = "Image to Image Masking";
       operatorLogo = "assets/image-logo.svg";
+      break;
+
+    case "upscaleTile":
+      viz = await fetchHTML("controlNetTile");
+      dataList = await fetchJSON("controlnet_tile");
+      operatorTitle = "Controlnet Tile Upscaler";
+      operatorLogo = "assets/upscale-tile-logo.svg";
+      break;
+
+    case "dalleTextToImage":
+      viz = await fetchHTML("dalleTextToImage");
+      dataList = await fetchJSON("dalle_text_to_image");
+      operatorTitle = "Dall-E Text to Image";
+      operatorLogo = "assets/palette-logo.svg";
+      break;
+
+    case "realVisXLTextToImage":
+      viz = await fetchHTML("realVisTextToImage");
+      dataList = await fetchJSON("real_vis_text_to_image");
+      operatorTitle = "RealVisXL Text to Image";
+      operatorLogo = "assets/palette-logo.svg";
       break;
 
     default:

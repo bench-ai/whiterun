@@ -3,6 +3,8 @@ package main
 import (
 	"ApiExecutor/cloud"
 	"ApiExecutor/controllers"
+	"ApiExecutor/controllers/dalle"
+	"ApiExecutor/controllers/replicate"
 	"ApiExecutor/controllers/stability"
 	"ApiExecutor/db"
 	"ApiExecutor/middleware"
@@ -117,6 +119,19 @@ func main() {
 
 	// upload
 	r.POST("api/upload/image", middleware.CheckExecutionAccess, controllers.UploadImageFile)
+
+	// Dall E
+	r.POST("api/dall-e/text-to-image", middleware.CheckExecutionAccess, dalle.TextToImage)
+
+	//Replicate
+	r.GET("api/replicate/", replicate.CollectReplicateImage)
+
+	// Realistic Vision
+	r.POST("api/replicate/realvisxl2/text-to-image", middleware.CheckExecutionAccess, replicate.RealVizTextToImage)
+
+	// high-resolution-controlnet-tile
+	r.POST("api/replicate/hrcnettile11/upscale", middleware.CheckExecutionAccess, replicate.UpscaleControlNetTile11)
+	r.GET("api/replicate", replicate.CollectReplicateImage)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")

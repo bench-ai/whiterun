@@ -2,21 +2,16 @@ package stability
 
 import (
 	"ApiExecutor/cloud"
-	"ApiExecutor/db"
-	"ApiExecutor/middleware"
+	"ApiExecutor/controllers"
 	"ApiExecutor/miscellaneous"
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func validateOptions(clipGuidance, samplerPreset, style string) (bool, string) {
@@ -217,16 +212,6 @@ type apiParameters struct {
 	MaskImage          string   `json:"mask_image"`
 }
 
-type image struct {
-	Base64       string `json:"base64"`
-	Seed         uint32 `json:"seed"`
-	FinishReason string `json:"finishReason"`
-}
-
-type apiResponse struct {
-	Images []image `json:"artifacts"`
-}
-
 func (tti apiParameters) getEngine() engine {
 	var eng engine
 
@@ -397,120 +382,76 @@ func imageToImageUpscaleLatent(iti *apiParameters) (bool, string) {
 	return imageToImageUpscaleRealESRGAN(iti)
 }
 
-func executeRequest(
-	pRequest *http.Request,
-	c *gin.Context,
-	requestMap map[string]interface{},
-	requestName string) (error, string) {
+type extendedResponse interface {
+	controllers.ResponseStruct
+}
 
-	startTime := time.Now().Unix()
-	pResponse, er := http.DefaultClient.Do(pRequest)
-	endTime := time.Now().Unix() - startTime
+type responseSuccess struct{}
 
-	defer pResponse.Body.Close()
+func (r *responseSuccess) Success(
+	pResponse *http.Response,
+	channel chan map[string]string,
+	fileName string) {
 
-	if er != nil {
-		return er, ""
+	channelMap := map[string]string{
+		"type":  "upload",
+		"url":   "",
+		"error": "",
 	}
 
-	var response apiResponse
-
-	if pResponse.StatusCode != 200 {
-
-		var failed struct {
-			Id      string `json:"id"`
-			Message string `json:"message"`
-			Name    string `json:"name"`
-		}
-
-		if err := json.NewDecoder(pResponse.Body).Decode(&failed); err != nil {
-			return err, ""
-		}
-		return errors.New(failed.Message), ""
+	type image struct {
+		Base64       string `json:"base64"`
+		Seed         uint32 `json:"seed"`
+		FinishReason string `json:"finishReason"`
 	}
 
-	if err := json.NewDecoder(pResponse.Body).Decode(&response); err != nil {
-		return err, ""
+	var apiResponse struct {
+		Images []image `json:"artifacts"`
 	}
 
-	uuidString := uuid.New().String()
-	uuidString += "-bench.png"
+	if err := json.NewDecoder(pResponse.Body).Decode(&apiResponse); err != nil {
+		channelMap["error"] = err.Error()
+		channel <- channelMap
+		return
+	} else {
 
-	b64 := response.Images[0].Base64
-
-	channel := make(chan map[string]string)
-
-	go func(ch chan map[string]string) {
-		channelMap := map[string]string{
-			"type":  "upload",
-			"url":   "",
-			"error": "",
-		}
-		err := cloud.UploadToS3fromBase64(b64, uuidString)
-
-		if err != nil {
-			channelMap["error"] = err.Error()
-			ch <- channelMap
+		if len(apiResponse.Images) == 0 {
+			channelMap["error"] = "no image was given"
+			channel <- channelMap
 			return
 		}
 
-		err, s := cloud.GetPresignedURL(uuidString)
+		b64 := apiResponse.Images[0].Base64
 
-		if err != nil {
+		er := cloud.UploadToS3fromBase64(b64, fileName)
+
+		if er != nil {
 			channelMap["error"] = err.Error()
-			ch <- channelMap
+			channel <- channelMap
+			return
+		}
+
+		er, s := cloud.GetPresignedURL(fileName)
+
+		if er != nil {
+			channelMap["error"] = err.Error()
+			channel <- channelMap
 			return
 		}
 
 		channelMap["url"] = s
-		ch <- channelMap
-		return
-	}(channel)
+		channel <- channelMap
+	}
+}
 
-	go func(ch chan map[string]string) {
-		if attr, ok := c.Get("accessToken"); ok {
-			user, valid := attr.(*middleware.JwtToken)
+func (r *responseSuccess) Failure(response *http.Response) *controllers.Failed {
+	var f controllers.Failed
 
-			if !valid {
-				panic("user is not of type token")
-			}
-
-			requestMap["response"] = map[string]string{
-				"object": uuidString,
-			}
-
-			er = db.LogApiRequest(
-				user.Email,
-				fmt.Sprintf("stability.ai:%s", requestName),
-				uint16(endTime),
-				requestMap,
-				"")
-
-			if er != nil {
-				log.Fatal("unable to log request")
-			}
-		}
-		ch <- map[string]string{
-			"type": "log",
-		}
-	}(channel)
-
-	channelOut := []map[string]string{
-		<-channel,
-		<-channel,
+	if err := json.NewDecoder(response.Body).Decode(&f); err != nil {
+		return nil
 	}
 
-	for _, i := range channelOut {
-		if i["type"] == "upload" {
-			if i["url"] == "" {
-				return errors.New(i["error"]), ""
-			} else {
-				return nil, i["url"]
-			}
-		}
-	}
-
-	return errors.New("failed"), ""
+	return &f
 }
 
 func TextToImage(c *gin.Context) {
@@ -568,7 +509,13 @@ func TextToImage(c *gin.Context) {
 	newReq.Header.Add("Accept", "application/json")
 	newReq.Header.Add("Authorization", "Bearer "+apiKey)
 
-	if ero, urll := executeRequest(newReq, c, postMap, "text-to-image"); ero != nil {
+	if ero, urll := controllers.ExecuteImageRequest(
+		newReq,
+		c,
+		postMap,
+		"text-to-image",
+		"stability.ai",
+		&responseSuccess{}); ero != nil {
 		c.String(http.StatusBadRequest, ero.Error())
 		return
 	} else {
@@ -681,7 +628,13 @@ func ImageToImage(c *gin.Context) {
 
 	defer newReq.Body.Close()
 
-	if ero, urll := executeRequest(newReq, c, postMap, "image-to-image"); ero != nil {
+	if ero, urll := controllers.ExecuteImageRequest(
+		newReq,
+		c,
+		postMap,
+		"image-to-image",
+		"stability.ai",
+		&responseSuccess{}); ero != nil {
 		c.String(http.StatusBadRequest, ero.Error())
 		return
 	} else {
@@ -788,7 +741,13 @@ func realEsrganUpscaler(c *gin.Context, body *apiParameters, engineId string) {
 
 	defer newReq.Body.Close()
 
-	if ero, urll := executeRequest(newReq, c, postMap, "image-to-image/upscale/ESRGAN"); ero != nil {
+	if ero, urll := controllers.ExecuteImageRequest(
+		newReq,
+		c,
+		postMap,
+		"image-to-image/upscale/ESRGAN",
+		"stability.ai",
+		&responseSuccess{}); ero != nil {
 		c.String(http.StatusBadRequest, ero.Error())
 		return
 	} else {
@@ -867,7 +826,13 @@ func latentUpscaler(c *gin.Context, body *apiParameters, engineId string) {
 
 	defer newReq.Body.Close()
 
-	if ero, urll := executeRequest(newReq, c, postMap, "image-to-image/upscale/LATENT"); ero != nil {
+	if ero, urll := controllers.ExecuteImageRequest(
+		newReq,
+		c,
+		postMap,
+		"image-to-image/upscale/LATENT",
+		"stability.ai",
+		&responseSuccess{}); ero != nil {
 		c.String(http.StatusBadRequest, ero.Error())
 		return
 	} else {
@@ -983,7 +948,13 @@ func ImageToImageMask(c *gin.Context) {
 
 	defer newReq.Body.Close()
 
-	if ero, urll := executeRequest(newReq, c, postMap, "image-to-image/masking"); ero != nil {
+	if ero, urll := controllers.ExecuteImageRequest(
+		newReq,
+		c,
+		postMap,
+		"image-to-image/masking",
+		"stability.ai",
+		&responseSuccess{}); ero != nil {
 		c.String(http.StatusBadRequest, ero.Error())
 		return
 	} else {

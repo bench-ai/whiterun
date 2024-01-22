@@ -83,6 +83,26 @@ export async function textToImage(body) {
     return response.json()
 }
 
+export async function dalleTextToImage(body) {
+    const url = `${urlPrefix}/api/dall-e/text-to-image`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
+    }
+
+    return response.json()
+}
+
 export async function imageUpscaler(body) {
     const url = `${urlPrefix}/api/stability/image-to-image/upscale`;
 
@@ -189,6 +209,62 @@ export async function imageToImageMask(body){
     return response.json()
 }
 
+async function processReplicateRequest(responseData) {
+    let status;
+    const startTime = Date.now();
+
+    do {
+        const response = await fetch(responseData.url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+        });
+
+        if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`${errorMessage}: ${response.status}`);
+        }
+
+        status = response.status;
+
+        if (status === 202) {
+            const elapsedTime = Date.now() - startTime;
+            if (elapsedTime >= 300000) { // 5 minutes in milliseconds
+                throw new Error('Timeout: Request took longer than 5 minutes');
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        } else if (status === 200) {
+            return await response.json();
+        }
+
+    } while (status === 202);
+
+    throw new Error(`Unexpected processing status: ${status}`);
+}
+
+export async function runReplicateAPI(url, body){
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
+    }
+
+    const initialResponseData = await response.json();
+
+    return await processReplicateRequest(initialResponseData);
+}
+
 
 export async function requestInterceptor(apiRequest, requestBody, redirect) {
 
@@ -218,4 +294,16 @@ export async function requestInterceptor(apiRequest, requestBody, redirect) {
             throw new Error(`status code is: ${number}`)
         }
     }
+}
+
+
+export async function realVisXLTextToImage(body) {
+    const url = `${urlPrefix}/api/replicate/realvisxl2/text-to-image`;
+    return await runReplicateAPI(url, body)
+}
+
+
+export async function controlNetTileUpscaler(body) {
+    const url = `${urlPrefix}/api/replicate/hrcnettile11/upscale`;
+    return await runReplicateAPI(url, body)
 }

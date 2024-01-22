@@ -17,15 +17,15 @@ func Contains[T constraints.Ordered](item T, slice []T) bool {
 }
 
 func Max[T constraints.Ordered](slice []T) T {
-	max := slice[0]
+	maxx := slice[0]
 
 	for _, value := range slice[1:] {
-		if value > max {
-			max = value
+		if value > maxx {
+			maxx = value
 		}
 	}
 
-	return max
+	return maxx
 
 }
 
@@ -49,4 +49,41 @@ func LowerSlice(currentSlice []string) {
 	for i, v := range currentSlice {
 		currentSlice[i] = strings.ToLower(v)
 	}
+}
+
+func CastBoolToInt(b bool) int8 {
+	if b {
+		return 1
+	} else {
+		return 0
+	}
+}
+
+func Sum[T constraints.Integer](slice []T) T {
+	var s T
+
+	for _, v := range slice {
+		s += v
+	}
+
+	return s
+}
+
+func InRange[T constraints.Ordered](value, lowest, highest T, lowestEqual, highestEqual bool) bool {
+	var greaterThan bool
+	var lessThan bool
+
+	if lowestEqual {
+		greaterThan = lowest <= value
+	} else {
+		greaterThan = lowest < value
+	}
+
+	if highestEqual {
+		lessThan = highest >= value
+	} else {
+		lessThan = highest > value
+	}
+
+	return greaterThan && lessThan
 }
