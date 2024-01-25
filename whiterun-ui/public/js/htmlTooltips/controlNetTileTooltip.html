@@ -1,0 +1,23 @@
+Upscale an image to a higher resolution and outputs it
+<br><br><Strong>Inputs:</Strong>
+<br><Strong>Input Image - </Strong>An Image File
+<br><Strong>Example Input Image - </Strong>Can take the output of a <Strong>Text to Image Operator or Image Operator</Strong>.
+<br><Strong>Positive Prompt - </Strong>A text object or list
+<br><Strong>Example Positive Prompt Input - </Strong>Can take the output of a <Strong>Image Prompt Operator</Strong>.
+<br><Strong>Negative Prompt - </Strong>A text object or list
+<br><Strong>Example Positive Prompt Input - </Strong>Can take the output of a <Strong>Image Prompt Operator</Strong> with negative prompt checked.
+<br><br><Strong>Output - </Strong>An image file
+<br><Strong>Example Connections - </Strong>Can be connected to a <Strong>Image Display Operator</Strong> in
+ order to display it.
+<br>
+<br><Strong>Sampler - </Strong>Determines patterns used to generate the image. Each sampler outputs a different quality at varying speeds so experimentation is needed.
+<br><Strong>Resolution - </Strong>Determines resolution to upscale the original image to.
+<br><Strong>Base Image Resemblance - </Strong>How close the upscaled image should look to the original input image.
+<br><Strong>Classifier Free Guidance - </Strong>How closely to follow the prompt.
+<br><Strong>Image HDR weightage - </Strong>How much to improve the HDR over the original image.
+<br><Strong>Image Creativity Scale - </Strong>How creative the model can be when upscaling the image.
+<br><Strong>Seed - </Strong>Value determines noise seed, leave the same if you want to generate the same image
+given the same prompt, otherwise we recommend leaving it as 0 for a random seed.
+<br><Strong>Steps - </Strong>How many diffusion steps to run, more steps means more quality but longer time to generate.
+<br><Strong>Guess Mode - </Strong>Tries to upscale the image based on the content of the image. Ignores all input prompts.
+Guidance scale between 3 and 5 is recommended when this option is enabled.

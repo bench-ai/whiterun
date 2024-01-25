@@ -1,0 +1,22 @@
+Generate an image using another image as a starting point <br><br><strong>(Only accepts 1024x1024 for SDXL 1.0 and 512x512 for any other engine)</strong>
+<br><br><Strong>Inputs:</Strong>
+<br><Strong>Prompt - </Strong>A text object or list
+<br><Strong>Example Prompt Input - </Strong>Can take the output of a <Strong>Image Prompt Operator or Prompt Grouper Operator</Strong>.
+<br><br><Strong>Input Image - </Strong>An Image File
+<br><Strong>Example Input Image - </Strong>Can take the output of a <Strong>Text to Image Operator or Image Operator</Strong>.
+<br><br><Strong>Input Mask Image - </Strong>An Image File
+<br><Strong>Example Input Image - </Strong>Can take the output of a <Strong>Image Operator</Strong>.
+<br><br><Strong>Output - </Strong>An image file
+<br><Strong>Example Connections - </Strong>Can be connected to a <Strong>Image Display Operator</Strong> in
+ order to display it. If you want to continue modifying it, you can connect it to a <Strong>Upscaler Operator</Strong>
+<br>
+<br><Strong>Style - </Strong>Guides the model towards a particular style when generating the image, only applicable for non-SDXL engines.
+<br><Strong>Engine - </Strong>Which Stable Diffusion model to use, SDXL 1.0 is recommended for most use cases.
+<br><Strong>Clip Guidance - </Strong>Determines how the model modifies the prompt internally to achieve better results. Only applicable for non-SDXL engines.
+<br><Strong>Sampler - </Strong>Determines patterns used to generate the image. Each sampler outputs a different quality at varying speeds so experimentation is needed.
+<br><Strong>Mask Source - </Strong>Determines whether the mask of the image is black or white.
+<br><Strong>CFG Scale - </Strong>How closely the model follows the given prompt when generating the image, lower
+values mean higher creativity while higher values require more detailed prompts. A good range is between 5 and 12.
+<br><Strong>Seed - </Strong>Value determines noise seed, leave the same if you want to generate the same image
+given the same prompt, otherwise we recommend leaving it as 0 for a random seed.
+<br><Strong>Steps - </Strong>How many diffusion steps to run, more steps means more quality but longer time to generate.

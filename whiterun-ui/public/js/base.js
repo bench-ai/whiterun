@@ -327,6 +327,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
   let visualization;
   let logo;
   let title;
+  let tooltip;
 
   if (name === "python") {
 
@@ -337,6 +338,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     title = valueArr[4];
     logo = valueArr[5];
     name = valueArr[0];
+    tooltip = "A dynamic Operator that executes Python code<br><Strong>Input - </Strong>User Defined<br><Strong>Output - </Strong>User Defined";
   } else {
     try {
       const dataList = await collectOperatorMetaData(name);
@@ -345,6 +347,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
       visualization = dataList[0];
       title = dataList[3];
       logo = dataList[4];
+      tooltip = dataList[5];
     } catch (error) {
       name = "none";
     }
@@ -354,7 +357,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
   pos_y = pos_y * (editor.precanvas.clientHeight / (editor.precanvas.clientHeight * editor.zoom)) - (editor.precanvas.getBoundingClientRect().y * (editor.precanvas.clientHeight / (editor.precanvas.clientHeight * editor.zoom)))
 
   if (name !== "none") {
-    let nodeDiv = mapToDiv(inputs, outputs, title, logo);
+    let nodeDiv = mapToDiv(inputs, outputs, title, logo, tooltip);
     nodeDiv = nodeDiv.replace("{viz}", visualization)
     const nodeMap = {"inputs": inputs, "outputs": outputs}
     editor.addNode(name, inputs["dynamic"].length, outputs.length, pos_x, pos_y, name, nodeMap, nodeDiv);
