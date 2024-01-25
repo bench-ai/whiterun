@@ -20,6 +20,7 @@ body{
   max-height: 90vh;
   overflow-x: hidden;
   overflow-y: scroll;
+  padding-right: 10px;
 }
 
 .col-right {
@@ -211,7 +212,7 @@ body{
   border-color: #696B6F;
   border-style: solid;
   border-radius: 30px;
-  margin-left: 20px;
+  margin-left: 5px;
   background-image:
     radial-gradient(circle, #696B6F 4px, transparent 4px),
     radial-gradient(circle, #606060 0px, transparent 0px);

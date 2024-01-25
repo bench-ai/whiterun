@@ -125,6 +125,68 @@ const DragAndDrop = () => {
 
   <div class="col">
     <div class="categories-header">Operators</div>
+    
+    <div class="operator-categories">Displays</div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="jsonDisplay">
+      <i class="icon">
+        <img class="logo" src="assets/json-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Display Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Displays anything that’s not an image</span>
+      </div>
+    </div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageDisplay">
+      <i class="icon">
+        <img class="logo" src="assets/image-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Image Display Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Takes in an image file and displays it</span>
+      </div>
+    </div>
+    
+    <div class="operator-categories">Prompts</div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="weightedPrompt">
+      <i class="icon">
+        <img class="logo" src="assets/image-prompt-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Image Prompt Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Prompt for AI image related operators</span>
+      </div>
+    </div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="promptGrouper">
+      <i class="icon">
+        <img class="logo" src="assets/prompt-grouper-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Prompt Grouper</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Takes up to five prompts and groups it into a list of prompts</span>
+      </div>
+    </div>
+    
+    <div class="operator-categories">Image Input</div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="image">
+      <i class="icon">
+        <img class="logo" src="assets/image-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Image Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Allows user to upload an image to be used in other operators</span>
+      </div>
+    </div>
+    
     <div class="operator-categories">Text to Image</div>
     
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="textToImage">
@@ -173,43 +235,6 @@ const DragAndDrop = () => {
       </div>
     </div>
     
-    <div class="operator-categories">Inpainting</div>
-    
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageToImageMasking">
-      <i class="icon">
-        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
-      </i>
-      <span class="operator-title">Mask Image to Image Operator</span>
-      <div class="tooltip">
-        <i class="far fa-question-circle"></i>
-        <span class="tooltiptext">Modify specific portions of an image by using a mask</span>
-      </div>
-    </div>
-    
-    <div class="operator-categories">Displays</div>
-    
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="jsonDisplay">
-      <i class="icon">
-        <img class="logo" src="assets/json-logo.svg" alt="Icon description" draggable="false">
-      </i>
-      <span class="operator-title">Display Operator</span>
-      <div class="tooltip">
-        <i class="far fa-question-circle"></i>
-        <span class="tooltiptext">Displays anything that’s not an image</span>
-      </div>
-    </div>
-    
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageDisplay">
-      <i class="icon">
-        <img class="logo" src="assets/image-logo.svg" alt="Icon description" draggable="false">
-      </i>
-      <span class="operator-title">Image Display Operator</span>
-      <div class="tooltip">
-        <i class="far fa-question-circle"></i>
-        <span class="tooltiptext">Takes in an image file and displays it</span>
-      </div>
-    </div>
-    
     <div class="operator-categories">Upscalers</div>
     
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageUpscaler">
@@ -234,38 +259,16 @@ const DragAndDrop = () => {
       </div>
     </div>
     
-    <div class="operator-categories">Prompts</div>
+    <div class="operator-categories">Inpainting</div>
     
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="weightedPrompt">
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageToImageMasking">
       <i class="icon">
-        <img class="logo" src="assets/image-prompt-logo.svg" alt="Icon description" draggable="false">
+        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
       </i>
-      <span class="operator-title">Image Prompt Operator</span>
+      <span class="operator-title">Mask Image to Image Operator</span>
       <div class="tooltip">
         <i class="far fa-question-circle"></i>
-        <span class="tooltiptext">Prompt for AI image related operators</span>
-      </div>
-    </div>
-    
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="promptGrouper">
-      <i class="icon">
-        <img class="logo" src="assets/prompt-grouper-logo.svg" alt="Icon description" draggable="false">
-      </i>
-      <span class="operator-title">Prompt Grouper</span>
-      <div class="tooltip">
-        <i class="far fa-question-circle"></i>
-        <span class="tooltiptext">Takes up to five prompts and groups it into a list of prompts</span>
-      </div>
-    </div>
-    
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="image">
-      <i class="icon">
-        <img class="logo" src="assets/image-logo.svg" alt="Icon description" draggable="false">
-      </i>
-      <span class="operator-title">Image Operator</span>
-      <div class="tooltip">
-        <i class="far fa-question-circle"></i>
-        <span class="tooltiptext">Allows user to upload an image to be used in other operators</span>
+        <span class="tooltiptext">Modify specific portions of an image by using a mask</span>
       </div>
     </div>
     
