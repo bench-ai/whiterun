@@ -26,12 +26,28 @@ async function fetchJSON(name){
   return [object["inputs"], object["outputs"]]
 }
 
+export async function fetchTooltipContent(fileName){
+  let filePath = `./js/htmlTooltips/{fileName}Tooltip.html`
+  filePath = filePath.replace("{fileName}", fileName)
+
+  const response = await fetch(filePath);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch HTML file (status ${response.status})`);
+  }
+
+  return await response.text();
+
+}
+
+
 export async function collectOperatorMetaData(name){
 
   let viz;
   let dataList;
   let operatorTitle;
   let operatorLogo;
+  let operatorTooltip;
 
   switch (name){
 
@@ -40,6 +56,7 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("image");
       operatorTitle = "Image Operator";
       operatorLogo = "assets/image-logo.svg";
+      operatorTooltip = await fetchTooltipContent("image");
       break;
 
     case "jsonDisplay":
@@ -47,6 +64,7 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("json_display");
       operatorTitle = "Json Display Operator";
       operatorLogo = "assets/json-logo.svg";
+      operatorTooltip = await fetchTooltipContent("jsonDisplay");
       break;
 
     case "text":
@@ -61,6 +79,7 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("image_prompt");
       operatorTitle = "Image Prompt Operator";
       operatorLogo = "assets/image-prompt-logo.svg";
+      operatorTooltip = await fetchTooltipContent("weightedPrompt");
       break;
 
     case "promptGrouper":
@@ -68,6 +87,7 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("prompt_grouper");
       operatorTitle = "Prompt Grouper";
       operatorLogo = "assets/prompt-grouper-logo.svg";
+      operatorTooltip = await fetchTooltipContent("promptGrouper");
       break;
 
     case "textToImage":
@@ -75,6 +95,7 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("text_to_image");
       operatorTitle = "Text to Image";
       operatorLogo = "assets/palette-logo.svg";
+      operatorTooltip = await fetchTooltipContent("textToImage");
       break;
 
     case "imageUpscaler":
@@ -82,6 +103,7 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("image_upscaler");
       operatorTitle = "Image Upscaler";
       operatorLogo = "assets/upscale-logo.svg";
+      operatorTooltip = await fetchTooltipContent("imageUpscaler");
       break;
 
     case "imageDisplay":
@@ -89,6 +111,7 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("image_display");
       operatorTitle = "Image Display";
       operatorLogo = "assets/image-logo.svg";
+      operatorTooltip = await fetchTooltipContent("imageDisplay");
       break;
 
     case "imageToImage":
@@ -96,6 +119,7 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("image_to_image");
       operatorTitle = "Image to Image";
       operatorLogo = "assets/image-logo.svg";
+      operatorTooltip = await fetchTooltipContent("imageToImage");
       break;
 
     case "imageToImageMasking":
@@ -103,6 +127,7 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("image_to_image_masking");
       operatorTitle = "Image to Image Masking";
       operatorLogo = "assets/image-logo.svg";
+      operatorTooltip = await fetchTooltipContent("imageToImageMasking");
       break;
 
     case "upscaleTile":
@@ -110,6 +135,7 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("controlnet_tile");
       operatorTitle = "Controlnet Tile Upscaler";
       operatorLogo = "assets/upscale-tile-logo.svg";
+      operatorTooltip = await fetchTooltipContent("controlNetTile");
       break;
 
     case "dalleTextToImage":
@@ -117,6 +143,8 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("dalle_text_to_image");
       operatorTitle = "Dall-E Text to Image";
       operatorLogo = "assets/palette-logo.svg";
+      operatorTooltip = await fetchTooltipContent("dalleTextToImage");
+
       break;
 
     case "realVisXLTextToImage":
@@ -124,13 +152,14 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("real_vis_text_to_image");
       operatorTitle = "RealVisXL Text to Image";
       operatorLogo = "assets/palette-logo.svg";
+      operatorTooltip = await fetchTooltipContent("realVisTextToImage");
       break;
 
     default:
       throw new Error("invalid name")
   }
 
-  return [viz, dataList[0], dataList[1], operatorTitle, operatorLogo]
+  return [viz, dataList[0], dataList[1], operatorTitle, operatorLogo, operatorTooltip]
 }
 
 function getPropertyDiv(dataArr, isStatic){
@@ -168,7 +197,6 @@ function getPropertyDiv(dataArr, isStatic){
         `.replace('{default_value}', def).replace('{value_name}',currentMap["name"])
       }
     }else{
-      console.log("in this part")
       if (isStatic){
         inputField += `<input class="${className}" type="text" name={value_name}>
         `.replace('{value_name}',currentMap["name"])
@@ -232,17 +260,27 @@ function constructFullHtml(title, stat, dynamic, output){
   return fullBox
 }
 
+
+
 export function mapToDiv(inputMapArr,
                          outPutMapArr,
                          name,
-                         logo){
+                         logo,
+                         tooltip){
+
 
   let titleBox = `<div class="title-box">
-                        {name}
                         <i class="operator-image">
                             <img class="node-logo" src={logo}>
                         </i>
-                    </div>`.replace('{name}', name).replace('{logo}', logo)
+                        {name}
+                        <div class="tooltip">
+                            <div class="hiddenToolTipText" style="display:none;">{tooltip}</div>
+                            <img class="helpLogoTooltipNode" src="assets/help-logo.svg" alt="help logo" onClick="openModal(event)">
+                        </div>
+                    </div>`
+      .replace('{name}', name).replace('{logo}', logo)
+      .replace('{tooltip}', tooltip)
 
   let hasStatic = "";
   let hasDynamic = "";
@@ -262,3 +300,27 @@ export function mapToDiv(inputMapArr,
 
   return constructFullHtml(titleBox, hasStatic, hasDynamic, hasOutput)
 }
+
+window.openModal = function(event) {
+  const modal = document.getElementById('myModal');
+  const modalTextElement = document.getElementById('modalText');
+
+  // Set the modal text
+  modalTextElement.innerHTML = event.target.parentElement.getElementsByClassName("hiddenToolTipText")[0].innerHTML;
+
+  // Display the modal
+  modal.style.display = 'block';
+
+  // Add an event listener to close the modal when the '×' is clicked
+  const closeBtn = document.getElementsByClassName('modal-node-close')[0];
+  closeBtn.onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  // Close the modal if the user clicks outside the modal
+  window.onclick = function(event) {
+    if (event.target === modal) {
+      modal.style.display = 'none';
+    }
+  };
+};

@@ -115,98 +115,173 @@ const DragAndDrop = () => {
 <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
 <div class="wrapper">
+
+<div id="myModal" class="modal-node">
+  <div class="modal-node-content">
+    <span class="modal-node-close">&times;</span>
+    <p id="modalText"></p>
+  </div>
+</div>
+
   <div class="col">
-
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="image">
-      <span class="operator-title">Image Operator</span>
-      <i class="icon">
-        <img class="logo" src="assets/image-logo.svg" alt="Icon description" draggable="false">
-      </i>
-    </div>
-
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="python">
-      <span class="operator-title">Python Operator</span>
-      <i class="icon">
-        <img class="logo" src="assets/python-logo.svg" alt="Icon description" draggable="false">
-      </i>
-    </div>
-
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="jsonDisplay">
-      <span class="operator-title">Display Operator</span>
-      <i class="icon">
-        <img class="logo" src="assets/json-logo.svg" alt="Icon description" draggable="false">
-      </i>
-    </div>
-    
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageDisplay">
-      <span class="operator-title">Image Display Operator</span>
-      <i class="icon">
-        <img class="logo" src="assets/image-logo.svg" alt="Icon description" draggable="false">
-      </i>
-    </div>
-    
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="weightedPrompt">
-      <span class="operator-title">Image Prompt Operator</span>
-      <i class="icon">
-        <img class="logo" src="assets/image-prompt-logo.svg" alt="Icon description" draggable="false">
-      </i>
-    </div>
-    
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="promptGrouper">
-      <span class="operator-title">Prompt Grouper</span>
-      <i class="icon">
-        <img class="logo" src="assets/prompt-grouper-logo.svg" alt="Icon description" draggable="false">
-      </i>
-    </div>
+    <div class="categories-header">Operators</div>
+    <div class="operator-categories">Text to Image</div>
     
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="textToImage">
+      <i class="icon">
+        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
+      </i>
       <span class="operator-title">Text to Image Operator</span>
-      <i class="icon">
-        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
-      </i>
-    </div>
-    
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageToImage">
-      <span class="operator-title">Image to Image Operator</span>
-      <i class="icon">
-        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
-      </i>
-    </div>
-    
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageUpscaler">
-      <span class="operator-title">Image Upscaler</span>
-      <i class="icon">
-        <img class="logo" src="assets/upscale-logo.svg" alt="Icon description" draggable="false">
-      </i>
-    </div>
-    
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageToImageMasking">
-      <span class="operator-title">Mask Image to Image Operator</span>
-      <i class="icon">
-        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
-      </i>
-    </div>
-    
-    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="upscaleTile">
-      <span class="operator-title">Controlnet tile Upscaler</span>
-      <i class="icon">
-        <img class="logo" src="assets/upscale-tile-logo.svg" alt="Icon description" draggable="false">
-      </i>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Generate a new image from a text prompt</span>
+      </div>
     </div>
     
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="dalleTextToImage">
-      <span class="operator-title">Dall-E Text to Image</span>
       <i class="icon">
         <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
       </i>
+      <span class="operator-title">Dall-E Text to Image</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Generate a new image from a text prompt using Dall-E 3</span>
+      </div>
     </div>
     
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="realVisXLTextToImage">
-      <span class="operator-title">RealVisXL Text to Image</span>
       <i class="icon">
         <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
       </i>
+      <span class="operator-title">RealVisXL Text to Image</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Generates a new image from a text prompt using RealVisXL. Generates more realistic images</span>
+      </div>
     </div>
+    
+    <div class="operator-categories">Image to Image</div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageToImage">
+      <i class="icon">
+        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Image to Image Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext"><p>Generate an image using another image as a starting point <p/> <p><strong>(Only accepts 1024x1024 for SDXL 1.0 and 512x512 for any other engine)</strong></p></span>
+      </div>
+    </div>
+    
+    <div class="operator-categories">Inpainting</div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageToImageMasking">
+      <i class="icon">
+        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Mask Image to Image Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Modify specific portions of an image by using a mask</span>
+      </div>
+    </div>
+    
+    <div class="operator-categories">Displays</div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="jsonDisplay">
+      <i class="icon">
+        <img class="logo" src="assets/json-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Display Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Displays anything that’s not an image</span>
+      </div>
+    </div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageDisplay">
+      <i class="icon">
+        <img class="logo" src="assets/image-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Image Display Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Takes in an image file and displays it</span>
+      </div>
+    </div>
+    
+    <div class="operator-categories">Upscalers</div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageUpscaler">
+      <i class="icon">
+        <img class="logo" src="assets/upscale-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Image Upscaler</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Upscale an image to higher resolution and displays it</span>
+      </div>
+    </div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="upscaleTile">
+      <i class="icon">
+        <img class="logo" src="assets/upscale-tile-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Controlnet tile Upscaler</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Upscale an image to a higher resolution and outputs it</span>
+      </div>
+    </div>
+    
+    <div class="operator-categories">Prompts</div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="weightedPrompt">
+      <i class="icon">
+        <img class="logo" src="assets/image-prompt-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Image Prompt Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Prompt for AI image related operators</span>
+      </div>
+    </div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="promptGrouper">
+      <i class="icon">
+        <img class="logo" src="assets/prompt-grouper-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Prompt Grouper</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Takes up to five prompts and groups it into a list of prompts</span>
+      </div>
+    </div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="image">
+      <i class="icon">
+        <img class="logo" src="assets/image-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Image Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Allows user to upload an image to be used in other operators</span>
+      </div>
+    </div>
+    
+    <div class="operator-categories">Other</div>
+
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="python">
+      <i class="icon">
+        <img class="logo" src="assets/python-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Python Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">A dynamic Operator that executes Python code</span>
+      </div>
+    </div>
+ 
   </div>
 
   <div class="col-right">
@@ -238,7 +313,60 @@ const DragAndDrop = () => {
     <img class="close-button" src="assets/close-logo.svg" alt="Icon description" draggable="false">
   </button>
 
-  <div class="underline-header" id="popupPyMainTitle"> Python Operator Settings</div>
+  <div class="underline-header" id="popupPyMainTitle" style="display: flex;"> Python Operator Settings
+    <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="node-tooltiptext">
+        <div class="pythonCodeTooltip">
+            A dynamic Operator that executes Python code
+            <br><br>
+            <Strong>Input (User Defined)</Strong>
+            <br><Strong>Example Input - </Strong> JSON Display Operator
+            <Strong>Output (User Defined)</Strong>
+            <br><Strong>Example Connections - </Strong> This can be connected to a <Strong>Image Prompt Operator or Prompt Grouper</Strong>
+            <br><br><Strong>Notes:</Strong>
+            <br>For your operator to work, define a function and call it at the end of your code like so:
+            <br>
+<pre class="codeHTML"><code>
+\`\`\`python
+def add(input_dict):
+    …
+
+add
+\`\`\`
+</code></pre>
+            <br>From here you can access all variables using the key “input_{input_number}” where input_number is the number of the output, inputs start from 1.
+<pre class="codeHTML"><code>
+\`\`\`python
+def add(input_dict):
+    input_dict = input_dict.to_py()
+    x = input_dict[“input_1”]
+    y = input_dict[“input_2”]
+    sum = x + y
+add
+\`\`\` 
+</code></pre>
+            <br>The amount of values you return should correlate to how many outputs you listed, when returning you should 
+            always return a dictionary, with keys correlating to how many outputs you listed. Keys must follow this naming 
+            standard “output_{input_number}”, outputs also start from 1
+            <br><br><Strong>Full Code:</Strong>
+            <br>
+<pre class="codeHTML"><code>
+\`\`\`python
+def add(input_dict):
+    input_dict = input_dict.to_py()
+    x = input_dict[“input_1”]
+    y = input_dict[“input_2”]
+    sum = x + y 
+    return {"output_1": sum}
+add
+\`\`\` 
+</code></pre>
+</div>
+        </span>
+    </div>
+  </div>
+  
   <div class="underline-header"> Python File</div>
 
   <div class="file-div">
