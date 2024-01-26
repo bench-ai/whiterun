@@ -48,7 +48,7 @@ const Register = () => {
     useEffect(() => {
         document.title = 'Create an Account - Bench AI';
         mixpanel.track("Register Page Viewed");
-    })
+    },[])
 
     const checkForm = (): boolean => {
         if (password !== confirmPassword) {
