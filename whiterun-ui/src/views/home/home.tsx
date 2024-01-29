@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 
 import axios from "axios";
 import Title from "antd/es/typography/Title";
-import {Button, Divider, Form, Input, Layout, Modal} from 'antd';
+import {Button, Form, Input, Layout, Modal} from 'antd';
 import {Content} from "antd/es/layout/layout";
 import {WorkflowList} from "./home.styles";
 import {WorkflowCard} from "../../components/workflow_card/workflow_card";

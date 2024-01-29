@@ -24,6 +24,12 @@ export const RightOptions = styled.div`
     align-items: center;
     justify-content: flex-end;
     padding-right: 20px;
+
+    @media (max-width: 450px) {
+        /* Hide Discord button when screen width is smaller than 450px */
+        & > div:last-child {
+            display: none;
+        }
 `;
 
 export const StyledLink = styled(Link)`
@@ -34,6 +40,6 @@ export const StyledButton = styled(Button)`
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 10px;
+    margin-right: 10px;
 `;
 
