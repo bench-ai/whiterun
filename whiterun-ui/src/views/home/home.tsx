@@ -7,11 +7,23 @@ import {Content} from "antd/es/layout/layout";
 import {WorkflowList} from "./home.styles";
 import {WorkflowCard} from "../../components/workflow_card/workflow_card";
 import {AddApiForm} from "../app_page/app_page.styles";
+import CardSelector from "../../components/workflow_template_card/template_card_selector";
 
 interface Workflow {
     id: string;
     name: string;
 }
+
+const cardData = [
+    {id: 1, title: 'Stable Diffusion', category: 'Text to Image'},
+    {id: 2, title: 'Dall-E', category: 'Text to Image'},
+    {id: 3, title: 'Realistic', category: 'Text to Image'},
+    {id: 4, title: 'Local Image', category: 'Image to Image'},
+    {id: 5, title: 'Stable Diffusion', category: 'Image to Image'},
+    {id: 6, title: 'Dall-E', category: 'Image to Image'},
+    {id: 7, title: 'Realistic', category: 'Image to Image'},
+    {id: 8, title: 'Stable Diffusion', category: 'Inpainting'},
+];
 
 const Home = () => {
 
@@ -84,11 +96,12 @@ const Home = () => {
                         Create WorkFlow
                     </Button>
                     <Modal
-                        title={<Title level={3}>Create a Workflow</Title>}
+                        title={<Title level={2}>Create a Workflow</Title>}
                         visible={isModalOpen}
                         onCancel={handleCancel}
                         footer={null}
                         destroyOnClose={true}
+                        width={800}
                     >
                         <AddApiForm name="create_workflow_form"
                                     initialValues={{remember: false}}
@@ -97,7 +110,7 @@ const Home = () => {
                                     onFinish={submit}
                         >
                             <Form.Item name="workflow_name"
-                                       label="Workflow Name"
+                                       label={<Title level={3} style={{marginBottom: '0'}}>Workflow Name:</Title>}
                                        rules={[{required: true, message: 'Please add a name for your workflow'}]}
                             >
                                 <Input
@@ -106,6 +119,15 @@ const Home = () => {
                                     size="large"
                                 />
                             </Form.Item>
+                            <Title level={3} style={{marginBottom: '10px', marginTop: '50px'}}>Get started easily with a
+                                template</Title>
+                            <hr style={{
+                                border: '2px solid #3FB950',
+                                borderRadius: '5px',
+                                width: '75%',
+                                marginLeft: '0'
+                            }}/>
+                            <CardSelector cardData={cardData}/>
                             <Form.Item>
                                 <Button type="primary" htmlType="submit" size="large" loading={loading}
                                         style={{width: '100%', marginTop: '25px'}}>
