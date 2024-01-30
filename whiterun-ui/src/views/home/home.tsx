@@ -119,15 +119,15 @@ const Home = () => {
                                     size="large"
                                 />
                             </Form.Item>
-                            <Title level={3} style={{marginBottom: '10px', marginTop: '50px'}}>Get started easily with a
-                                template</Title>
-                            <hr style={{
-                                border: '2px solid #3FB950',
-                                borderRadius: '5px',
-                                width: '75%',
-                                marginLeft: '0'
-                            }}/>
-                            <CardSelector cardData={cardData}/>
+                            {/*<Title level={3} style={{marginBottom: '10px', marginTop: '50px'}}>Get started easily with a*/}
+                            {/*    template</Title>*/}
+                            {/*<hr style={{*/}
+                            {/*    border: '2px solid #3FB950',*/}
+                            {/*    borderRadius: '5px',*/}
+                            {/*    width: '75%',*/}
+                            {/*    marginLeft: '0'*/}
+                            {/*}}/>*/}
+                            {/*<CardSelector cardData={cardData}/>*/}
                             <Form.Item>
                                 <Button type="primary" htmlType="submit" size="large" loading={loading}
                                         style={{width: '100%', marginTop: '25px'}}>
