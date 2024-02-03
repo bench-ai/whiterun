@@ -42,7 +42,7 @@ let workflowPromise = workflowLoader()
 
 let pythonOutputTable;
 let pythonInputTable;
-let selectedNode;
+
 
 let connectionRemovalReason = "";
 var id = document.getElementById("drawflow");
@@ -148,9 +148,7 @@ editor.on("connectionCreated", function (dataDict) {
   let inputNode = getOperator(dataDict["input_id"], editor);
   const success = inputNode.connectOperators(outputNode, dataDict["input_class"], dataDict["output_class"])
 
-  if (success) {
-    inputNode.saveNodeData(editor)
-  } else {
+  if (!success) {
     connectionRemovalReason = "rejectedOnCreation";
     editor.removeSingleConnection(dataDict["output_id"],
       dataDict["input_id"],
@@ -170,23 +168,6 @@ editor.on("connectionRemoved", async function (dataDict) {
   }
 });
 
-editor.on('nodeUnselected', function (update) {
-
-  if (update) {
-    const node = getOperator(selectedNode, editor)
-    const update = node.updateVisualizations()
-
-    if (update) {
-      node.saveNodeData(editor)
-    } else {
-      node.resetInputFields()
-    }
-  }
-})
-
-editor.on('nodeSelected', function (id) {
-  selectedNode = id
-})
 
 function positionMobile(ev) {
   mobile_last_move = ev;
