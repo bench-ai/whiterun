@@ -1,19 +1,61 @@
-import {operatorHandler} from "./operator.js";
+import {operatorHandler, setSelected, TypeCastingError} from "./operator.js";
 import {requestInterceptor, textToImage} from "../api.js";
+import {fetchHTML} from "../constuctOperator.js";
 
 export class textToImageHandler extends operatorHandler {
     constructor(editor, nodeId) {
         super(editor, nodeId);
+        const iDict = {
+            "height": 832,
+            "width": 1216,
+            "engine_id": "SDXL_v1.0",
+            "seed":0,
+            "steps":30,
+            "cfg_scale": 7,
+            "style_preset": "photographic",
+            "sampler": "DDIM",
+            "clip_guidance_preset": "NONE",
+        }
+        this.setInitialData(iDict)
     }
 
-    updateHeightAndWidth(event) {
+    static async load(dataDict){
 
-        const outerParent = event.target.parentElement.parentElement.parentElement
+        console.log(dataDict)
+        let html = await fetchHTML("textToImage")
+        const parse = new DOMParser()
+        const doc = parse.parseFromString(html, "text/html")
 
-        const engineSelect = event.target.parentElement.querySelector('.txt-to-img-engine');
-        const heightInput = outerParent.querySelector('.txt-to-img-height');
-        const widthInput = outerParent.querySelector('.txt-to-img-width');
+        const style = doc.getElementsByClassName("txt-to-img-style")[0]
+        const engine = doc.getElementsByClassName("txt-to-img-engine")[0]
+        const sampler = doc.getElementsByClassName("txt-to-img-sampler")[0]
+        const clip = doc.getElementsByClassName("txt-to-img-clip")[0]
 
+        setSelected(dataDict["style_preset"], style)
+        setSelected(dataDict["engine_id"], engine)
+        setSelected(dataDict["sampler"], sampler)
+        setSelected(dataDict["clip_guidance_preset"], clip)
+
+        const height = doc.getElementsByClassName("txt-to-img-height")[0]
+        const width = doc.getElementsByClassName("txt-to-img-width")[0]
+        const cfg = doc.getElementsByClassName("txt-to-img-cfg")[0]
+        const seed = doc.getElementsByClassName("txt-to-img-seed")[0]
+        const step = doc.getElementsByClassName("txt-to-img-step")[0]
+
+        height.setAttribute("value", dataDict["height"])
+        width.setAttribute("value", dataDict["width"])
+        cfg.setAttribute("value", dataDict["cfg_scale"])
+        seed.setAttribute("value", dataDict["seed"])
+        step.setAttribute("value", dataDict["steps"])
+
+        return doc.getElementsByClassName("visualization")[0].outerHTML
+    }
+
+    updateHeightAndWidth() {
+
+        const engineSelect = this.getVisualProperties("txt-to-img-engine");
+        const heightInput = this.getVisualProperties("txt-to-img-height");
+        const widthInput = this.getVisualProperties("txt-to-img-width");
 
         const engineValue = engineSelect.value;
 
@@ -42,148 +84,96 @@ export class textToImageHandler extends operatorHandler {
                 heightInput.value = 512;
                 widthInput.value = 512;
         }
-        heightInput.setAttribute("value", heightInput.value)
-        widthInput.setAttribute("value", widthInput.value)
-    }
 
-    updateCfg(event) {
-        if (event.target && event.target.classList.contains('txt-to-img-cfg')) {
-            const cfg = event.target;
-
-            cfg.addEventListener('blur', function() {
-                let cfgValue = parseFloat(cfg.value);
-
-                if (!isNaN(cfgValue) && cfgValue >= 0 && cfgValue <= 35) {
-                    cfg.value = cfgValue;
-                    cfg.setAttribute("value", cfgValue)
-                } else {
-                    cfg.value = '7';
-                    cfg.setAttribute("value", "7")
-                }
-            });
-        }
-    }
-
-    updateSeed(event) {
-        if (event.target && event.target.classList.contains('txt-to-img-seed')) {
-            const seed = event.target;
-
-            seed.addEventListener('blur', function() {
-                let seedValue = parseFloat(seed.value);
-
-                if (!isNaN(seedValue) && seedValue >= 0 && seedValue <= 4294967295) {
-                    seed.value = seedValue;
-                    seed.setAttribute("value", seedValue)
-                } else {
-                    seed.value = '0';
-                    seed.setAttribute("value", "0")
-                }
-            });
-        }
-    }
-
-    updateStep(event) {
-        if (event.target && event.target.classList.contains('txt-to-img-step')) {
-            const step = event.target;
-
-            step.addEventListener('blur', function() {
-                let stepValue = parseFloat(step.value);
-
-                if (!isNaN(stepValue) && stepValue >= 10 && stepValue <= 50) {
-                    step.value = stepValue;
-                    step.setAttribute("value", stepValue)
-                } else {
-                    step.value = '30';
-                    step.setAttribute("value", "30")
-                }
-            });
-        }
-    }
-
-    handleTextChange(event) {
-        const inputValue = event.target.value;
-
-        const targetList = event.target.getElementsByTagName("option")
-
-        const targetObject = {}
-
-        for (let i = 0; i < targetList.length; i++){
-            targetObject[targetList[i].value] = {
-                "number": i,
-                "text": targetList[i].textContent
-            }
-
-            targetList[i].removeAttribute("selected")
+        const opDict = {
+            "height": parseInt(heightInput.value),
+            "width": parseInt(widthInput.value)
         }
 
-        targetList[targetObject[inputValue]["number"]].setAttribute("selected", "true")
-        targetList[targetObject[inputValue]["number"]]["selected"] = "true"
+        this.updateNodeData(opDict)
+    }
 
+    updateValue(className, dictKey) {
+        const cfg = this.getVisualProperties(className)
+        const opDict = {}
+        opDict[dictKey] =  parseFloat(cfg.value)
+
+        this.updateNodeData(opDict)
+    }
+
+    handleTextChange(keyName, className) {
+        const inputValue = this.getVisualProperties(className).value;
+        const opDict = {}
+        opDict[keyName] = inputValue
+        this.updateNodeData(opDict)
     }
 
     setExecVisualizations() {
         const styleSelect = this.getVisualProperties("txt-to-img-style")
-        this.deleteField(styleSelect, "disabled")
-        styleSelect.addEventListener("input", this.handleTextChange)
+        styleSelect.addEventListener("input", () =>
+            this.handleTextChange("style_preset", "txt-to-img-style"))
 
         const engine = this.getVisualProperties("txt-to-img-engine")
-        this.deleteField(engine, "disabled")
-        engine.addEventListener("change", this.updateHeightAndWidth);
-        engine.addEventListener("input", this.handleTextChange)
+        engine.addEventListener("input", () =>
+            this.handleTextChange("engine_id", "txt-to-img-engine"))
+
+        engine.addEventListener("change", () =>
+            this.updateHeightAndWidth());
 
         const clip = this.getVisualProperties("txt-to-img-clip")
-        this.deleteField(clip, "disabled")
-        clip.addEventListener("input", this.handleTextChange)
+        clip.addEventListener("input", () =>
+            this.handleTextChange("clip_guidance_preset", "txt-to-img-clip"))
 
         const sampler = this.getVisualProperties("txt-to-img-sampler")
-        this.deleteField(sampler, "disabled")
-        sampler.addEventListener("input", this.handleTextChange)
+        sampler.addEventListener("input", () =>
+            this.handleTextChange("sampler", "txt-to-img-sampler"))
 
         const cfg = this.getVisualProperties("txt-to-img-cfg")
-        this.deleteField(cfg, "disabled")
-        cfg.addEventListener('input', this.updateCfg);
+        cfg.addEventListener('input', () =>
+            this.updateValue("txt-to-img-cfg", "cfg_scale"));
 
         const seed = this.getVisualProperties("txt-to-img-seed")
-        this.deleteField(seed, "disabled")
-        seed.addEventListener('input', this.updateSeed);
+        seed.addEventListener('input', () =>
+            this.updateValue("txt-to-img-seed", "seed"));
 
         const step = this.getVisualProperties("txt-to-img-step")
-        this.deleteField(step, "disabled")
-        step.addEventListener('input', this.updateStep);
+        step.addEventListener('input', () =>
+            this.updateValue("txt-to-img-step", "steps"));
 
         return super.setExecVisualizations();
     }
 
     removeExecVisualizations() {
-        this.setField(this.getVisualProperties("txt-to-img-style"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-engine"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-clip"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-sampler"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-cfg"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-seed"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-step"), "disabled", "true")
-
         const styleSelect = this.getVisualProperties("txt-to-img-style")
-        styleSelect.removeEventListener("input", this.handleTextChange)
+        styleSelect.removeEventListener("input", () =>
+            this.handleTextChange("style_preset", "txt-to-img-style"))
 
         const engine = this.getVisualProperties("txt-to-img-engine")
-        engine.removeEventListener("change", this.updateHeightAndWidth);
-        engine.removeEventListener("input", this.handleTextChange)
+        engine.removeEventListener("input", () =>
+            this.handleTextChange("engine_id", "txt-to-img-engine"))
+
+        engine.removeEventListener("change", () =>
+            this.updateHeightAndWidth());
 
         const clip = this.getVisualProperties("txt-to-img-clip")
-        clip.removeEventListener("input", this.handleTextChange)
+        clip.removeEventListener("input", () =>
+            this.handleTextChange("clip_guidance_preset", "txt-to-img-clip"))
 
         const sampler = this.getVisualProperties("txt-to-img-sampler")
-        sampler.removeEventListener("input", this.handleTextChange)
+        sampler.removeEventListener("input", () =>
+            this.handleTextChange("sampler", "txt-to-img-sampler"))
 
         const cfg = this.getVisualProperties("txt-to-img-cfg")
-        cfg.removeEventListener('input', this.updateCfg);
+        cfg.removeEventListener('input', () =>
+            this.updateValue("txt-to-img-cfg","cfg_scale"));
 
         const seed = this.getVisualProperties("txt-to-img-seed")
-        seed.removeEventListener('input', this.updateSeed);
+        seed.removeEventListener('input', () =>
+            this.updateValue("txt-to-img-seed", "seed"));
 
         const step = this.getVisualProperties("txt-to-img-step")
-        step.removeEventListener('input', this.updateStep);
+        step.removeEventListener('input', () =>
+            this.updateValue("txt-to-img-step","steps"));
 
         return super.setExecVisualizations();
     }
@@ -191,38 +181,34 @@ export class textToImageHandler extends operatorHandler {
 
     async getOutputObject(inputObject) {
 
-        const height = parseFloat(this.getVisualProperties("txt-to-img-height").value);
-        const width = parseFloat(this.getVisualProperties("txt-to-img-width").value);
-        const cfgScale = parseFloat(this.getVisualProperties("txt-to-img-cfg").value);
-        const seed = parseFloat(this.getVisualProperties("txt-to-img-seed").value);
-        const step = parseFloat(this.getVisualProperties("txt-to-img-step").value);
-
         let textPrompts = inputObject["input_1"]
 
         if (textPrompts) {
-            if (Array.isArray(textPrompts)) {
-            } else if (typeof textPrompts === "object") {
-                textPrompts = [textPrompts];
-            } else {
-                textPrompts = [];
+            if (!Array.isArray(textPrompts)) {
+                if (typeof textPrompts === "object") {
+                    textPrompts = [textPrompts];
+                }else{
+                    alert("Prompt must be object or lost")
+                    throw new TypeCastingError("Object | List", typeof textPrompts)
+                }
             }
         } else {
-            textPrompts = [];
+            alert("No Prompt was provided please connect a prompt grouper or a image prompt")
+            throw new TypeCastingError("Object | List", "undefined")
         }
 
         const requestBody = {
-            "height": height,
-            "width" : width,
+            "height": this.getNodeData()["height"],
+            "width" : this.getNodeData()["width"],
             "text_prompts": textPrompts,
-            "style_preset": this.getVisualProperties("txt-to-img-style").value,
-            "engine_id": this.getVisualProperties("txt-to-img-engine").value,
-            "clip_guidance_preset": this.getVisualProperties("txt-to-img-clip").value,
-            "sampler": this.getVisualProperties("txt-to-img-sampler").value,
-            "cfg_scale": cfgScale,
-            "seed": seed,
-            "steps": step,
+            "style_preset": this.getNodeData()["style_preset"],
+            "engine_id": this.getNodeData()["engine_id"],
+            "clip_guidance_preset": this.getNodeData()["clip_guidance_preset"],
+            "sampler": this.getNodeData()["sampler"],
+            "cfg_scale": this.getNodeData()["cfg_scale"],
+            "seed": this.getNodeData()["seed"],
+            "steps": this.getNodeData()["steps"],
         };
-
 
         let apiResponse;
 
@@ -245,6 +231,5 @@ export class textToImageHandler extends operatorHandler {
                 "type": "image"
             }
         };
-
     }
 }

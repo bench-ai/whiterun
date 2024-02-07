@@ -1,5 +1,6 @@
 import {operatorHandler} from "./operator.js";
 import {requestInterceptor, uploadImage} from "../api.js";
+import {fetchHTML} from "../constuctOperator.js";
 
 export class ImageHandler extends operatorHandler {
     constructor(editor, nodeId) {
@@ -21,6 +22,13 @@ export class ImageHandler extends operatorHandler {
                 reader.readAsDataURL(fileInput.files[0]);
             }
         }
+    }
+
+    static async load(dataDict){
+        let html = await fetchHTML("image")
+        const parse = new DOMParser()
+        const doc = parse.parseFromString(html, "text/html")
+        return doc.getElementsByClassName("visualization")[0].outerHTML
     }
 
     async getOutputObject(inputObject) {

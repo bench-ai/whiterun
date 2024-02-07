@@ -49,3 +49,37 @@ export function getOperator(nodeId, editor) {
   }
 }
 
+export async function getSaveViz(name, dataDict) {
+
+  switch (name) {
+    case 'python':
+      return new PythonHandler(editor, idNode)
+    case 'image':
+      return await ImageHandler.load(dataDict)
+    case 'jsonDisplay':
+      return await JsonDisplayHandler.load(dataDict)
+    case 'weightedPrompt':
+      return await ImagePromptHandler.load(dataDict)
+    case 'promptGrouper':
+      return await promptGrouperHandler.load(dataDict)
+    case 'textToImage':
+      return await textToImageHandler.load(dataDict)
+    case 'imageDisplay':
+      return await ImageDisplayHandler.load(dataDict)
+    case 'imageToImage':
+      return new ImageToImageHandler(editor, idNode)
+    case 'imageUpscaler':
+      return new ImageUpscalerHandler(editor, idNode)
+    case 'imageToImageMasking':
+      return new ImageToImageMaskHandler(editor, idNode)
+    case 'upscaleTile':
+      return new TileUpscaleHandler(editor, idNode)
+    case 'dalleTextToImage':
+      return new DallETextToImageHandler(editor, idNode)
+    case 'realVisXLTextToImage':
+      return new RealVisXLTextToImageHandler(editor, idNode)
+    default:
+      throw new ReferenceError("operator does not exist")
+  }
+}
+

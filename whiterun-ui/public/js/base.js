@@ -1,4 +1,4 @@
-import {getOperator} from "./operatorHandlers.js";
+import {getOperator, getSaveViz} from "./operatorHandlers.js";
 import {PythonTable} from "./pythonTable.js";
 import {collectOperatorMetaData, fetchHTML, mapToDiv} from "./constuctOperator.js"
 import {Drawflowoverride} from "./drawflowOverride.js";
@@ -56,20 +56,9 @@ async function saveDrawFlow(){
 
   Object.keys(exported_data["drawflow"]["Home"]["data"]).forEach(k =>{
     const currentNode = exported_data["drawflow"]["Home"]["data"][k]
-    const nodeHtml = document.getElementById(`node-${k}`)
-
-    let saveHtml = nodeHtml.getElementsByClassName("drawflow_content_node")[0]
-    saveHtml = saveHtml.cloneNode(true)
-
-    if(saveHtml.getElementsByClassName("image-op-file").length > 0){
-      let el = saveHtml.getElementsByClassName("image-op-file")
-      for (let i = 0; i < el.length; i++){
-        el[i].src = "./assets/image-logo.svg"
-      }
-    }
-
-    currentNode["html"] = saveHtml.innerHTML
+    currentNode["html"] = ""
   })
+
   const body = {
     "structure": exported_data,
     "id": parseUrl()
@@ -81,6 +70,18 @@ async function saveDrawFlow(){
 window.saveDrawFlow = saveDrawFlow;
 
 
+function loadNode(dataDict, currentNodeOutputs, operator){
+  Object.keys(currentNodeOutputs).forEach((element) => {
+    const match = element.match(/\d+/);
+    const number = parseInt(match[0], 10) - 1
+
+    if (currentNodeOutputs[element]["connections"].length > 0){
+      const supplier = currentNodeOutputs[element]["connections"][0]["node"]
+      operator.setSupplier(number, dataDict[supplier]["class"])
+    }
+  })
+}
+
 async function loadEditor(){
   const workflow = await workflowPromise
 
@@ -88,19 +89,46 @@ async function loadEditor(){
     window.location.replace("https://app.bench-ai.com/error");
   }
 
+  const operatorDict = {}
+
   if (workflow["structure"] !== null){
-    editor.import(workflow["structure"])
+
+    const keyList = Object.keys(workflow["structure"]["drawflow"]["Home"]["data"])
+
+    for (let i = 0; i < keyList.length; i++){
+      const currentNode = workflow["structure"]["drawflow"]["Home"]["data"][keyList[i]]
+      const dataList = await collectOperatorMetaData(currentNode["class"]);
+
+      operatorDict[currentNode["id"]] = {
+        "class": currentNode["class"],
+        "inputs": currentNode["inputs"],
+        "outputs": currentNode["outputs"],
+      }
+
+      const inputs = dataList[1];
+      const outputs = dataList[2];
+      const title = dataList[3];
+      const logo = dataList[4];
+      const tooltip = dataList[5];
+
+      let nodeDiv = mapToDiv(inputs, outputs, title, logo, tooltip);
+      nodeDiv = nodeDiv.replace("{viz}", await getSaveViz(
+          currentNode["class"],
+          currentNode["data"]["data"]))
+
+      currentNode["html"] = nodeDiv
+      editor.import(workflow["structure"])
+    }
 
     let xport = editor.export()["drawflow"]["Home"]["data"];
     let xportKeys = Object.keys(xport);
 
     xportKeys.forEach((element) => {
       const op = getOperator(element, editor);
-      // op.lockInputFields();
+      loadNode(operatorDict, operatorDict[element]["inputs"], op)
       op.setExecVisualizations();
     })
   }
-
 }
 
 loadEditor().then(r => {})
@@ -340,7 +368,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
   if (name !== "none") {
     let nodeDiv = mapToDiv(inputs, outputs, title, logo, tooltip);
     nodeDiv = nodeDiv.replace("{viz}", visualization)
-    const nodeMap = {"inputs": inputs, "outputs": outputs}
+    const nodeMap = {"inputs": inputs, "outputs": outputs, "data":{}}
     editor.addNode(name, inputs["dynamic"].length, outputs.length, pos_x, pos_y, name, nodeMap, nodeDiv);
 
     let xport = editor.export()["drawflow"]["Home"]["data"];
@@ -355,6 +383,11 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     const op = getOperator(nodeId.toString(), editor);
     op.setExecVisualizations()
   }
+}
+
+
+async function loadWorkflow(){
+
 }
 
 async function executeGraph(){

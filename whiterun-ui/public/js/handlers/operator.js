@@ -5,6 +5,24 @@ export class TypeCastingError extends Error {
 }
 
 
+export function setSelected(selected, doc){
+    const targetList = doc.getElementsByTagName("option")
+    const targetObject = {}
+
+    for (let i = 0; i < targetList.length; i++){
+        targetObject[targetList[i].value] = {
+            "number": i,
+            "text": targetList[i].textContent
+        }
+
+        targetList[i].removeAttribute("selected")
+    }
+
+    targetList[targetObject[selected]["number"]].setAttribute("selected", "true")
+    targetList[targetObject[selected]["number"]]["selected"] = "true"
+}
+
+
 export function checkOperatorTypes(type, value){
 
     const confirm = (type, value) => {
@@ -159,11 +177,27 @@ export class operatorHandler {
 
 
         this._title = this._operatorDoc.getElementsByClassName("title-box")[0]
+        this._editor = editor
         this.isConnected = false
         this._updatedNodeMap = {}
         this.name = this._node.name
 
-        console.log(this._node.data)
+    }
+
+    getNodeData(){
+        return this._node.data["data"]
+    }
+
+    updateNodeData(newObject){
+        this._node.data["data"] = Object.assign({}, this._node.data["data"], newObject)
+        this._editor.updateNodeDataFromId(this._node_number, this._node.data)
+    }
+
+    setInitialData(initialDict){
+        if (Object.keys(this._node.data["data"]).length === 0){
+            this.updateNodeData(initialDict)
+            console.log("entered")
+        }
     }
 
     _checkTypeValid(outputType, inputType) {
@@ -203,6 +237,13 @@ export class operatorHandler {
             this.setField(field, "disabled","true")
             return true
         }
+    }
+
+    setSupplier(inputNum, opName){
+        const inputFields = this._operatorDoc.getElementsByClassName("insert-field-dynamic")
+        const field = inputFields.item(inputNum)
+        this.setField(field, "value", `supplied by operator ${opName}`)
+        this.setField(field, "disabled","true")
     }
 
     disconnectOperator(inputNumber) {

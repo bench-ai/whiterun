@@ -1,4 +1,5 @@
 import {operatorHandler} from "./operator.js";
+import {fetchHTML} from "../constuctOperator.js";
 
 export class ImageDisplayHandler extends operatorHandler {
 
@@ -6,6 +7,7 @@ export class ImageDisplayHandler extends operatorHandler {
         super(editor, nodeId);
         this._image_set = false
     }
+
     setExecVisualizations() {
 
         this.deleteField(this.getVisualProperties("download-Button"), "disabled")
@@ -58,11 +60,20 @@ export class ImageDisplayHandler extends operatorHandler {
         document.body.removeChild(a);
     }
 
+    static async load(dataDict){
+        let html = await fetchHTML("imageDisplay")
+        const parse = new DOMParser()
+        const doc = parse.parseFromString(html, "text/html")
+        return doc.getElementsByClassName("visualization")[0].outerHTML
+    }
+
     async getOutputObject(inputObject) {
         const data = inputObject["input_1"]
 
-
-        if (data["type"] === "image"){
+        if (data === undefined){
+            alert("Please connect a operator that supplies a image")
+            throw new Error("can only work with image data")
+        } else if (data["type"] === "image"){
 
             if(data["url"] !== "") {
                 const imageElement = this.getVisualProperties("image-op-file")
@@ -87,6 +98,7 @@ export class ImageDisplayHandler extends operatorHandler {
             this._image_set = true
             return {}
         }else{
+            alert("Please connect a operator that supplies a image")
             throw new Error("can only work with image data")
         }
     }
