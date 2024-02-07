@@ -1,151 +1,81 @@
-import {operatorHandler, TypeCastingError} from "./operator.js";
+import {TypeCastingError} from "./operator.js";
 import {imageToImage, requestInterceptor} from "../api.js";
+import {fetchHTML} from "../constuctOperator.js";
+import {stabilityHandler} from "./stabilityV1.js";
 
-export class ImageToImageHandler extends operatorHandler {
 
+export class ImageToImageHandler extends stabilityHandler {
 
-    handleInputChange(event) {
-        const inputValue = event.target.value;
-        event.target.setAttribute("value", inputValue)
-        event.target["value"] = inputValue
+    constructor(editor, nodeId) {
+        super(editor, nodeId);
+
+        if (!Object.hasOwn(this.getNodeData(), "image_strength")){
+            this.updateNodeData({"image_strength": 0.35})
+        }
     }
 
-    handleTextChange(event) {
-        const inputValue = event.target.value;
+    static async load(dataDict){
 
-        const targetList = event.target.getElementsByTagName("option")
+        let html = await fetchHTML("imageToImage")
+        const parse = new DOMParser()
+        const doc = parse.parseFromString(html, "text/html")
 
-        const targetObject = {}
+        await stabilityHandler.loadUsingDoc(doc, dataDict)
+        const strength = doc.getElementsByClassName("txt-to-img-strength")[0]
+        strength.setAttribute("value", dataDict["image_strength"])
 
-        for (let i = 0; i < targetList.length; i++){
-            targetObject[targetList[i].value] = {
-                "number": i,
-                "text": targetList[i].textContent
-            }
-
-            targetList[i].removeAttribute("selected")
-        }
-
-        targetList[targetObject[inputValue]["number"]].setAttribute("selected", "true")
-        targetList[targetObject[inputValue]["number"]]["selected"] = "true"
-
+        return doc.getElementsByClassName("visualization")[0].outerHTML
     }
 
     setExecVisualizations() {
-        this.deleteField(this.getVisualProperties("txt-to-img-style"), "disabled");
-        this.deleteField(this.getVisualProperties("txt-to-img-engine"), "disabled");
-        this.deleteField(this.getVisualProperties("txt-to-img-clip"), "disabled");
-        this.deleteField(this.getVisualProperties("txt-to-img-sampler"), "disabled");
-        this.deleteField(this.getVisualProperties("txt-to-img-cfg"), "disabled");
-        this.deleteField(this.getVisualProperties("txt-to-img-seed"), "disabled");
-        this.deleteField(this.getVisualProperties("txt-to-img-step"), "disabled");
-        this.deleteField(this.getVisualProperties("txt-to-img-strength"), "disabled");
-
-        this.getVisualProperties("txt-to-img-style")
-            .addEventListener('input',this.handleTextChange);
-
-        this.getVisualProperties("txt-to-img-engine")
-            .addEventListener('input',this.handleTextChange);
-
-        this.getVisualProperties("txt-to-img-clip")
-            .addEventListener('input',this.handleTextChange);
-
-        this.getVisualProperties("txt-to-img-sampler")
-            .addEventListener('input',this.handleTextChange);
-
-        this.getVisualProperties("txt-to-img-cfg")
-            .addEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-seed")
-            .addEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-step")
-            .addEventListener('input',this.handleInputChange);
-
         this.getVisualProperties("txt-to-img-strength")
-            .addEventListener('input',this.handleInputChange);
+            .addEventListener('input', () =>
+                this.updateValue("txt-to-img-strength", "image_strength"));
 
         return super.setExecVisualizations();
     }
 
     removeExecVisualizations() {
-        this.setField(this.getVisualProperties("txt-to-img-style"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-engine"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-clip"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-sampler"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-cfg"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-seed"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-step"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-strength"), "disabled", "true");
-
-        this.getVisualProperties("txt-to-img-style")
-            .removeEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-engine")
-            .removeEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-clip")
-            .removeEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-sampler")
-            .removeEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-cfg")
-            .removeEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-seed")
-            .removeEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-step")
-            .removeEventListener('input',this.handleInputChange);
-
         this.getVisualProperties("txt-to-img-strength")
-            .removeEventListener('input',this.handleInputChange);
+            .removeEventListener('input', () =>
+                this.updateValue("txt-to-img-strength", "image_strength"));
 
         return super.setExecVisualizations();
     }
 
     async getOutputObject(inputObject) {
-        // inputObject = await super.getOutputObject(inputObject)
-
-        console.log(inputObject)
 
         let prompts = inputObject["input_1"]
         const imgObject = inputObject["input_2"]
+
         if (imgObject["type"] !== "image"){
+            alert("image file not provided")
             throw TypeCastingError("Image file", imgObject["type"])
         }
 
-        if(!Array.isArray(prompts)){
-            prompts = [prompts]
-        }
+        prompts = stabilityHandler.processPrompts(prompts)
 
         const requestBody = {
-            "engine_id": this.getVisualProperties("txt-to-img-engine").value,
+            "engine_id": this.getNodeData()["engine_id"],
             "text_prompts": prompts,
-            "cfg_scale": parseInt(this.getVisualProperties("txt-to-img-cfg").value),
-            "clip_guidance_preset": this.getVisualProperties("txt-to-img-clip").value,
-            "sampler": this.getVisualProperties("txt-to-img-sampler").value,
-            "seed": parseInt(this.getVisualProperties("txt-to-img-seed").value),
-            "steps": parseInt(this.getVisualProperties("txt-to-img-step").value),
-            "style_preset": this.getVisualProperties("txt-to-img-style").value,
+            "cfg_scale": this.getNodeData()["cfg_scale"],
+            "clip_guidance_preset": this.getNodeData()["clip_guidance_preset"],
+            "sampler": this.getNodeData()["sampler"],
+            "seed": this.getNodeData()["seed"],
+            "steps": this.getNodeData()["steps"],
+            "style_preset": this.getNodeData()["style_preset"],
             "init_image": imgObject["file_id"],
             "init_image_mode": "IMAGE_STRENGTH",
-            "image_strength": parseFloat(this.getVisualProperties("txt-to-img-strength").value)
+            "image_strength": this.getNodeData()["image_strength"]
         }
 
-        const response = await requestInterceptor(imageToImage,requestBody)
+        console.log(requestBody)
 
-        let fileId = response["url"].split("?X-Amz-Algorithm")[0]
+        const response = await requestInterceptor(imageToImage, requestBody)
 
-        fileId = fileId.split("amazonaws.com/")[1]
-
-        return {"output_1": {
-                "file_id": fileId,
-                "file": "",
-                "url": response["url"],
-                "type": "image"
-            }
-        }}
+        return {
+            "output_1": stabilityHandler.fileFromUrl(response["url"])
+        }
+    }
 
 }

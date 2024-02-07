@@ -67,7 +67,7 @@ export async function getSaveViz(name, dataDict) {
     case 'imageDisplay':
       return await ImageDisplayHandler.load(dataDict)
     case 'imageToImage':
-      return new ImageToImageHandler(editor, idNode)
+      return await ImageToImageHandler.load(dataDict)
     case 'imageUpscaler':
       return new ImageUpscalerHandler(editor, idNode)
     case 'imageToImageMasking':
