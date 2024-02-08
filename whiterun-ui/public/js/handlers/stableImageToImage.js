@@ -40,7 +40,7 @@ export class ImageToImageHandler extends stabilityHandler {
             .removeEventListener('input', () =>
                 this.updateValue("txt-to-img-strength", "image_strength"));
 
-        return super.setExecVisualizations();
+        return super.removeExecVisualizations();
     }
 
     async getOutputObject(inputObject) {
@@ -68,8 +68,6 @@ export class ImageToImageHandler extends stabilityHandler {
             "init_image_mode": "IMAGE_STRENGTH",
             "image_strength": this.getNodeData()["image_strength"]
         }
-
-        console.log(requestBody)
 
         const response = await requestInterceptor(imageToImage, requestBody)
 

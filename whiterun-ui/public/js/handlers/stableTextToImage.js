@@ -88,7 +88,7 @@ export class textToImageHandler extends stabilityHandler {
         engine.removeEventListener("change", () =>
             this.updateHeightAndWidth());
 
-        return super.setExecVisualizations();
+        return super.removeExecVisualizations();
     }
 
 

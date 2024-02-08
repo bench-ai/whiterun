@@ -143,7 +143,7 @@ export class stabilityHandler extends operatorHandler {
         step.removeEventListener('input', () =>
             this.updateValue("txt-to-img-step","steps"));
 
-        return super.setExecVisualizations();
+        return super.removeExecVisualizations();
     }
 
 }

@@ -1,115 +1,56 @@
-import {operatorHandler, TypeCastingError} from "./operator.js";
+import {setSelected, TypeCastingError} from "./operator.js";
 import {imageToImageMask, requestInterceptor} from "../api.js";
+import {fetchHTML} from "../constuctOperator.js";
+import {stabilityHandler} from "./stabilityV1.js";
 
-export class ImageToImageMaskHandler extends operatorHandler {
+export class ImageToImageMaskHandler extends stabilityHandler {
 
-    handleInputChange(event) {
-        const inputValue = event.target.value;
-        event.target.setAttribute("value", inputValue)
-        event.target["value"] = inputValue
+    constructor(editor, nodeId) {
+        super(editor, nodeId);
+
+        if (!Object.hasOwn(this.getNodeData(), "mask_source")){
+            this.updateNodeData({"mask_source": "MASK_IMAGE_BLACK"})
+        }
     }
 
-    handleTextChange(event) {
-        const inputValue = event.target.value;
+    static async load(dataDict){
 
-        const targetList = event.target.getElementsByTagName("option")
+        let html = await fetchHTML("imageToImageMasking")
+        const parse = new DOMParser()
+        const doc = parse.parseFromString(html, "text/html")
 
-        const targetObject = {}
+        await stabilityHandler.loadUsingDoc(doc, dataDict)
 
-        for (let i = 0; i < targetList.length; i++){
-            targetObject[targetList[i].value] = {
-                "number": i,
-                "text": targetList[i].textContent
-            }
+        const maskSource = doc.getElementsByClassName("txt-to-img-mask-source")[0]
+        setSelected(dataDict["mask_source"], maskSource)
 
-            targetList[i].removeAttribute("selected")
-        }
-
-        targetList[targetObject[inputValue]["number"]].setAttribute("selected", "true")
-        targetList[targetObject[inputValue]["number"]]["selected"] = "true"
-
+        return doc.getElementsByClassName("visualization")[0].outerHTML
     }
 
     setExecVisualizations() {
-        this.deleteField(this.getVisualProperties("txt-to-img-style"), "disabled");
-        this.deleteField(this.getVisualProperties("txt-to-img-engine"), "disabled");
-        this.deleteField(this.getVisualProperties("txt-to-img-clip"), "disabled");
-        this.deleteField(this.getVisualProperties("txt-to-img-sampler"), "disabled");
-        this.deleteField(this.getVisualProperties("txt-to-img-cfg"), "disabled");
-        this.deleteField(this.getVisualProperties("txt-to-img-seed"), "disabled");
-        this.deleteField(this.getVisualProperties("txt-to-img-step"), "disabled");
-        this.deleteField(this.getVisualProperties("txt-to-img-mask-source"), "disabled");
-
-        this.getVisualProperties("txt-to-img-style")
-            .addEventListener('input',this.handleTextChange);
-
-        this.getVisualProperties("txt-to-img-engine")
-            .addEventListener('input',this.handleTextChange);
-
-        this.getVisualProperties("txt-to-img-clip")
-            .addEventListener('input',this.handleTextChange);
-
-        this.getVisualProperties("txt-to-img-sampler")
-            .addEventListener('input',this.handleTextChange);
-
-        this.getVisualProperties("txt-to-img-cfg")
-            .addEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-seed")
-            .addEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-step")
-            .addEventListener('input',this.handleInputChange);
-
         this.getVisualProperties("txt-to-img-mask-source")
-            .addEventListener('input',this.handleTextChange);
+            .addEventListener('input', () =>
+                this.handleTextChange("mask_source", "txt-to-img-mask-source"));
 
         return super.setExecVisualizations();
     }
 
     removeExecVisualizations() {
-        this.setField(this.getVisualProperties("txt-to-img-style"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-engine"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-clip"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-sampler"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-cfg"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-seed"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-step"), "disabled", "true")
-        this.setField(this.getVisualProperties("txt-to-img-mask-source"), "disabled", "true");
-
-        this.getVisualProperties("txt-to-img-style")
-            .removeEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-engine")
-            .removeEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-clip")
-            .removeEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-sampler")
-            .removeEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-cfg")
-            .removeEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-seed")
-            .removeEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("txt-to-img-step")
-            .removeEventListener('input',this.handleInputChange);
-
         this.getVisualProperties("txt-to-img-mask-source")
-            .removeEventListener('input',this.handleTextChange);
+            .removeEventListener('input', () =>
+                this.handleTextChange("mask_source", "txt-to-img-mask-source"));
 
-        return super.setExecVisualizations();
+        return super.removeExecVisualizations();
     }
 
     async getOutputObject(inputObject) {
-        // inputObject = await super.getOutputObject(inputObject)
 
         let prompts = inputObject["input_1"]
+        prompts = stabilityHandler.processPrompts(prompts)
+
         const imgObject = inputObject["input_2"]
-        const maskObject = inputObject["input_2"]
+        const maskObject = inputObject["input_3"]
+
         if (imgObject["type"] !== "image"){
             throw TypeCastingError("Image file", imgObject["type"])
         }
@@ -118,37 +59,24 @@ export class ImageToImageMaskHandler extends operatorHandler {
             throw TypeCastingError("Image file", imgObject["type"])
         }
 
-        if(!Array.isArray(prompts)){
-            prompts = [prompts]
-        }
-
         const requestBody = {
-            "engine_id": this.getVisualProperties("txt-to-img-engine").value,
+            "engine_id": this.getNodeData()["engine_id"],
             "text_prompts": prompts,
-            "cfg_scale": parseInt(this.getVisualProperties("txt-to-img-cfg").value),
-            "clip_guidance_preset": this.getVisualProperties("txt-to-img-clip").value,
-            "sampler": this.getVisualProperties("txt-to-img-sampler").value,
-            "seed": parseInt(this.getVisualProperties("txt-to-img-seed").value),
-            "steps": parseInt(this.getVisualProperties("txt-to-img-step").value),
-            "style_preset": this.getVisualProperties("txt-to-img-style").value,
+            "cfg_scale": this.getNodeData()["cfg_scale"],
+            "clip_guidance_preset": this.getNodeData()["clip_guidance_preset"],
+            "sampler": this.getNodeData()["sampler"],
+            "seed": this.getNodeData()["seed"],
+            "steps": this.getNodeData()["steps"],
+            "style_preset": this.getNodeData()["style_preset"],
             "init_image": imgObject["file_id"],
             "mask_image": maskObject["file_id"],
-            "mask_source": this.getVisualProperties("txt-to-img-mask-source").value
+            "mask_source": this.getNodeData()["mask_source"],
         }
 
+        const response = await requestInterceptor(imageToImageMask, requestBody)
 
-        const response = await requestInterceptor(imageToImageMask,requestBody)
-
-        let fileId = response["url"].split("?X-Amz-Algorithm")[0]
-
-        fileId = fileId.split("amazonaws.com/")[1]
-
-        return {"output_1": {
-                "file_id": fileId,
-                "file": "",
-                "url": response["url"],
-                "type": "image"
-            }
+        return {
+            "output_1": stabilityHandler.fileFromUrl(response["url"])
         }
     }
 }

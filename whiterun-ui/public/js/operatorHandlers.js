@@ -71,7 +71,7 @@ export async function getSaveViz(name, dataDict) {
     case 'imageUpscaler':
       return new ImageUpscalerHandler(editor, idNode)
     case 'imageToImageMasking':
-      return new ImageToImageMaskHandler(editor, idNode)
+      return await ImageToImageMaskHandler.load(dataDict)
     case 'upscaleTile':
       return new TileUpscaleHandler(editor, idNode)
     case 'dalleTextToImage':
