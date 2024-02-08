@@ -37,21 +37,6 @@ export class stabilityHandler extends operatorHandler {
         return doc.getElementsByClassName("visualization")[0].outerHTML
     }
 
-    updateValue(className, dictKey) {
-        const cfg = this.getVisualProperties(className)
-        const opDict = {}
-        opDict[dictKey] =  parseFloat(cfg.value)
-
-        this.updateNodeData(opDict)
-    }
-
-    handleTextChange(keyName, className) {
-        const inputValue = this.getVisualProperties(className).value;
-        const opDict = {}
-        opDict[keyName] = inputValue
-        this.updateNodeData(opDict)
-    }
-
     static processPrompts(textPrompts){
         if (textPrompts) {
             if (!Array.isArray(textPrompts)) {

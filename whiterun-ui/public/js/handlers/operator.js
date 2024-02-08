@@ -4,6 +4,45 @@ export class TypeCastingError extends Error {
     }
 }
 
+function concatenatePrompts(promptList){
+
+    let fullText = ""
+
+    if (promptList.length === 1){
+        return promptList[0]["text"]
+    }
+
+    for (let i = 0; i < promptList.length; i++){
+        let text = promptList[i]["text"]
+
+        if (text.endsWith(".")){
+            text += " "
+        }else{
+            text += ". "
+        }
+
+        fullText += text
+    }
+
+    return fullText.slice(0,-1)
+}
+
+export function getPositiveAndNegativePrompts(promptList){
+
+    const negativePrompts = []
+    const positivePrompts = []
+
+    for (let i = 0; i < promptList.length; i++){
+        if (promptList[i]["weight"] < 0){
+            negativePrompts.push(promptList[i])
+        }else{
+            positivePrompts.push(promptList[i])
+        }
+    }
+
+    return [concatenatePrompts(positivePrompts), concatenatePrompts(negativePrompts)]
+}
+
 
 export function setSelected(selected, doc){
     const targetList = doc.getElementsByTagName("option")
@@ -20,6 +59,44 @@ export function setSelected(selected, doc){
 
     targetList[targetObject[selected]["number"]].setAttribute("selected", "true")
     targetList[targetObject[selected]["number"]]["selected"] = "true"
+}
+
+
+export function imageDownload(event){
+
+    const visualizationElement = event.target.closest('.visualization');
+    const imageElement = visualizationElement.querySelector('.image-op-file');
+
+    let fc = (base64String) =>{
+        const matches = base64String.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64/);
+
+        if (matches && matches.length > 1) {
+            return matches[1];
+        } else {
+            // Default to a generic type if MIME type cannot be determined
+            return 'application/octet-stream';
+        }
+    }
+
+    // const fileId =  this.fileId
+    // Create an invisible anchor element
+    const a = document.createElement('a');
+    a.style.display = 'none';
+
+    const mime = fc(imageElement.src).split("/")[1]
+
+    // Set the download URL and filename
+    a.href = imageElement.src
+    a.download = `result.${mime}`;
+    a.target = "_blank"
+    a.rel = "noopener noreferrer"
+
+    // Append the anchor to the document and trigger a click event
+    document.body.appendChild(a);
+    a.click();
+
+    // Remove the anchor from the document
+    document.body.removeChild(a);
 }
 
 
@@ -182,6 +259,21 @@ export class operatorHandler {
         this._updatedNodeMap = {}
         this.name = this._node.name
 
+    }
+
+    updateValue(className, dictKey) {
+        const cfg = this.getVisualProperties(className)
+        const opDict = {}
+        opDict[dictKey] =  parseFloat(cfg.value)
+
+        this.updateNodeData(opDict)
+    }
+
+    handleTextChange(keyName, className) {
+        const inputValue = this.getVisualProperties(className).value;
+        const opDict = {}
+        opDict[keyName] = inputValue
+        this.updateNodeData(opDict)
     }
 
     getNodeData(){

@@ -7,7 +7,12 @@
         "default_value": "realVisXLTextToImage"
       }
     ],
-    "dynamic": []
+    "dynamic": [
+      {
+        "name": "prompts",
+        "type": "object | list"
+      }
+    ]
   },
   "outputs": [
     {

@@ -1,5 +1,7 @@
-import {operatorHandler} from "./operator.js";
+import {imageDownload, operatorHandler} from "./operator.js";
 import {imageUpscaler, requestInterceptor} from "../api.js";
+import {fetchHTML} from "../constuctOperator.js";
+import {stabilityHandler} from "./stabilityV1.js";
 
 export class ImageUpscalerHandler extends operatorHandler {
 
@@ -9,14 +11,12 @@ export class ImageUpscalerHandler extends operatorHandler {
     }
 
     setExecVisualizations() {
-        this.deleteField(this.getVisualProperties("download-Button"), "disabled")
         this.getVisualProperties("download-Button").addEventListener('click', this.downloadImage);
 
         return super.setExecVisualizations();
     }
 
     removeExecVisualizations() {
-        this.setField(this.getVisualProperties("download-Button"), "disabled", "true")
         this.getVisualProperties("download-Button").removeEventListener('click', this.downloadImage);
 
         if (this._image_set){
@@ -27,41 +27,14 @@ export class ImageUpscalerHandler extends operatorHandler {
     }
 
     downloadImage(event) {
+        imageDownload(event)
+    }
 
-
-        const visualizationElement = event.target.closest('.visualization');
-        const imageElement = visualizationElement.querySelector('.image-op-file');
-
-        let fc = (base64String) =>{
-            const matches = base64String.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64/);
-
-            if (matches && matches.length > 1) {
-                return matches[1];
-            } else {
-                // Default to a generic type if MIME type cannot be determined
-                return 'application/octet-stream';
-            }
-        }
-
-        // const fileId =  this.fileId
-        // Create an invisible anchor element
-        const a = document.createElement('a');
-        a.style.display = 'none';
-
-        const mime = fc(imageElement.src).split("/")[1]
-
-        // Set the download URL and filename
-        a.href = imageElement.src
-        a.download = `result.${mime}`;
-        a.target = "_blank"
-        a.rel = "noopener noreferrer"
-
-        // Append the anchor to the document and trigger a click event
-        document.body.appendChild(a);
-        a.click();
-
-        // Remove the anchor from the document
-        document.body.removeChild(a);
+    static async load(dataDict){
+        let html = await fetchHTML("imageUpscaler")
+        const parse = new DOMParser()
+        const doc = parse.parseFromString(html, "text/html")
+        return doc.getElementsByClassName("visualization")[0].outerHTML
     }
 
     async getOutputObject(inputObject) {
@@ -91,6 +64,8 @@ export class ImageUpscalerHandler extends operatorHandler {
         const imageElement = this.getVisualProperties("image-op-file");
         imageElement.src = apiResponse["url"];
 
-        return {}
+        return {
+            "output_1": stabilityHandler.fileFromUrl(apiResponse["url"])
+        }
     }
 }

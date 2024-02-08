@@ -1,13 +1,12 @@
 {
   "inputs": {
-    "static": [
+    "static": [],
+    "dynamic": [
       {
-        "name": "name",
-        "type": "text",
-        "default_value": "dalleTextToImage"
+        "name": "prompt",
+        "type": "object | list"
       }
-    ],
-    "dynamic": []
+    ]
   },
   "outputs": [
     {

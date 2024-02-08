@@ -1,94 +1,89 @@
-import {operatorHandler} from "./operator.js";
+import {getPositiveAndNegativePrompts, operatorHandler, setSelected} from "./operator.js";
 import {dalleTextToImage, requestInterceptor} from "../api.js";
+import {fetchHTML} from "../constuctOperator.js";
+import {stabilityHandler} from "./stabilityV1.js";
 
 export class DallETextToImageHandler extends operatorHandler {
     constructor(editor, nodeId) {
         super(editor, nodeId);
-    }
 
-    handleTextChange(event) {
-        const inputValue = event.target.value;
-
-        const targetList = event.target.getElementsByTagName("option")
-
-        const targetObject = {}
-
-        for (let i = 0; i < targetList.length; i++){
-            targetObject[targetList[i].value] = {
-                "number": i,
-                "text": targetList[i].textContent
-            }
-
-            targetList[i].removeAttribute("selected")
+        const iDict = {
+            "quality": "standard",
+            "size" : "1024x1024",
+            "style": "vivid",
         }
 
-        targetList[targetObject[inputValue]["number"]].setAttribute("selected", "true")
-        targetList[targetObject[inputValue]["number"]]["selected"] = "true"
-
+        this.setInitialData(iDict)
     }
-
-    checkPrompt(event) {
-        const inputValue = event.target.value;
-        event.target.setAttribute("value", inputValue)
-        event.target["value"] = inputValue
-        event.target.setAttribute("textContent", inputValue)
-        event.target["textContent"] = inputValue
-    }
-
-
 
     setExecVisualizations() {
         const styleSelect = this.getVisualProperties("dalle-txt-to-img-style")
-        this.deleteField(styleSelect, "disabled")
-        styleSelect.addEventListener("input", this.handleTextChange)
+        styleSelect.addEventListener("input",
+            () => this.handleTextChange("style", "dalle-txt-to-img-style"))
 
         const resolution = this.getVisualProperties("dalle-txt-to-img-resolution")
-        this.deleteField(resolution, "disabled")
-        resolution.addEventListener("input", this.handleTextChange)
+        resolution.addEventListener("input",
+            () => this.handleTextChange("size", "dalle-txt-to-img-resolution"))
 
         const quality = this.getVisualProperties("dalle-txt-to-img-quality")
-        this.deleteField(resolution, "disabled")
-        quality.addEventListener("input", this.handleTextChange)
-
-        const prompt = this.getVisualProperties("dalle-txt-to-img-prompt");
-        prompt.addEventListener('input', this.checkPrompt);
+        quality.addEventListener("input",
+            () => this.handleTextChange("vivid", "dalle-txt-to-img-quality"))
 
         return super.setExecVisualizations();
     }
 
     removeExecVisualizations() {
-        this.setField(this.getVisualProperties("dalle-txt-to-img-style"), "disabled", "true")
-        this.setField(this.getVisualProperties("dalle-txt-to-img-resolution"), "disabled", "true")
-        this.setField(this.getVisualProperties("dalle-txt-to-img-quality"), "disabled", "true")
-
         const styleSelect = this.getVisualProperties("dalle-txt-to-img-style")
-        styleSelect.removeEventListener("input", this.handleTextChange)
+        styleSelect.removeEventListener("input",
+            () => this.handleTextChange("style", "dalle-txt-to-img-style"))
 
         const resolution = this.getVisualProperties("dalle-txt-to-img-resolution")
-        resolution.removeEventListener("input", this.handleTextChange)
+        resolution.removeEventListener("input",
+            () => this.handleTextChange("size", "dalle-txt-to-img-resolution"))
 
-        const quality = this.getVisualProperties("dalle-txt-to-img-resolution")
-        quality.removeEventListener("input", this.handleTextChange)
+        const quality = this.getVisualProperties("dalle-txt-to-img-quality")
+        quality.removeEventListener("input",
+            () => this.handleTextChange("vivid", "dalle-txt-to-img-quality"))
 
-        const prompt = this.getVisualProperties("dalle-txt-to-img-prompt");
-        prompt.removeEventListener('input', this.checkPrompt);
-
-        return super.setExecVisualizations();
+        return super.removeExecVisualizations();
     }
 
+    static async load(dataDict){
+
+        let html = await fetchHTML("dalleTextToImage")
+        const parse = new DOMParser()
+        const doc = parse.parseFromString(html, "text/html")
+
+        const style = doc.getElementsByClassName("dalle-txt-to-img-style")[0]
+        const resolution = doc.getElementsByClassName("dalle-txt-to-img-resolution")[0]
+        const quality = doc.getElementsByClassName("dalle-txt-to-img-quality")[0]
+
+        setSelected(dataDict["style"], style)
+        setSelected(dataDict["size"], resolution)
+        setSelected(dataDict["quality"], quality)
+
+        return doc.getElementsByClassName("visualization")[0].outerHTML
+    }
 
     async getOutputObject(inputObject) {
-        const quality = this.getVisualProperties("dalle-txt-to-img-quality").value;
-        const style = this.getVisualProperties("dalle-txt-to-img-style").value;
-        const resolution = this.getVisualProperties("dalle-txt-to-img-resolution").value;
-        const prompt = this.getVisualProperties("dalle-txt-to-img-prompt").value;
+        let prompt = inputObject["input_1"];
+
+        prompt = stabilityHandler.processPrompts(prompt)
+
+        const promptArr = getPositiveAndNegativePrompts(prompt)
+
+        if (promptArr[0] === ""){
+            alert("No positive prompt was provided, DALL-E only accepts positive prompts!")
+        }
 
         const requestBody = {
-            "quality": quality,
-            "size" : resolution,
-            "style": style,
-            "prompt": prompt
+            "quality": this.getNodeData()["quality"],
+            "size" : this.getNodeData()["size"],
+            "style": this.getNodeData()["style"],
+            "prompt": promptArr[0]
         };
+
+        console.log(requestBody)
 
         let apiResponse;
 
@@ -98,19 +93,8 @@ export class DallETextToImageHandler extends operatorHandler {
             console.log(error);
         }
 
-
-        let fileId = apiResponse["url"].split("?X-Amz-Algorithm")[0]
-
-        fileId = fileId.split("amazonaws.com/")[1]
-
         return {
-            "output_1": {
-                "file_id": fileId,
-                "file": "",
-                "url": apiResponse["url"],
-                "type": "image"
-            }
-        };
-
+            "output_1": stabilityHandler.fileFromUrl(apiResponse["url"])
+        }
     }
 }

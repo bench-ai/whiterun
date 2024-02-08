@@ -69,15 +69,15 @@ export async function getSaveViz(name, dataDict) {
     case 'imageToImage':
       return await ImageToImageHandler.load(dataDict)
     case 'imageUpscaler':
-      return new ImageUpscalerHandler(editor, idNode)
+      return await ImageUpscalerHandler.load(dataDict)
     case 'imageToImageMasking':
       return await ImageToImageMaskHandler.load(dataDict)
     case 'upscaleTile':
       return new TileUpscaleHandler(editor, idNode)
     case 'dalleTextToImage':
-      return new DallETextToImageHandler(editor, idNode)
+      return await DallETextToImageHandler.load(dataDict)
     case 'realVisXLTextToImage':
-      return new RealVisXLTextToImageHandler(editor, idNode)
+      return await RealVisXLTextToImageHandler.load(dataDict)
     default:
       throw new ReferenceError("operator does not exist")
   }
