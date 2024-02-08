@@ -1,83 +1,214 @@
-import {operatorHandler} from "./operator.js";
+import {getPositiveAndNegativePrompts, operatorHandler, setSelected} from "./operator.js";
 import {controlNetTileUpscaler, requestInterceptor} from "../api.js";
+import {stabilityHandler} from "./stabilityV1.js";
+import {fetchHTML} from "../constuctOperator.js";
 
 export class TileUpscaleHandler extends operatorHandler {
 
-    startSliderListeners(element){
-        element.target.setAttribute("value", element.target.value)
-        const parentElement = element.target.parentElement
-        const display = parentElement.getElementsByClassName("slider-weight-display")[0]
-        display.setAttribute("textContent", element.target.value)
-        display["textContent"] = element.target.value
-    }
+    constructor(editor, nodeId) {
+        super(editor, nodeId);
 
-    handleTextChange(event) {
-        const inputValue = event.target.value;
-
-        const targetList = event.target.getElementsByTagName("option")
-
-        const targetObject = {}
-
-        for (let i = 0; i < targetList.length; i++){
-            targetObject[targetList[i].value] = {
-                "number": i,
-                "text": targetList[i].textContent
-            }
-
-            targetList[i].removeAttribute("selected")
+        const retObject = {
+            "resemblance": 0.5,
+            "guidance_scale": 7,
+            "hdr": 0.7,
+            "creativity": 0.5,
+            "scheduler": "DPMSolverMultistep",
+            "resolution": "2048",
+            "steps": 30,
+            "guess_mode": false
         }
 
-        targetList[targetObject[inputValue]["number"]].setAttribute("selected", "true")
-        targetList[targetObject[inputValue]["number"]]["selected"] = "true"
+        this.setInitialData(retObject)
+    }
 
+    startSliderListeners(keyName, className){
+
+        const dataDict = {}
+
+        const block = this.getVisualProperties(className)
+        const data = block.getElementsByClassName("upscaler-slider")[0]
+
+        dataDict[keyName] = parseFloat(data.value)
+
+        const display = block.getElementsByClassName("slider-weight-display")[0]
+
+        display.textContent = data.value
+
+        this.updateNodeData(dataDict)
+    }
+
+    checkUncheck(){
+        this.updateNodeData({
+            "guess_mode": this.getVisualProperties("guess").checked
+        })
+    }
+
+    static async load(dataDict){
+
+        let html = await fetchHTML("controlNetTile")
+        const parse = new DOMParser()
+        const doc = parse.parseFromString(html, "text/html")
+
+        const resemblance = doc.getElementsByClassName("slider-resemblance")[0]
+        const sliderResemblance = resemblance.getElementsByClassName("upscaler-slider")[0];
+        const displayResemblance = resemblance.getElementsByClassName("slider-weight-display")[0]
+
+        const hdr = doc.getElementsByClassName("slider-hdr")[0]
+        const sliderHDR = hdr.getElementsByClassName("upscaler-slider")[0];
+        const displayHDR = hdr.getElementsByClassName("slider-weight-display")[0]
+
+        const creativity = doc.getElementsByClassName("slider-creativity")[0]
+        const sliderCreativity = creativity.getElementsByClassName("upscaler-slider")[0];
+        const displayCreativity = creativity.getElementsByClassName("slider-weight-display")[0]
+
+        const cfg = doc.getElementsByClassName("slider-cfg-scale")[0]
+        const sliderCFG = cfg.getElementsByClassName("upscaler-slider")[0];
+        const displayCFG = cfg.getElementsByClassName("slider-weight-display")[0]
+
+        const scheduler = doc.getElementsByClassName("upscaler-sampler")[0]
+        const resolution = doc.getElementsByClassName("upscaler-resolution")[0]
+        const seed = doc.getElementsByClassName("upscaler-seed")[0]
+        const step = doc.getElementsByClassName("upscaler-step")[0]
+        const guess = doc.getElementsByClassName("guess")[0]
+
+        setSelected(dataDict["scheduler"], scheduler)
+        setSelected(dataDict["resolution"], resolution)
+
+        sliderResemblance.setAttribute("value", dataDict["resemblance"])
+        sliderHDR.setAttribute("value", dataDict["hdr"])
+        sliderCreativity.setAttribute("value", dataDict["creativity"])
+        sliderCFG.setAttribute("value", dataDict["guidance_scale"])
+
+        displayResemblance.textContent = dataDict["resemblance"]
+        displayHDR.textContent = dataDict["hdr"]
+        displayCreativity.textContent = dataDict["creativity"]
+        displayCFG.textContent = dataDict["guidance_scale"]
+
+        seed.setAttribute("value", dataDict["seed"])
+        step.setAttribute("value", dataDict["steps"])
+
+        if (dataDict["guess_mode"]){
+            guess.setAttribute("checked", true)
+        }
+
+        return doc.getElementsByClassName("visualization")[0].outerHTML
+    }
+
+    setExecVisualizations() {
+
+        this.getVisualProperties("slider-resemblance")
+            .getElementsByClassName("upscaler-slider")[0]
+            .addEventListener('input',
+                () => this.startSliderListeners("resemblance", "slider-resemblance"));
+
+        this.getVisualProperties("slider-hdr")
+            .getElementsByClassName("upscaler-slider")[0]
+            .addEventListener('input',
+                () => this.startSliderListeners("hdr", "slider-hdr"));
+
+        this.getVisualProperties("slider-creativity")
+            .getElementsByClassName("upscaler-slider")[0]
+            .addEventListener('input',
+                () => this.startSliderListeners("creativity", "slider-creativity"));
+
+        this.getVisualProperties("slider-cfg-scale")
+            .getElementsByClassName("upscaler-slider")[0]
+            .addEventListener('input',
+                () => this.startSliderListeners("guidance_scale", "slider-cfg-scale"));
+
+        this.getVisualProperties("upscaler-sampler")
+            .addEventListener('input',() => this.handleTextChange("scheduler", "upscaler-sampler"));
+
+        this.getVisualProperties("upscaler-resolution")
+            .addEventListener('input',() => this.handleTextChange("resolution", "upscaler-resolution"));
+
+        this.getVisualProperties("upscaler-seed")
+            .addEventListener('input',() => this.updateValue("upscaler-seed", "seed"));
+
+        this.getVisualProperties("upscaler-step")
+            .addEventListener('input', () => this.updateValue("upscaler-step", "steps"));
+
+        this.getVisualProperties("guess")
+            .addEventListener('change',() => this.checkUncheck());
+
+        return super.setExecVisualizations();
+    }
+
+    removeExecVisualizations() {
+
+        this.getVisualProperties("slider-resemblance")
+            .getElementsByClassName("upscaler-slider")[0]
+            .removeEventListener('input',
+                () => this.startSliderListeners("slider-resemblance"));
+
+        this.getVisualProperties("slider-hdr")
+            .getElementsByClassName("upscaler-slider")[0]
+            .removeEventListener('input',
+                () => this.startSliderListeners("slider-hdr"));
+
+        this.getVisualProperties("slider-creativity")
+            .getElementsByClassName("upscaler-slider")[0]
+            .removeEventListener('input',
+                () => this.startSliderListeners("slider-creativity"));
+
+        this.getVisualProperties("slider-cfg-scale")
+            .getElementsByClassName("upscaler-slider")[0]
+            .removeEventListener('input',
+                () => this.startSliderListeners("slider-cfg-scale"));
+
+        this.getVisualProperties("upscaler-sampler")
+            .removeEventListener('input',() => this.handleTextChange("scheduler", "upscaler-sampler"));
+
+        this.getVisualProperties("upscaler-resolution")
+            .removeEventListener('input',() => this.handleTextChange("resolution", "upscaler-resolution"));
+
+        this.getVisualProperties("upscaler-seed")
+            .removeEventListener('input',() => this.updateValue("upscaler-seed", "seed"));
+
+        this.getVisualProperties("upscaler-step")
+            .removeEventListener('input', () => this.updateValue("upscaler-step", "steps"));
+
+        this.getVisualProperties("guess")
+            .removeEventListener('change',() => this.checkUncheck());
+
+        return super.removeExecVisualizations();
     }
 
     async getOutputObject(inputObject) {
 
-        console.log(this.getVisualProperties("upscaler-seed").value)
-
         const retObject = {
-            "resemblance": parseFloat(this.getVisualProperties("slider-resemblance")
-                .getElementsByClassName("upscaler-slider")[0].value),
-
-            "guidance_scale": parseFloat(this.getVisualProperties("slider-cfg-scale")
-                .getElementsByClassName("upscaler-slider")[0].value),
-
-            "hdr": parseFloat(this.getVisualProperties("slider-hdr")
-                .getElementsByClassName("upscaler-slider")[0].value),
-
-            "creativity": parseFloat(this.getVisualProperties("slider-creativity")
-                .getElementsByClassName("upscaler-slider")[0].value),
-
-            "scheduler": this.getVisualProperties("upscaler-sampler").value,
-            "resolution": parseInt(this.getVisualProperties("upscaler-resolution").value),
-            "steps": parseInt(this.getVisualProperties("upscaler-step").value),
-            "guess_mode": this.getVisualProperties("guess").checked
+            "resemblance": this.getNodeData()["resemblance"],
+            "guidance_scale": this.getNodeData()["guidance_scale"],
+            "hdr": this.getNodeData()["hdr"],
+            "creativity": this.getNodeData()["creativity"],
+            "scheduler": this.getNodeData()["scheduler"],
+            "resolution": parseInt(this.getNodeData()["resolution"]),
+            "steps": this.getNodeData()["steps"],
+            "guess_mode": this.getNodeData()["guess_mode"],
         }
 
-        if (this.getVisualProperties("upscaler-seed").value !== ""){
-            retObject["seed"] = parseInt(this.getVisualProperties("upscaler-seed").value)
+        if (Object.hasOwn(this.getNodeData(), "seed")){
+            retObject["seed"] = this.getNodeData()["seed"]
         }
 
         if (!inputObject.hasOwnProperty("input_1")){
+            alert("No image was provided")
             throw new Error("missing file")
         }else{
             retObject["image"] = inputObject["input_1"]["file_id"]
         }
 
         if (inputObject.hasOwnProperty("input_2")){
-            if (typeof inputObject["input_2"] == "object"){
-                retObject["prompt"] = inputObject["input_2"]["text"]
-            }else{
-                retObject["prompt"] = inputObject["input_2"]
-            }
-        }
+            let prompt = stabilityHandler.processPrompts(inputObject["input_2"])
+            const promptArr = getPositiveAndNegativePrompts(prompt)
 
-        if (inputObject.hasOwnProperty("input_3")){
-            if (typeof inputObject["input_3"] == "object"){
-                retObject["negative_prompt"] = inputObject["input_3"]["text"]
-            }else{
-                retObject["negative_prompt"] = inputObject["input_3"]
+            if (promptArr[0] !== ""){
+                retObject["prompt"] = promptArr[0]
+            }
+
+            if (promptArr[1] !== ""){
+                retObject["negative_prompt"] = promptArr[1]
             }
         }
 
@@ -91,102 +222,9 @@ export class TileUpscaleHandler extends operatorHandler {
             console.log(error);
         }
 
-        let fileId = apiResponse["url"].split("?X-Amz-Algorithm")[0]
-
-        fileId = fileId.split("amazonaws.com/")[1]
-
         return {
-            "output_1": {
-                "file_id": fileId,
-                "file": "",
-                "url": apiResponse["url"],
-                "type": "image"
-            }
-        };
-    }
-
-    handleInputChange(event) {
-        const inputValue = event.target.value;
-        event.target.setAttribute("value", inputValue)
-        event.target["value"] = inputValue
-    }
-
-    checkUncheck(event){
-        if (event.target.checked){
-            event.target.setAttribute("checked", true)
-        }else{
-            event.target.removeAttribute("checked")
+            "output_1": stabilityHandler.fileFromUrl(apiResponse["url"])
         }
-    }
-
-    setExecVisualizations() {
-        this.getVisualProperties("slider-resemblance")
-            .getElementsByClassName("upscaler-slider")[0]
-            .addEventListener('input',this.startSliderListeners);
-
-        this.getVisualProperties("slider-hdr")
-            .getElementsByClassName("upscaler-slider")[0]
-            .addEventListener('input',this.startSliderListeners);
-
-        this.getVisualProperties("slider-creativity")
-            .getElementsByClassName("upscaler-slider")[0]
-            .addEventListener('input',this.startSliderListeners);
-
-        this.getVisualProperties("slider-cfg-scale")
-            .getElementsByClassName("upscaler-slider")[0]
-            .addEventListener('input',this.startSliderListeners);
-
-        this.getVisualProperties("upscaler-sampler")
-            .addEventListener('input',this.handleTextChange);
-
-        this.getVisualProperties("upscaler-resolution")
-            .addEventListener('input',this.handleTextChange);
-
-        this.getVisualProperties("upscaler-seed")
-            .addEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("upscaler-step")
-            .addEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("guess")
-            .addEventListener('change',this.checkUncheck);
-
-        return super.setExecVisualizations();
-    }
-
-    removeExecVisualizations() {
-        this.getVisualProperties("slider-resemblance")
-            .getElementsByClassName("upscaler-slider")[0]
-            .removeEventListener('input',this.startSliderListeners);
-
-        this.getVisualProperties("slider-hdr")
-            .getElementsByClassName("upscaler-slider")[0]
-            .removeEventListener('input',this.startSliderListeners);
-
-        this.getVisualProperties("slider-creativity")
-            .getElementsByClassName("upscaler-slider")[0]
-            .removeEventListener('input',this.startSliderListeners);
-
-        this.getVisualProperties("slider-cfg-scale")
-            .getElementsByClassName("upscaler-slider")[0]
-            .removeEventListener('input',this.startSliderListeners);
-
-        this.getVisualProperties("upscaler-sampler")
-            .removeEventListener('input',this.handleTextChange);
-
-        this.getVisualProperties("upscaler-resolution")
-            .removeEventListener('input',this.handleTextChange);
-
-        this.getVisualProperties("upscaler-seed")
-            .removeEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("upscaler-step")
-            .removeEventListener('input',this.handleInputChange);
-
-        this.getVisualProperties("guess")
-            .removeEventListener('change',this.checkUncheck);
-
-        return super.removeExecVisualizations();
     }
 
 }

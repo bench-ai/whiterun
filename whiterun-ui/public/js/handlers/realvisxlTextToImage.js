@@ -106,7 +106,7 @@ export class RealVisXLTextToImageHandler extends operatorHandler {
         const promptArr = getPositiveAndNegativePrompts(prompt)
 
         if (promptArr[0] === ""){
-            alert("No positive prompt was provided, DALL-E only accepts positive prompts!")
+            alert("No positive prompt was provided")
         }
 
         const requestBody = {
