@@ -140,22 +140,22 @@ export class TileUpscaleHandler extends operatorHandler {
         this.getVisualProperties("slider-resemblance")
             .getElementsByClassName("upscaler-slider")[0]
             .removeEventListener('input',
-                () => this.startSliderListeners("slider-resemblance"));
+                () => this.startSliderListeners("resemblance", "slider-resemblance"));
 
         this.getVisualProperties("slider-hdr")
             .getElementsByClassName("upscaler-slider")[0]
             .removeEventListener('input',
-                () => this.startSliderListeners("slider-hdr"));
+                () => this.startSliderListeners("hdr", "slider-hdr"));
 
         this.getVisualProperties("slider-creativity")
             .getElementsByClassName("upscaler-slider")[0]
             .removeEventListener('input',
-                () => this.startSliderListeners("slider-creativity"));
+                () => this.startSliderListeners("creativity", "slider-creativity"));
 
         this.getVisualProperties("slider-cfg-scale")
             .getElementsByClassName("upscaler-slider")[0]
             .removeEventListener('input',
-                () => this.startSliderListeners("slider-cfg-scale"));
+                () => this.startSliderListeners("guidance_scale", "slider-cfg-scale"));
 
         this.getVisualProperties("upscaler-sampler")
             .removeEventListener('input',() => this.handleTextChange("scheduler", "upscaler-sampler"));

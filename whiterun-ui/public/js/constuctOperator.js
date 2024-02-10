@@ -155,6 +155,16 @@ export async function collectOperatorMetaData(name){
       operatorTooltip = await fetchTooltipContent("realVisTextToImage");
       break;
 
+    case "python":
+      viz = await fetchHTML('pythonViz');
+      dataList = [{}, {}]
+      operatorTitle = "Python Operator"
+      operatorLogo = "assets/python-logo.svg";
+      operatorLogo = "assets/python-logo.svg";
+      operatorTooltip = "A dynamic Operator that executes Python code<br><Strong>Input - " +
+          "</Strong>User Defined<br><Strong>Output - </Strong>User Defined";
+      break;
+
     default:
       throw new Error("invalid name")
   }

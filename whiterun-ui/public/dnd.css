@@ -885,6 +885,93 @@ body{
 
 /*------------remove connection css-----------*/
 
+/*------------mask maker-----------*/
+.modal-wrapper {
+  display: none;
+  position: fixed;
+  z-index: 1001;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-edit-image {
+  background-color: #232e3e;
+  margin: 15% auto;
+  padding: 20px;
+  border-radius: 15px;
+  max-width: fit-content;
+  max-height: 80%;
+  overflow-y: scroll;
+}
+
+.modal-edit-image-close {
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.model-edit-image-title {
+  display: flex;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.modal-edit-image-content {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.modal-editor-button {
+  background-color: #39a047;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 10px;
+  cursor:pointer;
+  width: 100%;
+}
+
+.modal-editor-column {
+  flex-grow: 1;
+  margin: 0 15px 15px 15px;
+}
+
+.modal-editor-divider {
+  border: 0;
+  margin-top: 8px;
+}
+
+.modal-editor-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 5px;
+  margin-right: 9px;
+}
+
+.modal-editor-slider {
+  -webkit-appearance: none;
+  margin-top: 15px;
+  width: 98%;
+  border: 1px solid #3FB950; /* Set border color for disabled state */
+  height: 1px;
+  background-color: #3FB950;
+  border-radius: 1px;
+}
+/*-----------------------*/
+
+
 /* Editing Drawflow */
 
 .drawflow .drawflow-node {

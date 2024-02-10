@@ -1,6 +1,7 @@
 import {operatorHandler} from "./operator.js";
 import {requestInterceptor, uploadImage} from "../api.js";
 import {fetchHTML} from "../constuctOperator.js";
+import {showModal, hideModal} from "../maskModal.js";
 
 export class ImageHandler extends operatorHandler {
     constructor(editor, nodeId) {
@@ -49,6 +50,22 @@ export class ImageHandler extends operatorHandler {
     setExecVisualizations() {
         const imageButton = this.getVisualProperties("image-input")
         imageButton.addEventListener('change', this.changeInput);
+
+        const editButton = this.getVisualProperties("edit-button")
+        // Disable the edit button initially
+        editButton.disabled = true;
+
+        // Add an event listener to enable/disable the edit button based on file selection
+        imageButton.addEventListener('change', (event) => {
+            editButton.disabled = !(event.target.files && event.target.files[0]);
+        });
+
+        editButton.addEventListener('click', () => showModal(this.getVisualProperties('image-input')));
+
+        // Add an event listener to close the modal when the close button (×) is clicked
+        const closeButton = document.querySelector('.modal-edit-image-close');
+        closeButton.addEventListener('click', () => hideModal());
+
         return super.setExecVisualizations();
     }
 

@@ -105,11 +105,16 @@ async function loadEditor(){
         "outputs": currentNode["outputs"],
       }
 
-      const inputs = dataList[1];
-      const outputs = dataList[2];
+      let inputs = dataList[1];
+      let outputs = dataList[2];
       const title = dataList[3];
       const logo = dataList[4];
       const tooltip = dataList[5];
+
+      if (currentNode["class"] === "python"){
+        inputs = currentNode["data"]["inputs"];
+        outputs = currentNode["data"]["outputs"];
+      }
 
       let nodeDiv = mapToDiv(inputs, outputs, title, logo, tooltip);
       nodeDiv = nodeDiv.replace("{viz}", await getSaveViz(
@@ -322,7 +327,7 @@ async function processPythonForm() {
   document.getElementById("popupContainer").style.display = "none"
   document.getElementById("overlay").style.display = "none"
 
-  return [name, inputs, outputs, visualization, "Python Operator", "assets/python-logo.svg"]
+  return [visualization, inputs, outputs]
 }
 
 
@@ -338,28 +343,23 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
   let title;
   let tooltip;
 
-  if (name === "python") {
+  try {
+    const dataList = await collectOperatorMetaData(name);
+    inputs = dataList[1];
+    outputs = dataList[2];
+    visualization = dataList[0];
+    title = dataList[3];
+    logo = dataList[4];
+    tooltip = dataList[5];
+  } catch (error) {
+    name = "none";
+  }
 
+  if (name === "python") {
     const valueArr = await processPythonForm();
+    visualization = valueArr[0]
     inputs = {"dynamic": valueArr[1], "static": []};
     outputs = valueArr[2];
-    visualization = valueArr[3];
-    title = valueArr[4];
-    logo = valueArr[5];
-    name = valueArr[0];
-    tooltip = "A dynamic Operator that executes Python code<br><Strong>Input - </Strong>User Defined<br><Strong>Output - </Strong>User Defined";
-  } else {
-    try {
-      const dataList = await collectOperatorMetaData(name);
-      inputs = dataList[1];
-      outputs = dataList[2];
-      visualization = dataList[0];
-      title = dataList[3];
-      logo = dataList[4];
-      tooltip = dataList[5];
-    } catch (error) {
-      name = "none";
-    }
   }
 
   pos_x = pos_x * (editor.precanvas.clientWidth / (editor.precanvas.clientWidth * editor.zoom)) - (editor.precanvas.getBoundingClientRect().x * (editor.precanvas.clientWidth / (editor.precanvas.clientWidth * editor.zoom)));
@@ -383,11 +383,6 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     const op = getOperator(nodeId.toString(), editor);
     op.setExecVisualizations()
   }
-}
-
-
-async function loadWorkflow(){
-
 }
 
 async function executeGraph(){

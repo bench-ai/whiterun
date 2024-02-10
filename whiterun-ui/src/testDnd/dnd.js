@@ -116,6 +116,40 @@ const DragAndDrop = () => {
 
 <div class="wrapper">
 
+<div id="editModal" class="modal-wrapper">
+  <div class="modal-edit-image">
+  <span class="modal-edit-image-close">&times;</span>
+  <div class="model-edit-image-title">
+    Image Mask Editor
+  </div>
+    <div class="modal-edit-image-content">
+    <div class="modal-editor-column">
+        <div class="modal-editor-divider">
+            <button id="resetButton" class="modal-editor-button">Reset Edits</button>
+        </div>
+        <div class="modal-editor-divider">
+            <button id="toggleCanvasButton" class="modal-editor-button">Toggle Mask Preview</button>
+        </div>
+        <div class="modal-editor-divider">
+            <button id="flipColorsButton" class="modal-editor-button">Flip Mask Output Color</button>
+        </div>
+        <div class="modal-editor-divider">
+            <button id="downloadButton" class="modal-editor-button">Download Edits</button>
+        </div>   
+        <div class="modal-editor-divider">
+            <label class="modal-editor-title" for="brushSizeSlider">Brush Size:</label>
+            <input type="range" class="modal-editor-slider" id="brushSizeSlider" min="1" max="20" step="1" value="5">
+        </div>
+    </div>
+    <div>
+        <canvas id="myCanvas" width="400" height="400" style="border:1px solid #000;"></canvas>
+        <canvas id="myCanvas2" width="400" height="400" style="border:1px solid #000; display: none"></canvas>
+        <canvas id="outputCanvas" width="400" height="400" style="border:1px solid #000; display: none"></canvas>
+    </div>
+    </div>
+  </div>
+</div>
+
 <div id="myModal" class="modal-node">
   <div class="modal-node-content">
     <span class="modal-node-close">&times;</span>

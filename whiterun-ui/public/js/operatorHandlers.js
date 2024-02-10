@@ -53,7 +53,7 @@ export async function getSaveViz(name, dataDict) {
 
   switch (name) {
     case 'python':
-      return new PythonHandler(editor, idNode)
+      return await PythonHandler.load(dataDict)
     case 'image':
       return await ImageHandler.load(dataDict)
     case 'jsonDisplay':
