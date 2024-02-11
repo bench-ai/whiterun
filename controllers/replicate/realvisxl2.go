@@ -14,6 +14,7 @@ import (
 )
 
 type apiParameters struct {
+	Mode                 string
 	Prompt               string
 	NegativePrompt       string `json:"negative_prompt"`
 	CfgScale             uint8  `json:"cfg_scale"`
@@ -25,6 +26,25 @@ type apiParameters struct {
 	Image                string
 	Mask                 string
 	DisableSafetyChecker bool `json:"disable_safety_checker"`
+}
+
+func setInnerMapValue(
+	postMap map[string]interface{},
+	key string,
+	value interface{}) map[string]interface{} {
+
+	if body, ok := postMap["body"].(map[string]interface{}); ok {
+		if input, ok := body["input"].(map[string]interface{}); ok {
+			input[key] = value
+		} else {
+			return nil
+		}
+
+	} else {
+		return nil
+	}
+
+	return postMap
 }
 
 func (a *apiParameters) validateScheduler() int8 {
@@ -74,6 +94,14 @@ func (a *apiParameters) validateInferenceSteps() int8 {
 		true))
 }
 
+func (a *apiParameters) validateMode() bool {
+	contains := miscellaneous.Contains[string]
+	modeArr := [3]string{
+		"text", "image", "mask",
+	}
+	return contains(a.Mode, modeArr[:])
+}
+
 func (a *apiParameters) PostBodyText() map[string]interface{} {
 	validationArr := [3]int8{
 		a.validatePromptStrength(),
@@ -110,20 +138,55 @@ func (a *apiParameters) PostBodyText() map[string]interface{} {
 		}
 
 		if a.Seed != nil {
-			if body, ok := postMap["body"].(map[string]interface{}); ok {
-				if input, ok := body["input"].(map[string]interface{}); ok {
-					input["seed"] = *a.Seed
-				} else {
-					return nil
-				}
-
-			} else {
-				return nil
-			}
+			postMap = setInnerMapValue(postMap, "seed", *a.Seed)
 		}
 
 		return postMap
 	}
+}
+
+func (a *apiParameters) addPromptStrength() map[string]interface{} {
+	postMap := a.PostBodyText()
+
+	if postMap == nil {
+		return nil
+	}
+
+	return setInnerMapValue(postMap, "prompt_strength", a.PromptStrength)
+}
+
+func (a *apiParameters) PostBodyMask() map[string]interface{} {
+	postMap := a.PostBodyImage()
+
+	var url string
+	var err error
+
+	if err, url = cloud.GetPresignedURL(a.Mask); err != nil {
+		return nil
+	}
+
+	if postMap == nil {
+		return nil
+	}
+
+	return setInnerMapValue(postMap, "mask", url)
+}
+
+func (a *apiParameters) PostBodyImage() map[string]interface{} {
+	postMap := a.addPromptStrength()
+
+	if postMap == nil {
+		return nil
+	}
+
+	var url string
+	var err error
+
+	if err, url = cloud.GetPresignedURL(a.Image); err != nil {
+		return nil
+	}
+
+	return setInnerMapValue(postMap, "image", url)
 }
 
 type extendedResponse interface {
@@ -209,7 +272,28 @@ func RealVizTextToImage(c *gin.Context) {
 		return
 	}
 
-	request := body.PostBodyText()
+	if !body.validateMode() {
+		c.String(http.StatusBadRequest, "invalid mode provided")
+		return
+	}
+
+	var request map[string]interface{}
+	var requestName string
+
+	switch body.Mode {
+	case "text":
+		request = body.PostBodyText()
+		requestName = "text-to-image"
+	case "mask":
+		request = body.PostBodyMask()
+		requestName = "image-to-image/mask"
+	case "image":
+		request = body.PostBodyImage()
+		requestName = "image-to-image"
+	default:
+		c.String(http.StatusBadRequest, "invalid mode provided")
+		return
+	}
 
 	if request == nil {
 		c.String(http.StatusBadRequest, "failed")
@@ -219,6 +303,8 @@ func RealVizTextToImage(c *gin.Context) {
 	postBody, ok := request["body"].(map[string]interface{})
 
 	var postBytes []byte
+
+	fmt.Println(postBody)
 
 	if ok {
 		postBytes, err = json.Marshal(postBody)
@@ -241,7 +327,7 @@ func RealVizTextToImage(c *gin.Context) {
 		newReq,
 		c,
 		postBody,
-		"text-to-image",
+		requestName,
 		"replicate/lucataco/realvisxl-v2.0",
 		&responseSuccess{}); ero != nil {
 
