@@ -12,6 +12,7 @@ import {ImageToImageMaskHandler} from "./handlers/stableImageToImageMask.js";
 import {DallETextToImageHandler} from "./handlers/dalleTextToImage.js";
 import {RealVisXLTextToImageHandler} from "./handlers/realvisxlTextToImage.js";
 import {TileUpscaleHandler} from "./handlers/controlnetTileUpscaler.js";
+import {RealVisXLImageToImageHandler} from "./handlers/realVisXLImageToImage.js";
 
 export function getOperator(nodeId, editor) {
   const idNode = "node-{id}".replace("{id}", nodeId)
@@ -44,6 +45,8 @@ export function getOperator(nodeId, editor) {
       return new DallETextToImageHandler(editor, idNode)
     case 'realVisXLTextToImage':
       return new RealVisXLTextToImageHandler(editor, idNode)
+    case 'realVisXLImageToImage':
+      return new RealVisXLImageToImageHandler(editor, idNode)
     default:
       throw new ReferenceError("operator does not exist")
   }
@@ -78,6 +81,8 @@ export async function getSaveViz(name, dataDict) {
       return await DallETextToImageHandler.load(dataDict)
     case 'realVisXLTextToImage':
       return await RealVisXLTextToImageHandler.load(dataDict)
+    case 'realVisXLImageToImage':
+      return await RealVisXLImageToImageHandler.load(dataDict)
     default:
       throw new ReferenceError("operator does not exist")
   }

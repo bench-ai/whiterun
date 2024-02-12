@@ -1,15 +1,20 @@
-Generates a new image from a text prompt using RealVisXL. Generates more realistic images.</strong>
+<Strong>Generate an image using another image as a starting point using RealVisXL. Generates more realistic
+    images.</strong>
+<br><br><Strong>Inputs:</Strong>
+<br><Strong>Input Image - </Strong>An Image File
+<br><Strong>Example Input Image - </Strong>Can take the output of a <Strong>Text to Image Operator or Image
+    Operator</Strong>.
 <br><br><Strong>Output - </Strong>An image file
 <br><Strong>Example Connections - </Strong>Can be connected to a <Strong>Image Display Operator</Strong> in
 order to display it. If you want to continue modifying it, you can connect it to a <Strong>Upscaler Operator</Strong>.
 <br>
 <br><Strong>Sampler - </Strong>Determines patterns used to generate the image. Each sampler outputs a different
 quality at varying speeds so experimentation is needed.
-<br><Strong>Inference Steps
-    - </Strong>How many diffusion steps to run, more steps means more quality but longer time to generate.
+<br><Strong>Inference Steps - </Strong>Determines the output resolution of the generated image.
 <br><Strong>Guidance Scale - </Strong>How closely to follow the prompt.
 <br><Strong>Seed - </Strong>Value determines noise seed, leave the same if you want to generate the same image
 given the same prompt, otherwise we recommend leaving it as 0 for a random seed.
 <br><Strong>Disable safety filter - </Strong>Checking this option allows model to generate NSFW images.
 <br><Strong>Positive Prompt - </Strong>Text description for the desired image.
 <br><Strong>Negative Prompt - </Strong>Text description things you want the model to not include or generate.
+<br><Strong>Prompt Strength - </Strong>How strongly the prompt should be taken when generating the image.

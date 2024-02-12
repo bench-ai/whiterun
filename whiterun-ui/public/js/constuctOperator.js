@@ -165,6 +165,22 @@ export async function collectOperatorMetaData(name){
           "</Strong>User Defined<br><Strong>Output - </Strong>User Defined";
       break;
 
+    case "realVisXLImageToImage":
+      viz = await fetchHTML("realVisImgToImg");
+      dataList = await fetchJSON("real_vis_img_to_img");
+      operatorTitle = "RealVisXL Image to Image Operator";
+      operatorLogo = "assets/image-logo.svg";
+      operatorTooltip = await fetchTooltipContent("realVisImgToImg")
+      break;
+
+    case "realVisXLMasking":
+      viz = await fetchHTML("realVisMasking");
+      dataList = await fetchJSON("real_vis_masking");
+      operatorTitle = "RealVISXL Masking Operator";
+      operatorLogo = "assets/image-logo.svg";
+      operatorTooltip = await fetchTooltipContent("realVisMasking")
+      break;
+
     default:
       throw new Error("invalid name")
   }

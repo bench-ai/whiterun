@@ -269,6 +269,17 @@ const DragAndDrop = () => {
       </div>
     </div>
     
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="realVisXLImageToImage">
+      <i class="icon">
+        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">RealVisXL Image to Image Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext"><p>Generate an image using another image as a starting point. Uses RealVisXL</strong></p></span>
+      </div>
+    </div>
+    
     <div class="operator-categories">Upscalers</div>
     
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageUpscaler">
@@ -303,6 +314,17 @@ const DragAndDrop = () => {
       <div class="tooltip">
         <i class="far fa-question-circle"></i>
         <span class="tooltiptext">Modify specific portions of an image by using a mask</span>
+      </div>
+    </div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="realVisXLMasking">
+      <i class="icon">
+        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">RealVisXL Mask Image to Image Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Modify specific portions of an image by using a mask. Uses RealVisXL.</span>
       </div>
     </div>
     

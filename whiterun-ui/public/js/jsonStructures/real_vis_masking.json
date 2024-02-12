@@ -1,0 +1,26 @@
+{
+  "inputs": {
+    "static": [
+      {
+        "name": "name",
+        "type": "text",
+        "default_value": "realVisXLMasking"
+      }
+    ],
+    "dynamic": [
+      {
+        "name": "input_image",
+        "type": "file"
+      },
+      {
+        "name": "mask_image",
+        "type": "file"
+      }
+    ]
+  },
+  "outputs": [
+    {
+      "type": "file"
+    }
+  ]
+}

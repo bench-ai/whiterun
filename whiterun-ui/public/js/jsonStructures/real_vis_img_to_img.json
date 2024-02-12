@@ -1,0 +1,20 @@
+{
+  "inputs": {
+    "static": [],
+    "dynamic": [
+      {
+        "name": "input_image",
+        "type": "file"
+      },
+      {
+        "name": "prompts",
+        "type": "object | list"
+      }
+    ]
+  },
+  "outputs": [
+    {
+      "type": "file"
+    }
+  ]
+}
