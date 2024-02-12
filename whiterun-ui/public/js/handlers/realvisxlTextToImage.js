@@ -30,6 +30,7 @@ export class RealVisXLTextToImageHandler extends RealVisXL {
 
         if (promptArr[0] === ""){
             alert("No positive prompt was provided")
+            throw new Error("No valid prompts")
         }
 
         const requestBody = {
@@ -45,8 +46,6 @@ export class RealVisXLTextToImageHandler extends RealVisXL {
         if (Object.hasOwn(this.getNodeData(), "seed")) {
             requestBody.seed = this.getNodeData()["seed"];
         }
-
-        console.log(requestBody)
 
         let apiResponse;
 

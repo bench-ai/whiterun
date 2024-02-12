@@ -3,19 +3,16 @@ import {fetchHTML} from "../constuctOperator.js";
 import {stabilityHandler} from "./stabilityV1.js";
 import {getPositiveAndNegativePrompts} from "./operator.js";
 import {realVisXLTextToImage, requestInterceptor} from "../api.js";
+import {RealVisXLImageToImageHandler} from "./realVisXLImageToImage.js";
 
-export class RealVisXLImageToImageHandler extends RealVisXL {
+export class RealVisXLMask extends RealVisXLImageToImageHandler {
     constructor(editor, nodeId) {
         super(editor, nodeId);
-
-        if (!Object.hasOwn(this.getNodeData(), "prompt_strength")){
-            this.updateNodeData({"prompt_strength": 0.7})
-        }
     }
 
     static async load(dataDict){
 
-        let html = await fetchHTML("realVisImgToImg")
+        let html = await fetchHTML("realVisMasking")
         const parse = new DOMParser()
         let doc = parse.parseFromString(html, "text/html")
 
@@ -23,7 +20,6 @@ export class RealVisXLImageToImageHandler extends RealVisXL {
 
         let block = doc.getElementsByClassName("slider-hdr")[0]
 
-        console.log(block)
         block.getElementsByClassName("upscaler-slider")[0].setAttribute(
             "value", dataDict["prompt_strength"]
         )
@@ -34,43 +30,9 @@ export class RealVisXLImageToImageHandler extends RealVisXL {
         return doc.getElementsByClassName("visualization")[0].outerHTML
     }
 
-    startSliderListeners(){
-        const dataDict = {}
-
-        const block = this.getVisualProperties("slider-hdr")
-        const data = block.getElementsByClassName("upscaler-slider")[0]
-
-        dataDict["prompt_strength"] = parseFloat(data.value)
-
-        const display = block.getElementsByClassName("slider-weight-display")[0]
-
-        display.textContent = data.value
-
-        this.updateNodeData(dataDict)
-    }
-
-    setExecVisualizations() {
-
-        this.getVisualProperties("slider-hdr")
-            .getElementsByClassName("upscaler-slider")[0]
-            .addEventListener('input',
-                () => this.startSliderListeners());
-
-        return super.setExecVisualizations();
-    }
-
-    removeExecVisualizations() {
-        this.getVisualProperties("slider-hdr")
-            .getElementsByClassName("upscaler-slider")[0]
-            .removeEventListener('input',
-                () => this.startSliderListeners());
-
-        return super.removeExecVisualizations();
-    }
-
     async getOutputObject(inputObject) {
 
-        let prompt = inputObject["input_2"];
+        let prompt = inputObject["input_3"];
 
         prompt = stabilityHandler.processPrompts(prompt)
 
@@ -82,10 +44,11 @@ export class RealVisXLImageToImageHandler extends RealVisXL {
         }
 
         const requestBody = {
-            "mode": "image",
+            "mode": "mask",
             "prompt": promptArr[0],
             "negative_prompt" : promptArr[1],
             "image": inputObject["input_1"]["file_id"],
+            "mask": inputObject["input_2"]["file_id"],
             "scheduler": this.getNodeData()["scheduler"],
             "guidance_scale": this.getNodeData()["guidance_scale"],
             "num_inference_steps": this.getNodeData()["num_inference_steps"],

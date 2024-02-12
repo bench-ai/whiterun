@@ -1,12 +1,6 @@
 {
   "inputs": {
-    "static": [
-      {
-        "name": "name",
-        "type": "text",
-        "default_value": "realVisXLMasking"
-      }
-    ],
+    "static": [],
     "dynamic": [
       {
         "name": "input_image",
@@ -15,6 +9,10 @@
       {
         "name": "mask_image",
         "type": "file"
+      },
+      {
+        "name": "prompts",
+        "type": "object | list"
       }
     ]
   },
