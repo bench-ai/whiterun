@@ -22,22 +22,6 @@ export class TileUpscaleHandler extends operatorHandler {
         this.setInitialData(retObject)
     }
 
-    startSliderListeners(keyName, className){
-
-        const dataDict = {}
-
-        const block = this.getVisualProperties(className)
-        const data = block.getElementsByClassName("upscaler-slider")[0]
-
-        dataDict[keyName] = parseFloat(data.value)
-
-        const display = block.getElementsByClassName("slider-weight-display")[0]
-
-        display.textContent = data.value
-
-        this.updateNodeData(dataDict)
-    }
-
     checkUncheck(){
         this.updateNodeData({
             "guess_mode": this.getVisualProperties("guess").checked

@@ -971,6 +971,67 @@ body{
 }
 /*-----------------------*/
 
+/*--------Photo Maker---------*/
+
+.photoMaker-name {
+  padding-top: 15px;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+}
+
+.photoMaker-divider {
+  display: flex;
+  border: 0;
+  margin-top: 15px;
+}
+
+.photoMaker-style-title,
+.photoMaker-steps-title,
+.photoMaker-strength-title,
+.photoMaker-guidance-title,
+.photoMaker-seed-title {
+  font-size: 13px;
+  color: white;
+  flex: 1;
+  margin-bottom: 5px;
+  margin-right: 9px;
+}
+
+.photoMaker-style,
+.photoMaker-steps,
+.photoMaker-guidance,
+.photoMaker-seed {
+  display: block;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #696b6f;
+  max-width: 100px;
+  margin-top: 10px;
+  color: white;
+}
+
+.photoMaker-strength {
+  -webkit-appearance: none;
+  margin-top: 15px;
+  width: 98%;
+  border: 1px solid #3FB950;
+  height: 1px;
+  background-color: #3FB950;
+  border-radius: 1px;
+  position: relative;
+}
+
+.photoMaker-safety-title {
+  font-size: 13px;
+  color: white;
+}
+
+.photoMaker-safety {
+  margin-bottom: 10px;
+}
+/*-----------------------*/
+
 
 /* Editing Drawflow */
 

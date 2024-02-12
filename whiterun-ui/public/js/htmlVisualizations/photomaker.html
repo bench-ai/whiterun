@@ -1,0 +1,52 @@
+<div class="visualization">
+    <div>
+        <div class="photoMaker-name">photoMaker</div>
+        <div class="photoMaker-divider">
+            <label class="photoMaker-style-title">Style:
+                <select class="photoMaker-style">
+                    <option value="Photographic (Default)">Photographic (Default)</option>
+                    <option value="(No style)">(No style)</option>
+                    <option value="Cinematic">Cinematic</option>
+                    <option value="Disney Charactor">Disney Charactor</option>
+                    <option value="Digital Art">Digital Art</option>
+                    <option value="Fantasy art">Fantasy art</option>
+                    <option value="Neonpunk">Neonpunk</option>
+                    <option value="Enhance">Enhance</option>
+                    <option value="Comic book">Comic book</option>
+                    <option value="Lowpoly">Lowpoly</option>
+                    <option value="Line art">Line art</option>
+                </select>
+            </label>
+            <label class="photoMaker-steps-title">Inference Steps:
+                <input onKeyDown="return false" class="photoMaker-steps" type="number" value="20" min="1" max="40"/>
+            </label>
+        </div>
+
+        <div class="photoMaker-divider">
+            <div class="slider-hdr">
+                <label class="photoMaker-strength-title">Prompt Strength</label>
+                <input class="upscaler-slider" type="range" min="15" max="50" value="20" step="1"/>
+                <div class="slider-labels">
+                    <div class="label-left">15</div>
+                    <div class="slider-weight-display">20</div>
+                    <div class="label-right">50</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="photoMaker-divider">
+            <label class="photoMaker-guidance-title">Guidance Scale:
+                <input onKeyDown="return false" class="photoMaker-guidance" type="number" value="5" min="1" max="10"/>
+            </label>
+            <label class="photoMaker-seed-title">Seed:
+                <input onKeyDown="return false" class="photoMaker-seed" type="number" min="0" max="4294967295"/>
+            </label>
+        </div>
+        <div class="photoMaker-divider">
+            <label class="photoMaker-safety-title">Disable Safety Filter 😏:
+                <input class="photoMaker-safety" type="checkbox"/>
+                <span class="checkmark"></span>
+            </label>
+        </div>
+    </div>
+</div>

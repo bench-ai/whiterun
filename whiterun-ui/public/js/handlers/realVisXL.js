@@ -14,13 +14,6 @@ export class RealVisXL extends operatorHandler {
         this.setInitialData(iDict)
     }
 
-    updateFilter() {
-        const filterDisabled = this.getVisualProperties("real-vis-txt-to-img-safety").checked;
-        this.updateNodeData({
-            "disable_safety_checker": filterDisabled
-        })
-    }
-
     static async loadUsingDoc(doc, dataDict){
         const sampler = doc.getElementsByClassName("real-vis-txt-to-img-sampler")[0];
         const step = doc.getElementsByClassName("real-vis-txt-to-img-steps")[0];
@@ -60,7 +53,9 @@ export class RealVisXL extends operatorHandler {
         seed.addEventListener('input', () =>
             this.updateValue("real-vis-txt-to-img-seed", "seed"));
 
-        disabledFilter.addEventListener('change', () => this.updateFilter());
+        disabledFilter.addEventListener('change', () => this.updateFilter(
+            "real-vis-txt-to-img-safety", "disable_safety_checker"
+        ));
 
         return super.setExecVisualizations();
     }

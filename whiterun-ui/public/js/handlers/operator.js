@@ -261,6 +261,31 @@ export class operatorHandler {
 
     }
 
+    updateFilter(className, keyName) {
+        const filterDisabled = this.getVisualProperties(className).checked;
+
+        let data = {}
+        data[keyName] = filterDisabled
+
+        this.updateNodeData(data)
+    }
+
+    startSliderListeners(keyName, className){
+
+        const dataDict = {}
+
+        const block = this.getVisualProperties(className)
+        const data = block.getElementsByClassName("upscaler-slider")[0]
+
+        dataDict[keyName] = parseFloat(data.value)
+
+        const display = block.getElementsByClassName("slider-weight-display")[0]
+
+        display.textContent = data.value
+
+        this.updateNodeData(dataDict)
+    }
+
     updateValue(className, dictKey) {
         const cfg = this.getVisualProperties(className)
         const opDict = {}

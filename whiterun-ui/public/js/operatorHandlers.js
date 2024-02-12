@@ -14,6 +14,7 @@ import {RealVisXLTextToImageHandler} from "./handlers/realvisxlTextToImage.js";
 import {TileUpscaleHandler} from "./handlers/controlnetTileUpscaler.js";
 import {RealVisXLImageToImageHandler} from "./handlers/realVisXLImageToImage.js";
 import {RealVisXLMask} from "./handlers/realVisXLMask.js";
+import {PhotoMakerHandler} from "./handlers/photomaker.js";
 
 export function getOperator(nodeId, editor) {
   const idNode = "node-{id}".replace("{id}", nodeId)
@@ -50,6 +51,8 @@ export function getOperator(nodeId, editor) {
       return new RealVisXLImageToImageHandler(editor, idNode)
     case 'realVisXLMasking':
       return new RealVisXLMask(editor, idNode)
+    case 'photoMaker':
+      return new PhotoMakerHandler(editor, idNode)
     default:
       throw new ReferenceError("operator does not exist")
   }
@@ -88,6 +91,8 @@ export async function getSaveViz(name, dataDict) {
       return await RealVisXLImageToImageHandler.load(dataDict)
     case 'realVisXLMasking':
       return await RealVisXLMask.load(dataDict)
+    case 'photoMaker':
+      return await PhotoMakerHandler.load(dataDict)
     default:
       throw new ReferenceError("operator does not exist")
   }

@@ -145,7 +145,7 @@ func (p *photomakerParameters) PostBodyText() map[string]interface{} {
 
 		for k, v := range inputMap {
 			if v != nil {
-				err, url = cloud.GetPresignedURL(p.InputImage)
+				err, url = cloud.GetPresignedURL(*v)
 				if err != nil {
 					return nil
 				}

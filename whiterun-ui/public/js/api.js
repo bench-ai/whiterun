@@ -307,3 +307,8 @@ export async function controlNetTileUpscaler(body) {
     const url = `${urlPrefix}/api/replicate/hrcnettile11/upscale`;
     return await runReplicateAPI(url, body)
 }
+
+export async function photoMaker(body) {
+    const url = `${urlPrefix}/api/replicate/tencentarc/photomaker`;
+    return await runReplicateAPI(url, body)
+}

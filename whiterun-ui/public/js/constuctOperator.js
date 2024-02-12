@@ -181,6 +181,14 @@ export async function collectOperatorMetaData(name){
       operatorTooltip = await fetchTooltipContent("realVisMasking")
       break;
 
+    case "photoMaker":
+      viz = await fetchHTML("photomaker");
+      dataList = await fetchJSON("photomaker");
+      operatorTitle = "Photomaker Image to Image Operator";
+      operatorLogo = "assets/image-logo.svg";
+      operatorTooltip = await fetchTooltipContent("photomaker")
+      break;
+
     default:
       throw new Error("invalid name")
   }
