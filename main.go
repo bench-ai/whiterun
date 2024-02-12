@@ -133,6 +133,9 @@ func main() {
 	r.POST("api/replicate/hrcnettile11/upscale", middleware.CheckExecutionAccess, replicate.UpscaleControlNetTile11)
 	r.GET("api/replicate", replicate.CollectReplicateImage)
 
+	//Photo maker
+	r.POST("api/replicate/tencentarc/photomaker", middleware.CheckExecutionAccess, replicate.PhotoMaker)
+	
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")
 		panic(err)
