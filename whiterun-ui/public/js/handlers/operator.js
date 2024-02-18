@@ -66,6 +66,18 @@ export function imageDownload(event){
 
     const visualizationElement = event.target.closest('.visualization');
     const imageElement = visualizationElement.querySelector('.image-op-file');
+    const videoElement = visualizationElement.querySelector('.image-op-file-video');
+
+    let mediaElement;
+
+    if (imageElement.style.display !== 'none') {
+        mediaElement = imageElement;
+    } else if (videoElement.style.display !== 'none') {
+        mediaElement = videoElement;
+    } else {
+        console.error('Unable to determine media type for download');
+        return;
+    }
 
     let fc = (base64String) =>{
         const matches = base64String.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64/);
@@ -83,10 +95,10 @@ export function imageDownload(event){
     const a = document.createElement('a');
     a.style.display = 'none';
 
-    const mime = fc(imageElement.src).split("/")[1]
+    const mime = fc(mediaElement.src).split("/")[1]
 
     // Set the download URL and filename
-    a.href = imageElement.src
+    a.href = mediaElement.src
     a.download = `result.${mime}`;
     a.target = "_blank"
     a.rel = "noopener noreferrer"

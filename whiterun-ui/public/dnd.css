@@ -511,7 +511,8 @@ body{
   color: white;
 }
 
-.image-op-file{
+.image-op-file,
+.image-op-file-video {
   margin-top: 20px;
   width: 261px;
 }

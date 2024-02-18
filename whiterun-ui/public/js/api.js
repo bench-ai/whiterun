@@ -352,3 +352,8 @@ export async function photoMaker(body) {
     const url = `${urlPrefix}/api/replicate/tencentarc/photomaker`;
     return await runReplicateAPI(url, body)
 }
+
+export async function i2vgen(body) {
+    const url = `${urlPrefix}/api/replicate/ali-vilab/i2vgen-xl`;
+    return await runReplicateAPI(url, body)
+}

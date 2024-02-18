@@ -324,7 +324,7 @@ const DragAndDrop = () => {
       <span class="operator-title">Image to Video Operator</span>
       <div class="tooltip">
         <i class="far fa-question-circle"></i>
-        <span class="tooltiptext"><p>Generate a video using an image as a starting point <p/>
+        <span class="tooltiptext">Generate a video using an image as a starting point
       </div>
     </div>
 
@@ -348,7 +348,7 @@ const DragAndDrop = () => {
       <span class="operator-title">Prompt Maker</span>
       <div class="tooltip">
         <i class="far fa-question-circle"></i>
-        <span class="tooltiptext">Allows users to come up with a list of prompts using ChatGPT</span>
+        <span class="tooltiptext">Allows users to come up with a list of five prompts using ChatGPT</span>
       </div>
     </div>
     

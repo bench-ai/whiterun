@@ -67,6 +67,18 @@ export class stabilityHandler extends operatorHandler {
         }
     }
 
+    static fileFromVideoUrl(url){
+        let fileId = url.split("?X-Amz-Algorithm")[0]
+        fileId = fileId.split("amazonaws.com/")[1]
+
+        return {
+            "file_id": fileId,
+            "file": "",
+            "url": url,
+            "type": "video"
+        }
+    }
+
     setExecVisualizations() {
         const styleSelect = this.getVisualProperties("txt-to-img-style")
         styleSelect.addEventListener("input", () =>

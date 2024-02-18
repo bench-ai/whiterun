@@ -202,7 +202,7 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("chat_gpt");
       operatorTitle = "ChatGPT";
       operatorLogo = "assets/chat-logo.svg";
-      operatorTooltip = await fetchTooltipContent("photomaker")
+      operatorTooltip = await fetchTooltipContent("chatGPT")
       break;
 
     case "imageToVideo":
@@ -210,7 +210,7 @@ export async function collectOperatorMetaData(name){
       dataList = await fetchJSON("i2vgen");
       operatorTitle = "Image to Video";
       operatorLogo = "assets/video-logo.svg";
-      operatorTooltip = await fetchTooltipContent("photomaker")
+      operatorTooltip = await fetchTooltipContent("i2vgen")
       break;
 
     default:

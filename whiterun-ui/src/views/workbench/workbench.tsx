@@ -54,7 +54,7 @@ const Workbench = () => {
     useEffect(() => {
         const artificialLoadingTimeout = setTimeout(() => {
             setLoading(false);
-        }, 1000);
+        }, 3000);
 
         return () => clearTimeout(artificialLoadingTimeout);
     }, []);
@@ -128,7 +128,7 @@ const Workbench = () => {
                                             If you need assistance or have feedback, feel free to reach out:
                                             <ul style={{marginTop: "5px"}}>
                                                 <li>
-                                                    <a href="https://discord.gg/Jv9fUCy7" target="_blank"
+                                                    <a href="https://discord.com/invite/gt8HvMgUn5" target="_blank"
                                                        rel="noopener noreferrer">Discord Server</a>
                                                 </li>
                                                 <li>
@@ -171,7 +171,7 @@ const Workbench = () => {
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                     allowFullScreen></TutorialVideoModal>
                                 <Title level={4}>For additional Help:</Title>
-                                <a href="https://discord.gg/Jv9fUCy7" target="_blank" rel="noopener noreferrer">
+                                <a href="https://discord.com/invite/gt8HvMgUn5" target="_blank" rel="noopener noreferrer">
                                     <Button style={{
                                         backgroundColor: '#404eed',
                                         borderColor: '#404eed',

@@ -43,18 +43,19 @@ export class ImageDisplayHandler extends operatorHandler {
         const data = inputObject["input_1"]
 
         if (data === undefined){
-            alert("Please connect a operator that supplies a image")
-            throw new Error("can only work with image data")
+            alert("Please connect a operator that supplies an image or video")
+            throw new Error("can only work with image or video data")
         } else if (data["type"] === "image"){
+            const imageElement = this.getVisualProperties("image-op-file");
+            const videoElement = this.getVisualProperties("image-op-file-video");
+
+            imageElement.style.display = "revert";
+            videoElement.style.display = "none";
 
             if(data["url"] !== "") {
-                const imageElement = this.getVisualProperties("image-op-file")
                 imageElement.src = data["url"]
 
             } else if (data["file"] !== null){
-
-                const imageElement = this.getVisualProperties("image-op-file")
-
                 const reader = new FileReader();
 
                 reader.onload = function(e) {
@@ -69,9 +70,34 @@ export class ImageDisplayHandler extends operatorHandler {
 
             this._image_set = true
             return {}
-        }else{
-            alert("Please connect a operator that supplies a image")
-            throw new Error("can only work with image data")
+        } else if (data["type"] === "video"){
+            const imageElement = this.getVisualProperties("image-op-file");
+            const videoElement = this.getVisualProperties("image-op-file-video");
+
+            imageElement.style.display = "none";
+            videoElement.style.display = "revert";
+
+            if(data["url"] !== "") {
+                videoElement.src = data["url"]
+
+            } else if (data["file"] !== null){
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    videoElement.src = e.target.result;
+                };
+
+                reader.readAsDataURL(data["file"]);
+
+            } else{
+                throw new Error("unable to utilize data")
+            }
+
+            this._image_set = true
+            return {}
+        } else{
+            alert("Please connect a operator that supplies an image or video")
+            throw new Error("can only work with image or video data")
         }
     }
 }

@@ -1,6 +1,7 @@
 import {getPositiveAndNegativePrompts, operatorHandler} from "./operator.js";
 import {fetchHTML} from "../constuctOperator.js";
 import {stabilityHandler} from "./stabilityV1.js";
+import {i2vgen, requestInterceptor} from "../api.js";
 
 export class I2VGenHandler extends operatorHandler {
     constructor(editor, nodeId) {
@@ -99,8 +100,16 @@ export class I2VGenHandler extends operatorHandler {
             requestBody["seed"] = this.getNodeData()["seed"]
         }
 
-        console.log(requestBody)
+        let apiResponse;
 
-        return super.getOutputObject(inputObject);
+        try {
+            apiResponse = await requestInterceptor(i2vgen, requestBody);
+        } catch(error) {
+            console.log(error);
+        }
+
+        return {
+            "output_1": stabilityHandler.fileFromVideoUrl(apiResponse["url"])
+        }
     }
 }
