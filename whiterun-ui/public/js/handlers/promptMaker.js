@@ -137,9 +137,6 @@ export class PromptMakerHandler extends operatorHandler {
             "style": this.getNodeData()["style"]
         }
 
-        console.log(requestBody)
-        console.log(this.getNodeData());
-
         let apiResponse;
 
         try {
@@ -147,14 +144,13 @@ export class PromptMakerHandler extends operatorHandler {
         } catch(error) {
             console.log(error);
         }
-        console.log(apiResponse);
 
         return {
-            "output_1": apiResponse[0],
-            "output_2": apiResponse[1],
-            "output_3": apiResponse[2],
-            "output_4": apiResponse[3],
-            "output_5": apiResponse[4],
+            "output_1": {"text": apiResponse[0], "weight": this.getNodeData()["weight"]},
+            "output_2": {"text": apiResponse[1], "weight": this.getNodeData()["weight"]},
+            "output_3": {"text": apiResponse[2], "weight": this.getNodeData()["weight"]},
+            "output_4": {"text": apiResponse[3],  "weight": this.getNodeData()["weight"]},
+            "output_5": {"text": apiResponse[4],  "weight": this.getNodeData()["weight"]},
         }
     }
 }

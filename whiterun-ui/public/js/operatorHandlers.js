@@ -15,9 +15,9 @@ import {TileUpscaleHandler} from "./handlers/controlnetTileUpscaler.js";
 import {RealVisXLImageToImageHandler} from "./handlers/realVisXLImageToImage.js";
 import {RealVisXLMask} from "./handlers/realVisXLMask.js";
 import {PhotoMakerHandler} from "./handlers/photomaker.js";
-import {GPTHandler} from "./handlers/gpt.js";
 import {I2VGenHandler} from "./handlers/i2vgen.js";
 import {PromptMakerHandler} from "./handlers/promptMaker.js";
+import {GPTHandler} from "./handlers/openaiGpt.js";
 
 export function getOperator(nodeId, editor) {
   const idNode = "node-{id}".replace("{id}", nodeId)
