@@ -137,6 +137,9 @@ func main() {
 	//Photo maker
 	r.POST("api/replicate/tencentarc/photomaker", middleware.CheckExecutionAccess, replicate.PhotoMaker)
 
+	//i2vgen
+	r.POST("api/replicate/ali-vilab/i2vgen-xl", middleware.CheckExecutionAccess, replicate.I2vgenxl)
+
 	//GPT
 	r.POST("api/openai/gpt", middleware.CheckExecutionAccess, chatgpt.Gpt)
 	r.POST("api/openai/prompt/generator", middleware.CheckExecutionAccess, chatgpt.PromptGenerator)

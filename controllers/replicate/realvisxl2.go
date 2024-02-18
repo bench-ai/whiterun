@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type apiParameters struct {
@@ -199,10 +200,11 @@ func replicateFailure(response *http.Response) *controllers.Failed {
 	var body struct {
 		Detail string
 		Title  string
-		Status string
+		Status int
 	}
 
 	if err := json.NewDecoder(response.Body).Decode(&body); err != nil {
+		fmt.Println(err)
 		return nil
 	}
 
@@ -337,15 +339,7 @@ func RealVizTextToImage(c *gin.Context) {
 	}
 }
 
-func CollectReplicateImage(c *gin.Context) {
-
-	imageId := c.Query("imageId")
-
-	if imageId == "" {
-		c.String(http.StatusBadRequest, "id not provided")
-		return
-	}
-
+func processReplicateImage(imageId string) (int, string) {
 	url := fmt.Sprintf("https://api.replicate.com/v1/predictions/%s", imageId)
 
 	newReq, _ := http.NewRequest("GET", url, nil)
@@ -357,7 +351,7 @@ func CollectReplicateImage(c *gin.Context) {
 	pResponse, er := http.DefaultClient.Do(newReq)
 
 	if er != nil {
-		c.String(http.StatusInternalServerError, "unable to process and handle request")
+		return http.StatusInternalServerError, "unable to process and handle request"
 	}
 
 	var dataBody struct {
@@ -365,7 +359,7 @@ func CollectReplicateImage(c *gin.Context) {
 		Model       string
 		Version     string
 		Input       map[string]interface{}
-		Output      []string
+		Output      interface{}
 		Logs        string
 		Error       string
 		Status      string
@@ -373,39 +367,75 @@ func CollectReplicateImage(c *gin.Context) {
 	}
 
 	if err := json.NewDecoder(pResponse.Body).Decode(&dataBody); err != nil {
-		c.String(http.StatusInternalServerError, "unable to process and handle request")
-		return
+		fmt.Println(err)
+		return http.StatusInternalServerError, "unable to process and handle request"
 	} else {
+
 		if dataBody.CompletedAt == nil {
-			c.String(http.StatusAccepted, "still processing")
+			return http.StatusAccepted, "still processing"
 		} else {
 			if dataBody.Status == "failed" {
-				c.String(http.StatusBadRequest, dataBody.Error)
+				return http.StatusBadRequest, dataBody.Error
 			} else {
-				if dataBody.Output == nil {
-					c.String(http.StatusBadRequest, "we have been lied too")
+
+				var output []string
+
+				if blankOutput, ok := dataBody.Output.([]interface{}); !ok {
+					if stringOutput, okk := dataBody.Output.(string); okk {
+						output = append(output, stringOutput)
+					} else {
+						return http.StatusBadRequest, "failed array conversion"
+					}
 				} else {
+					for _, value := range blankOutput {
+						if setUrl, okk := value.(string); okk {
+							output = append(output, setUrl)
+						}
+					}
+				}
+
+				if dataBody.Output == nil {
+					return http.StatusBadRequest, "we have been lied too"
+				} else {
+
+					stringSlice := strings.Split(output[0], ".")
+					annotation := stringSlice[len(stringSlice)-1]
+
 					uuidString := uuid.New().String()
-					uuidString += "-bench.png"
-					err = cloud.UploadUrlToS3(dataBody.Output[0], uuidString)
+					uuidString += fmt.Sprintf("-bench.%s", annotation)
+					err = cloud.UploadUrlToS3(output[0], uuidString, annotation)
 
 					if err != nil {
-						c.String(http.StatusInternalServerError, "unable to save image")
-						return
+						return http.StatusInternalServerError, "unable to save image"
 					}
 
 					err, url = cloud.GetPresignedURL(uuidString)
 
 					if err != nil {
-						c.String(http.StatusInternalServerError, "unable to save image")
-						return
+						return http.StatusInternalServerError, "unable to save image"
 					}
 
-					c.JSON(http.StatusOK, gin.H{"url": url})
-					return
-
+					return http.StatusOK, url
 				}
 			}
 		}
+	}
+}
+
+func CollectReplicateImage(c *gin.Context) {
+
+	imageId := c.Query("imageId")
+
+	if imageId == "" {
+		c.String(http.StatusBadRequest, "id not provided")
+		return
+	}
+
+	status, url := processReplicateImage(imageId)
+
+	if status == 200 {
+		c.JSON(http.StatusOK, gin.H{"url": url})
+	} else {
+		c.String(status, url)
 	}
 }
