@@ -1,0 +1,28 @@
+{
+  "inputs": {
+    "static": [],
+    "dynamic": []
+  },
+  "outputs": [
+    {
+      "name": "promptOne",
+      "type": "object"
+    },
+    {
+      "name": "promptTwo",
+      "type": "object"
+    },
+    {
+      "name": "promptThree",
+      "type": "object"
+    },
+    {
+      "name": "promptFour",
+      "type": "object"
+    },
+    {
+      "name": "promptFive",
+      "type": "object"
+    }
+  ]
+}

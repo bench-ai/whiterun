@@ -83,8 +83,6 @@ export class DallETextToImageHandler extends operatorHandler {
             "prompt": promptArr[0]
         };
 
-        console.log(requestBody)
-
         let apiResponse;
 
         try {

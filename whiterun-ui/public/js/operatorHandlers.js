@@ -15,6 +15,9 @@ import {TileUpscaleHandler} from "./handlers/controlnetTileUpscaler.js";
 import {RealVisXLImageToImageHandler} from "./handlers/realVisXLImageToImage.js";
 import {RealVisXLMask} from "./handlers/realVisXLMask.js";
 import {PhotoMakerHandler} from "./handlers/photomaker.js";
+import {GPTHandler} from "./handlers/gpt.js";
+import {I2VGenHandler} from "./handlers/i2vgen.js";
+import {PromptMakerHandler} from "./handlers/promptMaker.js";
 
 export function getOperator(nodeId, editor) {
   const idNode = "node-{id}".replace("{id}", nodeId)
@@ -53,6 +56,12 @@ export function getOperator(nodeId, editor) {
       return new RealVisXLMask(editor, idNode)
     case 'photoMaker':
       return new PhotoMakerHandler(editor, idNode)
+    case 'chatGPT':
+      return new GPTHandler(editor, idNode)
+    case 'imageToVideo':
+      return new I2VGenHandler(editor, idNode)
+    case 'promptMaker':
+      return new PromptMakerHandler(editor, idNode)
     default:
       throw new ReferenceError("operator does not exist")
   }
@@ -93,6 +102,12 @@ export async function getSaveViz(name, dataDict) {
       return await RealVisXLMask.load(dataDict)
     case 'photoMaker':
       return await PhotoMakerHandler.load(dataDict)
+    case 'chatGPT':
+      return await GPTHandler.load(dataDict)
+    case 'imageToVideo':
+      return await I2VGenHandler.load(dataDict)
+    case 'promptMaker':
+      return await PromptMakerHandler.load(dataDict)
     default:
       throw new ReferenceError("operator does not exist")
   }

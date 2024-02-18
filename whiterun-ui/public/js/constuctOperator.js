@@ -189,6 +189,30 @@ export async function collectOperatorMetaData(name){
       operatorTooltip = await fetchTooltipContent("photomaker")
       break;
 
+    case "promptMaker":
+      viz = await fetchHTML("promptMaker");
+      dataList = await fetchJSON("prompt_maker");
+      operatorTitle = "Prompt Maker";
+      operatorLogo = "assets/chat-logo.svg";
+      operatorTooltip = await fetchTooltipContent("promptMaker")
+      break;
+
+    case "chatGPT":
+      viz = await fetchHTML("chatGPT");
+      dataList = await fetchJSON("chat_gpt");
+      operatorTitle = "ChatGPT";
+      operatorLogo = "assets/chat-logo.svg";
+      operatorTooltip = await fetchTooltipContent("photomaker")
+      break;
+
+    case "imageToVideo":
+      viz = await fetchHTML("i2vgen");
+      dataList = await fetchJSON("i2vgen");
+      operatorTitle = "Image to Video";
+      operatorLogo = "assets/video-logo.svg";
+      operatorTooltip = await fetchTooltipContent("photomaker")
+      break;
+
     default:
       throw new Error("invalid name")
   }

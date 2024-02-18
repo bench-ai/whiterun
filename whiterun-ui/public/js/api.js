@@ -245,6 +245,46 @@ async function processReplicateRequest(responseData) {
     throw new Error(`Unexpected processing status: ${status}`);
 }
 
+export async function chatGPTRequest(body) {
+    const url = `${urlPrefix}/api/openai/gpt`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
+    }
+
+    return response.json()
+}
+
+export async function promptGenerator(body) {
+    const url = `${urlPrefix}/api/openai/prompt/generator`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
+    }
+
+    return response.json()
+}
+
 export async function runReplicateAPI(url, body){
     const response = await fetch(url, {
         method: 'POST',

@@ -315,6 +315,43 @@ const DragAndDrop = () => {
       </div>
     </div>
     
+    <div class="operator-categories">Image to Video</div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageToVideo">
+      <i class="icon">
+        <img class="logo" src="assets/video-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Image to Video Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext"><p>Generate a video using an image as a starting point <p/>
+      </div>
+    </div>
+
+    <div class="operator-categories">Chat Bot</div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="chatGPT">
+      <i class="icon">
+        <img class="logo" src="assets/chat-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">ChatGPT</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Allows users to interact with a chat bot using ChatGPT</span>
+      </div>
+    </div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="promptMaker">
+      <i class="icon">
+        <img class="logo" src="assets/chat-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Prompt Maker</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Allows users to come up with a list of prompts using ChatGPT</span>
+      </div>
+    </div>
+    
     <div class="operator-categories">Inpainting</div>
     
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageToImageMasking">
