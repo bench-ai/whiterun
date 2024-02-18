@@ -486,10 +486,12 @@ body{
   cursor: pointer;
   font-size: 15px;
   z-index: 1000;
+  width: 40px;
+  margin-right: 20px;
 }
 
 .play-button img{
-  width: 40px;
+  width: 50px;
 }
 /*------------------------------------------------------------------------------*/
 
@@ -928,7 +930,7 @@ body{
 }
 
 .save-button img{
-  width: 40px;
+  width: 50px;
 }
 
 /*------------------------------*/
@@ -1136,7 +1138,23 @@ body{
   margin-bottom: 10px;
 }
 /*-----------------------*/
+.loader {
+  border: 8px solid #696b6f; /* Light grey */
+  border-top: 8px solid #3FB950; /* Blue */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+  z-index: 1000;
+  display: none;
+  margin-right: 10px;
+}
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+/*------------------------------------------*/
 
 /* Editing Drawflow */
 

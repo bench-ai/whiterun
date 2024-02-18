@@ -396,10 +396,8 @@ const DragAndDrop = () => {
     <div id="drawflow" ondrop="drop(event)" ondragover="allowDrop(event)">
 
       <div class="btn-lock">
-   
-        <button class="play-button" id="disabled-play-button">
-          <img src="assets/play-button-disabled-logo.svg" alt="Play Button" style="display:none;">
-        </button>
+      
+      <div class="loader"></div>
         
         <button class="play-button" id="enabled-play-button" onclick="handlePlayButtonClick()">
             <img src="assets/play-button-logo.svg" alt="Play Button" onclick="executeGraph()">

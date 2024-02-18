@@ -389,8 +389,8 @@ async function executeGraph(){
   const playButton = document.getElementById('enabled-play-button');
   playButton.style.display = "none"
 
-  const grayPlay = document.getElementById('disabled-play-button');
-  grayPlay.style.display = "block"
+  const loader = document.getElementsByClassName('loader')[0];
+  loader.style.display = "block"
 
   let xport = editor.export()["drawflow"]["Home"]["data"];
   let e = new ExecutionGraph(xport)
@@ -401,7 +401,7 @@ async function executeGraph(){
     console.log(error)
   }
 
-  grayPlay.style.display = "none"
+  loader.style.display = "none"
   playButton.style.display = "block"
 }
 window.executeGraph = executeGraph;
