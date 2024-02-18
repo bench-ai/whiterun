@@ -3,6 +3,7 @@ package main
 import (
 	"ApiExecutor/cloud"
 	"ApiExecutor/controllers"
+	"ApiExecutor/controllers/chatgpt"
 	"ApiExecutor/controllers/dalle"
 	"ApiExecutor/controllers/replicate"
 	"ApiExecutor/controllers/stability"
@@ -135,7 +136,11 @@ func main() {
 
 	//Photo maker
 	r.POST("api/replicate/tencentarc/photomaker", middleware.CheckExecutionAccess, replicate.PhotoMaker)
-	
+
+	//GPT
+	r.POST("api/openai/gpt", middleware.CheckExecutionAccess, chatgpt.Gpt)
+	r.POST("api/openai/prompt/generator", middleware.CheckExecutionAccess, chatgpt.PromptGenerator)
+
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")
 		panic(err)

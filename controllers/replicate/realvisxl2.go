@@ -304,8 +304,6 @@ func RealVizTextToImage(c *gin.Context) {
 
 	var postBytes []byte
 
-	fmt.Println(postBody)
-
 	if ok {
 		postBytes, err = json.Marshal(postBody)
 

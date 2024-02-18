@@ -23,6 +23,66 @@ type ResponseStruct interface {
 	Failure(response *http.Response) *Failed
 }
 
+type ChatResponseStruct interface {
+	Success(response *http.Response) []string
+	Failure(response *http.Response) *Failed
+}
+
+func ExecuteChatRequest(
+	pRequest *http.Request,
+	c *gin.Context,
+	requestMap map[string]interface{},
+	requestName string,
+	org string,
+	responseStruct ChatResponseStruct) ([]string, error) {
+
+	startTime := time.Now().Unix()
+	pResponse, er := http.DefaultClient.Do(pRequest)
+	endTime := time.Now().Unix() - startTime
+
+	defer pResponse.Body.Close()
+
+	if er != nil {
+		return nil, er
+	}
+
+	if pResponse.StatusCode != 200 {
+		pFailed := responseStruct.Failure(pResponse)
+		return nil, errors.New(pFailed.Message)
+	}
+
+	contentArr := responseStruct.Success(pResponse)
+
+	if contentArr == nil {
+		return nil, errors.New("failed to collect gpt response")
+	}
+
+	if attr, ok := c.Get("accessToken"); ok {
+		user, valid := attr.(*middleware.JwtToken)
+
+		if !valid {
+			panic("user is not of type token")
+		}
+
+		requestMap["response"] = map[string][]string{
+			"content": contentArr,
+		}
+
+		er = db.LogApiRequest(
+			user.Email,
+			fmt.Sprintf("%s:%s", org, requestName),
+			uint16(endTime),
+			requestMap,
+			"")
+
+		if er != nil {
+			log.Fatal("unable to log request")
+		}
+	}
+
+	return contentArr, nil
+}
+
 func ExecuteImageRequest(
 	pRequest *http.Request,
 	c *gin.Context,
@@ -42,8 +102,6 @@ func ExecuteImageRequest(
 	}
 
 	if (pResponse.StatusCode != 200) && (pResponse.StatusCode != 201) {
-
-		fmt.Println(pResponse.StatusCode)
 
 		pFailed := responseStruct.Failure(pResponse)
 
