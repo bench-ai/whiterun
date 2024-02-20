@@ -13,7 +13,7 @@
         "type": "file"
       },
       {
-        "name": "prompt",
+        "name": "prompt (optional)",
         "type": "object | list"
       }
     ]
