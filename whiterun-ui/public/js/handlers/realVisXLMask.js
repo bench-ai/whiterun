@@ -65,7 +65,7 @@ export class RealVisXLMask extends RealVisXLImageToImageHandler {
         let apiResponse;
 
         try {
-            apiResponse = await requestInterceptor(realVisXLTextToImage, requestBody);
+            apiResponse = await requestInterceptor(realVisXLTextToImage, requestBody, true);
         } catch(error) {
             console.log(error);
         }

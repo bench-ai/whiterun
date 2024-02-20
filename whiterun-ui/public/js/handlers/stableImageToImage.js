@@ -69,7 +69,7 @@ export class ImageToImageHandler extends stabilityHandler {
             "image_strength": this.getNodeData()["image_strength"]
         }
 
-        const response = await requestInterceptor(imageToImage, requestBody)
+        const response = await requestInterceptor(imageToImage, requestBody, true)
 
         return {
             "output_1": stabilityHandler.fileFromUrl(response["url"])

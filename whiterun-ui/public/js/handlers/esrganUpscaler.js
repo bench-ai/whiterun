@@ -54,7 +54,7 @@ export class ImageUpscalerHandler extends operatorHandler {
 
         try {
             // Make the API request
-            apiResponse = await requestInterceptor(imageUpscaler, requestBody);
+            apiResponse = await requestInterceptor(imageUpscaler, requestBody, true);
         } catch(error) {
             console.log(error);
             throw new Error("API request failed");

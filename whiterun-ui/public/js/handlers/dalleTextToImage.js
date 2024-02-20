@@ -86,7 +86,7 @@ export class DallETextToImageHandler extends operatorHandler {
         let apiResponse;
 
         try {
-            apiResponse = await requestInterceptor(dalleTextToImage, requestBody);
+            apiResponse = await requestInterceptor(dalleTextToImage, requestBody, true);
         } catch(error) {
             console.log(error);
         }

@@ -173,7 +173,7 @@ export class PhotoMakerHandler extends operatorHandler {
         let apiResponse
 
         try {
-            apiResponse = await requestInterceptor(photoMaker, requestBody);
+            apiResponse = await requestInterceptor(photoMaker, requestBody, true);
         } catch(error) {
             console.log(error);
         }

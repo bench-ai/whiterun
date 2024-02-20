@@ -78,7 +78,7 @@ export class GPTHandler extends operatorHandler {
         let apiResponse;
 
         try {
-            apiResponse = await requestInterceptor(chatGPTRequest, requestBody);
+            apiResponse = await requestInterceptor(chatGPTRequest, requestBody, true);
         } catch(error) {
             console.log(error);
         }

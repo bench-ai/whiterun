@@ -100,7 +100,7 @@ export class I2VGenHandler extends operatorHandler {
         let apiResponse;
 
         try {
-            apiResponse = await requestInterceptor(i2vgen, requestBody);
+            apiResponse = await requestInterceptor(i2vgen, requestBody, true);
         } catch(error) {
             console.log(error);
         }

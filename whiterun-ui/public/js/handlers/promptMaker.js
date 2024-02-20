@@ -140,7 +140,7 @@ export class PromptMakerHandler extends operatorHandler {
         let apiResponse;
 
         try {
-            apiResponse = await requestInterceptor(promptGenerator, requestBody);
+            apiResponse = await requestInterceptor(promptGenerator, requestBody, true);
         } catch(error) {
             console.log(error);
         }

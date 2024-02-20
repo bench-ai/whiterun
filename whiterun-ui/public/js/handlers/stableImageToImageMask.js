@@ -73,7 +73,7 @@ export class ImageToImageMaskHandler extends stabilityHandler {
             "mask_source": this.getNodeData()["mask_source"],
         }
 
-        const response = await requestInterceptor(imageToImageMask, requestBody)
+        const response = await requestInterceptor(imageToImageMask, requestBody, true)
 
         return {
             "output_1": stabilityHandler.fileFromUrl(response["url"])

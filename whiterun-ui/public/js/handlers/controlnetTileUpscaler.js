@@ -201,7 +201,7 @@ export class TileUpscaleHandler extends operatorHandler {
         let apiResponse
 
         try {
-            apiResponse = await requestInterceptor(controlNetTileUpscaler, retObject);
+            apiResponse = await requestInterceptor(controlNetTileUpscaler, retObject, true);
         } catch(error) {
             console.log(error);
         }

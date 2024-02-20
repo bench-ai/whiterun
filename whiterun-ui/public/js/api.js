@@ -324,7 +324,6 @@ export async function requestInterceptor(apiRequest, requestBody, redirect) {
         if (number === 401){
             if (redirect){
                 alert("Signup / login the product is completely free")
-                window.location.replace("https://app.bench-ai.com/login");
             }else{
                 // alert("This workflow is protected, You will get ten usages a day. After which If you wish to continue using this workflow please login")
                 throw new Error("unauthorized to use api")

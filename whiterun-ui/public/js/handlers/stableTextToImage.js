@@ -114,7 +114,7 @@ export class textToImageHandler extends stabilityHandler {
         let apiResponse;
 
         try {
-            apiResponse = await requestInterceptor(textToImage, requestBody);
+            apiResponse = await requestInterceptor(textToImage, requestBody, true);
         } catch(error) {
             console.log(error);
         }
