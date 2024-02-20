@@ -82,7 +82,6 @@ export class GPTHandler extends operatorHandler {
         } catch(error) {
             console.log(error);
         }
-        console.log(apiResponse);
 
         return {
             "output_1": apiResponse[0]

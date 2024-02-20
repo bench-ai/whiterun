@@ -7,7 +7,7 @@ export class PromptMakerHandler extends operatorHandler {
         super(editor, nodeId);
         const iDict = {
             "temperature": 1,
-            "weight": 0,
+            "weight": 1,
             "text": "",
             "style": "photorealistic",
         }

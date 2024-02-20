@@ -14,7 +14,7 @@
       },
       {
         "name": "prompt",
-        "type": "object"
+        "type": "object | list"
       }
     ]
   },

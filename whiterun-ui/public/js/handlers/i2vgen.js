@@ -8,8 +8,8 @@ export class I2VGenHandler extends operatorHandler {
         super(editor, nodeId);
         const iDict = {
             "max_frames": 16,
-            "num_inference_steps": "50",
-            "guidance_scale": "50"
+            "num_inference_steps": 50,
+            "guidance_scale": 9
         }
         this.setInitialData(iDict)
     }
