@@ -78,22 +78,19 @@ export class I2VGenHandler extends operatorHandler {
 
     async getOutputObject(inputObject) {
 
-        let prompt = inputObject["input_2"];
-
-        prompt = stabilityHandler.processPrompts(prompt)
-
-        const promptArr = getPositiveAndNegativePrompts(prompt)
-
-        if (promptArr[0] === ""){
-            alert("No positive prompt was provided, Image to Video Operator only accepts positive prompts!")
-        }
-
         const requestBody = {
             "image": inputObject["input_1"]["file_id"],
-            "prompt": promptArr[0],
             "max_frames": this.getNodeData()["max_frames"],
             "num_inference_steps": this.getNodeData()["num_inference_steps"],
             "guidance_scale": this.getNodeData()["guidance_scale"],
+        }
+
+        let prompt = inputObject["input_2"];
+
+        if ((prompt) !== undefined){
+            prompt = stabilityHandler.processPrompts(prompt)
+            const promptArr = getPositiveAndNegativePrompts(prompt)
+            requestBody["prompt"] = promptArr[0]
         }
 
         if (this.getNodeData().hasOwnProperty("seed")){

@@ -13,7 +13,7 @@ export class TileUpscaleHandler extends operatorHandler {
             "guidance_scale": 7,
             "hdr": 0.7,
             "creativity": 0.5,
-            "scheduler": "DPMSolverMultistep",
+            "scheduler": "DDIM",
             "resolution": "2048",
             "steps": 30,
             "guess_mode": false
