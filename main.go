@@ -3,6 +3,7 @@ package main
 import (
 	"ApiExecutor/cloud"
 	"ApiExecutor/controllers"
+	"ApiExecutor/controllers/chatgpt"
 	"ApiExecutor/controllers/dalle"
 	"ApiExecutor/controllers/replicate"
 	"ApiExecutor/controllers/stability"
@@ -132,6 +133,16 @@ func main() {
 	// high-resolution-controlnet-tile
 	r.POST("api/replicate/hrcnettile11/upscale", middleware.CheckExecutionAccess, replicate.UpscaleControlNetTile11)
 	r.GET("api/replicate", replicate.CollectReplicateImage)
+
+	//Photo maker
+	r.POST("api/replicate/tencentarc/photomaker", middleware.CheckExecutionAccess, replicate.PhotoMaker)
+
+	//i2vgen
+	r.POST("api/replicate/ali-vilab/i2vgen-xl", middleware.CheckExecutionAccess, replicate.I2vgenxl)
+
+	//GPT
+	r.POST("api/openai/gpt", middleware.CheckExecutionAccess, chatgpt.Gpt)
+	r.POST("api/openai/prompt/generator", middleware.CheckExecutionAccess, chatgpt.PromptGenerator)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")

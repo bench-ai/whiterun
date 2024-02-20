@@ -116,6 +116,40 @@ const DragAndDrop = () => {
 
 <div class="wrapper">
 
+<div id="editModal" class="modal-wrapper">
+  <div class="modal-edit-image">
+  <span class="modal-edit-image-close">&times;</span>
+  <div class="model-edit-image-title">
+    Image Mask Editor
+  </div>
+    <div class="modal-edit-image-content">
+    <div class="modal-editor-column">
+        <div class="modal-editor-divider">
+            <button id="resetButton" class="modal-editor-button">Reset Edits</button>
+        </div>
+        <div class="modal-editor-divider">
+            <button id="toggleCanvasButton" class="modal-editor-button">Toggle Mask Preview</button>
+        </div>
+        <div class="modal-editor-divider">
+            <button id="flipColorsButton" class="modal-editor-button">Flip Mask Output Color</button>
+        </div>
+        <div class="modal-editor-divider">
+            <button id="downloadButton" class="modal-editor-button">Download Edits</button>
+        </div>   
+        <div class="modal-editor-divider">
+            <label class="modal-editor-title" for="brushSizeSlider">Brush Size:</label>
+            <input type="range" class="modal-editor-slider" id="brushSizeSlider" min="1" max="20" step="1" value="5">
+        </div>
+    </div>
+    <div>
+        <canvas id="myCanvas" width="400" height="400" style="border:1px solid #000;"></canvas>
+        <canvas id="myCanvas2" width="400" height="400" style="border:1px solid #000; display: none"></canvas>
+        <canvas id="outputCanvas" width="400" height="400" style="border:1px solid #000; display: none"></canvas>
+    </div>
+    </div>
+  </div>
+</div>
+
 <div id="myModal" class="modal-node">
   <div class="modal-node-content">
     <span class="modal-node-close">&times;</span>
@@ -235,6 +269,28 @@ const DragAndDrop = () => {
       </div>
     </div>
     
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="realVisXLImageToImage">
+      <i class="icon">
+        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">RealVisXL Image to Image Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext"><p>Generate an image using another image as a starting point. Uses RealVisXL</strong></p></span>
+      </div>
+    </div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="photoMaker">
+      <i class="icon">
+        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Photomaker Image to Image Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext"><p>Generate an image in a unique style using another image as a starting point.</strong></p></span>
+      </div>
+    </div>
+    
     <div class="operator-categories">Upscalers</div>
     
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageUpscaler">
@@ -259,6 +315,43 @@ const DragAndDrop = () => {
       </div>
     </div>
     
+    <div class="operator-categories">Image to Video</div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageToVideo">
+      <i class="icon">
+        <img class="logo" src="assets/video-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Image to Video Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Generate a video using an image as a starting point
+      </div>
+    </div>
+
+    <div class="operator-categories">Chat Bot</div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="chatGPT">
+      <i class="icon">
+        <img class="logo" src="assets/chat-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">ChatGPT</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Allows users to interact with a chat bot using ChatGPT</span>
+      </div>
+    </div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="promptMaker">
+      <i class="icon">
+        <img class="logo" src="assets/chat-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">Prompt Maker</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Allows users to come up with a list of five prompts using ChatGPT</span>
+      </div>
+    </div>
+    
     <div class="operator-categories">Inpainting</div>
     
     <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="imageToImageMasking">
@@ -269,6 +362,17 @@ const DragAndDrop = () => {
       <div class="tooltip">
         <i class="far fa-question-circle"></i>
         <span class="tooltiptext">Modify specific portions of an image by using a mask</span>
+      </div>
+    </div>
+    
+    <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="realVisXLMasking">
+      <i class="icon">
+        <img class="logo" src="assets/palette-logo.svg" alt="Icon description" draggable="false">
+      </i>
+      <span class="operator-title">RealVisXL Mask Image to Image Operator</span>
+      <div class="tooltip">
+        <i class="far fa-question-circle"></i>
+        <span class="tooltiptext">Modify specific portions of an image by using a mask. Uses RealVisXL.</span>
       </div>
     </div>
     
@@ -292,10 +396,8 @@ const DragAndDrop = () => {
     <div id="drawflow" ondrop="drop(event)" ondragover="allowDrop(event)">
 
       <div class="btn-lock">
-   
-        <button class="play-button" id="disabled-play-button">
-          <img src="assets/play-button-disabled-logo.svg" alt="Play Button" style="display:none;">
-        </button>
+      
+      <div class="loader"></div>
         
         <button class="play-button" id="enabled-play-button" onclick="handlePlayButtonClick()">
             <img src="assets/play-button-logo.svg" alt="Play Button" onclick="executeGraph()">

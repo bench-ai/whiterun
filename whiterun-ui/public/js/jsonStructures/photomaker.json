@@ -1,0 +1,38 @@
+{
+  "inputs": {
+    "static": [
+      {
+        "name": "name",
+        "type": "text",
+        "default_value": "photoMaker"
+      }
+    ],
+    "dynamic": [
+      {
+        "name": "inputImage",
+        "type": "file"
+      },
+      {
+        "name": "inputImage2 (Optional)",
+        "type": "file"
+      },
+      {
+        "name": "inputImage3 (Optional)",
+        "type": "file"
+      },
+      {
+        "name": "inputImage4 (Optional)",
+        "type": "file"
+      },
+      {
+        "name": "prompt",
+        "type": "object | list"
+      }
+    ]
+  },
+  "outputs": [
+    {
+      "type": "file"
+    }
+  ]
+}

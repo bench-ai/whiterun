@@ -66,10 +66,10 @@ export class ExecutionGraph{
             const returnDict = await data(nodeMap[requiredInput["node"]], nodeMap)
             inputObject[connection] = returnDict[requiredInput["input"]]
 
+            console.log(returnDict)
+
             // added this
-            outputObject[requiredInput["node"]] = {
-              [requiredInput["input"]]: returnDict[requiredInput["input"]]
-            }
+            outputObject[requiredInput["node"]] = returnDict
           }
         }
       }

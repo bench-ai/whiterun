@@ -54,7 +54,7 @@ const Workbench = () => {
     useEffect(() => {
         const artificialLoadingTimeout = setTimeout(() => {
             setLoading(false);
-        }, 1000);
+        }, 3000);
 
         return () => clearTimeout(artificialLoadingTimeout);
     }, []);
@@ -99,49 +99,49 @@ const Workbench = () => {
                                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                                 allowFullScreen></TutorialVideo>
                                     </Card>
-                                    <Card bordered={false}>
-                                        <Title level={4} style={{marginTop: 0}}>2. Example Workflows</Title>
-                                        <Paragraph>
-                                            To get an idea of the kind of workflows you can create, here's a list of workflows:
-                                            <ul style={{marginTop: "5px"}}>
-                                                <li>
-                                                    <a href="https://app.bench-ai.com/workbench?id=f2a58b0e-bd5e-11ee-bcd5-429d37f5fddc"
-                                                       target="_blank"
-                                                       rel="noopener noreferrer">Upscaling a Text to Image Workflow using
-                                                        Dall-E</a>
-                                                </li>
-                                                <li>
-                                                    <a href="https://app.bench-ai.com/workbench?id=c6bfd926-be87-11ee-bcd5-429d37f5fddc"
-                                                       target="_blank"
-                                                       rel="noopener noreferrer">Simple Text to Image Workflow w/ Negative
-                                                        Prompts using Stable Diffusion</a>
-                                                </li>
-                                                <li>
-                                                    <a href="https://app.bench-ai.com/workbench?id=cbc0dcc8-be87-11ee-bcd5-429d37f5fddc"
-                                                       target="_blank"
-                                                       rel="noopener noreferrer">Image to Image Workflow Using Stable Diffusion</a>
-                                                </li>
-                                            </ul>
-                                        </Paragraph>
-                                        <Title level={4} style={{marginTop: 0}}>3. Need help or have feedback?</Title>
-                                        <Paragraph>
-                                            If you need assistance or have feedback, feel free to reach out:
-                                            <ul style={{marginTop: "5px"}}>
-                                                <li>
-                                                    <a href="https://discord.gg/Jv9fUCy7" target="_blank"
-                                                       rel="noopener noreferrer">Discord Server</a>
-                                                </li>
-                                                <li>
-                                                    <a href="https://www.linkedin.com/company/bench-ai" target="_blank"
-                                                       rel="noopener noreferrer">LinkedIn</a>
-                                                </li>
-                                                <li>
-                                                    Email: <a
-                                                    href="mailto:founders@bench-ai.com">founders@bench-ai.com</a>
-                                                </li>
-                                            </ul>
-                                        </Paragraph>
-                                    </Card>
+                                    {/*<Card bordered={false}>*/}
+                                    {/*    <Title level={4} style={{marginTop: 0}}>2. Example Workflows</Title>*/}
+                                    {/*    <Paragraph>*/}
+                                    {/*        To get an idea of the kind of workflows you can create, here's a list of workflows:*/}
+                                    {/*        <ul style={{marginTop: "5px"}}>*/}
+                                    {/*            <li>*/}
+                                    {/*                <a href="https://app.bench-ai.com/workbench?id=f2a58b0e-bd5e-11ee-bcd5-429d37f5fddc"*/}
+                                    {/*                   target="_blank"*/}
+                                    {/*                   rel="noopener noreferrer">Upscaling a Text to Image Workflow using*/}
+                                    {/*                    Dall-E</a>*/}
+                                    {/*            </li>*/}
+                                    {/*            <li>*/}
+                                    {/*                <a href="https://app.bench-ai.com/workbench?id=c6bfd926-be87-11ee-bcd5-429d37f5fddc"*/}
+                                    {/*                   target="_blank"*/}
+                                    {/*                   rel="noopener noreferrer">Simple Text to Image Workflow w/ Negative*/}
+                                    {/*                    Prompts using Stable Diffusion</a>*/}
+                                    {/*            </li>*/}
+                                    {/*            <li>*/}
+                                    {/*                <a href="https://app.bench-ai.com/workbench?id=cbc0dcc8-be87-11ee-bcd5-429d37f5fddc"*/}
+                                    {/*                   target="_blank"*/}
+                                    {/*                   rel="noopener noreferrer">Image to Image Workflow Using Stable Diffusion</a>*/}
+                                    {/*            </li>*/}
+                                    {/*        </ul>*/}
+                                    {/*    </Paragraph>*/}
+                                    {/*    <Title level={4} style={{marginTop: 0}}>3. Need help or have feedback?</Title>*/}
+                                    {/*    <Paragraph>*/}
+                                    {/*        If you need assistance or have feedback, feel free to reach out:*/}
+                                    {/*        <ul style={{marginTop: "5px"}}>*/}
+                                    {/*            <li>*/}
+                                    {/*                <a href="https://discord.com/invite/gt8HvMgUn5" target="_blank"*/}
+                                    {/*                   rel="noopener noreferrer">Discord Server</a>*/}
+                                    {/*            </li>*/}
+                                    {/*            <li>*/}
+                                    {/*                <a href="https://www.linkedin.com/company/bench-ai" target="_blank"*/}
+                                    {/*                   rel="noopener noreferrer">LinkedIn</a>*/}
+                                    {/*            </li>*/}
+                                    {/*            <li>*/}
+                                    {/*                Email: <a*/}
+                                    {/*                href="mailto:founders@bench-ai.com">founders@bench-ai.com</a>*/}
+                                    {/*            </li>*/}
+                                    {/*        </ul>*/}
+                                    {/*    </Paragraph>*/}
+                                    {/*</Card>*/}
                                 </TutorialCardList>
                             </Panel>
                         </Collapse>
@@ -171,7 +171,7 @@ const Workbench = () => {
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                     allowFullScreen></TutorialVideoModal>
                                 <Title level={4}>For additional Help:</Title>
-                                <a href="https://discord.gg/Jv9fUCy7" target="_blank" rel="noopener noreferrer">
+                                <a href="https://discord.com/invite/gt8HvMgUn5" target="_blank" rel="noopener noreferrer">
                                     <Button style={{
                                         backgroundColor: '#404eed',
                                         borderColor: '#404eed',

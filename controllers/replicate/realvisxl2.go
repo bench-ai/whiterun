@@ -11,9 +11,11 @@ import (
 	"github.com/google/uuid"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type apiParameters struct {
+	Mode                 string
 	Prompt               string
 	NegativePrompt       string `json:"negative_prompt"`
 	CfgScale             uint8  `json:"cfg_scale"`
@@ -25,6 +27,25 @@ type apiParameters struct {
 	Image                string
 	Mask                 string
 	DisableSafetyChecker bool `json:"disable_safety_checker"`
+}
+
+func setInnerMapValue(
+	postMap map[string]interface{},
+	key string,
+	value interface{}) map[string]interface{} {
+
+	if body, ok := postMap["body"].(map[string]interface{}); ok {
+		if input, ok := body["input"].(map[string]interface{}); ok {
+			input[key] = value
+		} else {
+			return nil
+		}
+
+	} else {
+		return nil
+	}
+
+	return postMap
 }
 
 func (a *apiParameters) validateScheduler() int8 {
@@ -74,6 +95,14 @@ func (a *apiParameters) validateInferenceSteps() int8 {
 		true))
 }
 
+func (a *apiParameters) validateMode() bool {
+	contains := miscellaneous.Contains[string]
+	modeArr := [3]string{
+		"text", "image", "mask",
+	}
+	return contains(a.Mode, modeArr[:])
+}
+
 func (a *apiParameters) PostBodyText() map[string]interface{} {
 	validationArr := [3]int8{
 		a.validatePromptStrength(),
@@ -110,20 +139,55 @@ func (a *apiParameters) PostBodyText() map[string]interface{} {
 		}
 
 		if a.Seed != nil {
-			if body, ok := postMap["body"].(map[string]interface{}); ok {
-				if input, ok := body["input"].(map[string]interface{}); ok {
-					input["seed"] = *a.Seed
-				} else {
-					return nil
-				}
-
-			} else {
-				return nil
-			}
+			postMap = setInnerMapValue(postMap, "seed", *a.Seed)
 		}
 
 		return postMap
 	}
+}
+
+func (a *apiParameters) addPromptStrength() map[string]interface{} {
+	postMap := a.PostBodyText()
+
+	if postMap == nil {
+		return nil
+	}
+
+	return setInnerMapValue(postMap, "prompt_strength", a.PromptStrength)
+}
+
+func (a *apiParameters) PostBodyMask() map[string]interface{} {
+	postMap := a.PostBodyImage()
+
+	var url string
+	var err error
+
+	if err, url = cloud.GetPresignedURL(a.Mask); err != nil {
+		return nil
+	}
+
+	if postMap == nil {
+		return nil
+	}
+
+	return setInnerMapValue(postMap, "mask", url)
+}
+
+func (a *apiParameters) PostBodyImage() map[string]interface{} {
+	postMap := a.addPromptStrength()
+
+	if postMap == nil {
+		return nil
+	}
+
+	var url string
+	var err error
+
+	if err, url = cloud.GetPresignedURL(a.Image); err != nil {
+		return nil
+	}
+
+	return setInnerMapValue(postMap, "image", url)
 }
 
 type extendedResponse interface {
@@ -136,10 +200,11 @@ func replicateFailure(response *http.Response) *controllers.Failed {
 	var body struct {
 		Detail string
 		Title  string
-		Status string
+		Status int
 	}
 
 	if err := json.NewDecoder(response.Body).Decode(&body); err != nil {
+		fmt.Println(err)
 		return nil
 	}
 
@@ -209,7 +274,28 @@ func RealVizTextToImage(c *gin.Context) {
 		return
 	}
 
-	request := body.PostBodyText()
+	if !body.validateMode() {
+		c.String(http.StatusBadRequest, "invalid mode provided")
+		return
+	}
+
+	var request map[string]interface{}
+	var requestName string
+
+	switch body.Mode {
+	case "text":
+		request = body.PostBodyText()
+		requestName = "text-to-image"
+	case "mask":
+		request = body.PostBodyMask()
+		requestName = "image-to-image/mask"
+	case "image":
+		request = body.PostBodyImage()
+		requestName = "image-to-image"
+	default:
+		c.String(http.StatusBadRequest, "invalid mode provided")
+		return
+	}
 
 	if request == nil {
 		c.String(http.StatusBadRequest, "failed")
@@ -241,7 +327,7 @@ func RealVizTextToImage(c *gin.Context) {
 		newReq,
 		c,
 		postBody,
-		"text-to-image",
+		requestName,
 		"replicate/lucataco/realvisxl-v2.0",
 		&responseSuccess{}); ero != nil {
 
@@ -250,6 +336,89 @@ func RealVizTextToImage(c *gin.Context) {
 
 	} else {
 		c.JSON(http.StatusOK, gin.H{"url": urll})
+	}
+}
+
+func processReplicateImage(imageId string) (int, string) {
+	url := fmt.Sprintf("https://api.replicate.com/v1/predictions/%s", imageId)
+
+	newReq, _ := http.NewRequest("GET", url, nil)
+	apiKey := os.Getenv("REP")
+
+	newReq.Header.Add("Content-Type", "application/json")
+	newReq.Header.Add("Authorization", "Token "+apiKey)
+
+	pResponse, er := http.DefaultClient.Do(newReq)
+
+	if er != nil {
+		return http.StatusInternalServerError, "unable to process and handle request"
+	}
+
+	var dataBody struct {
+		Id          string
+		Model       string
+		Version     string
+		Input       map[string]interface{}
+		Output      interface{}
+		Logs        string
+		Error       string
+		Status      string
+		CompletedAt *string `json:"completed_at"`
+	}
+
+	if err := json.NewDecoder(pResponse.Body).Decode(&dataBody); err != nil {
+		fmt.Println(err)
+		return http.StatusInternalServerError, "unable to process and handle request"
+	} else {
+
+		if dataBody.CompletedAt == nil {
+			return http.StatusAccepted, "still processing"
+		} else {
+			if dataBody.Status == "failed" {
+				return http.StatusBadRequest, dataBody.Error
+			} else {
+
+				var output []string
+
+				if blankOutput, ok := dataBody.Output.([]interface{}); !ok {
+					if stringOutput, okk := dataBody.Output.(string); okk {
+						output = append(output, stringOutput)
+					} else {
+						return http.StatusBadRequest, "failed array conversion"
+					}
+				} else {
+					for _, value := range blankOutput {
+						if setUrl, okk := value.(string); okk {
+							output = append(output, setUrl)
+						}
+					}
+				}
+
+				if dataBody.Output == nil {
+					return http.StatusBadRequest, "we have been lied too"
+				} else {
+
+					stringSlice := strings.Split(output[0], ".")
+					annotation := stringSlice[len(stringSlice)-1]
+
+					uuidString := uuid.New().String()
+					uuidString += fmt.Sprintf("-bench.%s", annotation)
+					err = cloud.UploadUrlToS3(output[0], uuidString, annotation)
+
+					if err != nil {
+						return http.StatusInternalServerError, "unable to save image"
+					}
+
+					err, url = cloud.GetPresignedURL(uuidString)
+
+					if err != nil {
+						return http.StatusInternalServerError, "unable to save image"
+					}
+
+					return http.StatusOK, url
+				}
+			}
+		}
 	}
 }
 
@@ -262,66 +431,11 @@ func CollectReplicateImage(c *gin.Context) {
 		return
 	}
 
-	url := fmt.Sprintf("https://api.replicate.com/v1/predictions/%s", imageId)
+	status, url := processReplicateImage(imageId)
 
-	newReq, _ := http.NewRequest("GET", url, nil)
-	apiKey := os.Getenv("REP")
-
-	newReq.Header.Add("Content-Type", "application/json")
-	newReq.Header.Add("Authorization", "Token "+apiKey)
-
-	pResponse, er := http.DefaultClient.Do(newReq)
-
-	if er != nil {
-		c.String(http.StatusInternalServerError, "unable to process and handle request")
-	}
-
-	var dataBody struct {
-		Id          string
-		Model       string
-		Version     string
-		Input       map[string]interface{}
-		Output      []string
-		Logs        string
-		Error       string
-		Status      string
-		CompletedAt *string `json:"completed_at"`
-	}
-
-	if err := json.NewDecoder(pResponse.Body).Decode(&dataBody); err != nil {
-		c.String(http.StatusInternalServerError, "unable to process and handle request")
-		return
+	if status == 200 {
+		c.JSON(http.StatusOK, gin.H{"url": url})
 	} else {
-		if dataBody.CompletedAt == nil {
-			c.String(http.StatusAccepted, "still processing")
-		} else {
-			if dataBody.Status == "failed" {
-				c.String(http.StatusBadRequest, dataBody.Error)
-			} else {
-				if dataBody.Output == nil {
-					c.String(http.StatusBadRequest, "we have been lied too")
-				} else {
-					uuidString := uuid.New().String()
-					uuidString += "-bench.png"
-					err = cloud.UploadUrlToS3(dataBody.Output[0], uuidString)
-
-					if err != nil {
-						c.String(http.StatusInternalServerError, "unable to save image")
-						return
-					}
-
-					err, url = cloud.GetPresignedURL(uuidString)
-
-					if err != nil {
-						c.String(http.StatusInternalServerError, "unable to save image")
-						return
-					}
-
-					c.JSON(http.StatusOK, gin.H{"url": url})
-					return
-
-				}
-			}
-		}
+		c.String(status, url)
 	}
 }

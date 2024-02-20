@@ -1,0 +1,26 @@
+{
+  "inputs": {
+    "static": [
+      {
+        "name": "name",
+        "type": "text",
+        "default_value": "imageToVideo"
+      }
+    ],
+    "dynamic": [
+      {
+        "name": "inputImage",
+        "type": "file"
+      },
+      {
+        "name": "prompt (optional)",
+        "type": "object | list"
+      }
+    ]
+  },
+  "outputs": [
+    {
+      "type": "video"
+    }
+  ]
+}

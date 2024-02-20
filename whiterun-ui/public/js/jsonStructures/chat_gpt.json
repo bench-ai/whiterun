@@ -1,0 +1,11 @@
+{
+  "inputs": {
+    "static": [],
+    "dynamic": []
+  },
+  "outputs": [
+    {
+      "type": "text"
+    }
+  ]
+}

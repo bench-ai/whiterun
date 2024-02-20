@@ -14,8 +14,15 @@ import (
 	"time"
 )
 
-func UploadToS3fromBase64(data string, objectKey string) error {
+func UploadToS3fromBase64PNG(data, objectKey string) error {
+	return UploadToS3fromBase64(data, objectKey, "image/png")
+}
 
+func UploadToS3fromBase64MP4(data, objectKey string) error {
+	return UploadToS3fromBase64(data, objectKey, "video/mp4")
+}
+
+func UploadToS3fromBase64(data, objectKey, annotation string) error {
 	// Specify the S3 bucket name and region
 	bucketName := os.Getenv("AWS_BUCKET")
 	client, err := GetClient()
@@ -35,7 +42,7 @@ func UploadToS3fromBase64(data string, objectKey string) error {
 		Bucket:      aws.String(bucketName),
 		Key:         aws.String(objectKey),
 		Body:        bytes.NewReader(decode),
-		ContentType: aws.String("image/png"), // required. Notice the back ticks
+		ContentType: aws.String(annotation), // required. Notice the back ticks
 	})
 
 	return err
@@ -149,12 +156,19 @@ func downloadUrlToBase64(downloadUrl string) (error, string) {
 	return nil, base64.StdEncoding.EncodeToString(data)
 }
 
-func UploadUrlToS3(fileUrl, s3ObjectKey string) error {
+func UploadUrlToS3(fileUrl, s3ObjectKey, annotation string) error {
 	err, base64Str := downloadUrlToBase64(fileUrl)
 
 	if err != nil {
 		return err
 	}
 
-	return UploadToS3fromBase64(base64Str, s3ObjectKey)
+	switch annotation {
+	case "png":
+		return UploadToS3fromBase64PNG(base64Str, s3ObjectKey)
+	case "mp4":
+		return UploadToS3fromBase64MP4(base64Str, s3ObjectKey)
+	default:
+		return fmt.Errorf("%s is not a valid type", annotation)
+	}
 }

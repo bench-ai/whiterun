@@ -423,7 +423,7 @@ func (r *responseSuccess) Success(
 
 		b64 := apiResponse.Images[0].Base64
 
-		er := cloud.UploadToS3fromBase64(b64, fileName)
+		er := cloud.UploadToS3fromBase64PNG(b64, fileName)
 
 		if er != nil {
 			channelMap["error"] = err.Error()

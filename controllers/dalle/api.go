@@ -57,7 +57,7 @@ func (r *responseSuccess) Success(
 		data, ok := response.Data[0]["b64_json"]
 
 		if ok {
-			if err = cloud.UploadToS3fromBase64(data, fileName); err != nil {
+			if err = cloud.UploadToS3fromBase64PNG(data, fileName); err != nil {
 				channelMap["error"] = err.Error()
 				channel <- channelMap
 				return

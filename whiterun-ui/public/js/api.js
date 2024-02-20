@@ -1,6 +1,6 @@
 
-const urlPrefix = "https://app.bench-ai.com"
-// const urlPrefix = "http://localhost:8080"
+// const urlPrefix = "https://app.bench-ai.com"
+const urlPrefix = "http://localhost:8080"
 
 
 export async function getUser(body) {
@@ -245,6 +245,46 @@ async function processReplicateRequest(responseData) {
     throw new Error(`Unexpected processing status: ${status}`);
 }
 
+export async function chatGPTRequest(body) {
+    const url = `${urlPrefix}/api/openai/gpt`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
+    }
+
+    return response.json()
+}
+
+export async function promptGenerator(body) {
+    const url = `${urlPrefix}/api/openai/prompt/generator`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`${errorMessage}: ${response.status}`);
+    }
+
+    return response.json()
+}
+
 export async function runReplicateAPI(url, body){
     const response = await fetch(url, {
         method: 'POST',
@@ -284,7 +324,6 @@ export async function requestInterceptor(apiRequest, requestBody, redirect) {
         if (number === 401){
             if (redirect){
                 alert("Signup / login the product is completely free")
-                window.location.replace("https://app.bench-ai.com/login");
             }else{
                 // alert("This workflow is protected, You will get ten usages a day. After which If you wish to continue using this workflow please login")
                 throw new Error("unauthorized to use api")
@@ -305,5 +344,15 @@ export async function realVisXLTextToImage(body) {
 
 export async function controlNetTileUpscaler(body) {
     const url = `${urlPrefix}/api/replicate/hrcnettile11/upscale`;
+    return await runReplicateAPI(url, body)
+}
+
+export async function photoMaker(body) {
+    const url = `${urlPrefix}/api/replicate/tencentarc/photomaker`;
+    return await runReplicateAPI(url, body)
+}
+
+export async function i2vgen(body) {
+    const url = `${urlPrefix}/api/replicate/ali-vilab/i2vgen-xl`;
     return await runReplicateAPI(url, body)
 }

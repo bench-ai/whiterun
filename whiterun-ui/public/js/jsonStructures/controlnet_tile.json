@@ -7,12 +7,8 @@
         "type": "file"
       },
       {
-        "name": "positivePrompt",
-        "type": "object | text"
-      },
-      {
-        "name": "negativePrompt",
-        "type": "object | text"
+        "name": "prompt",
+        "type": "object | list"
       }
     ]
   },

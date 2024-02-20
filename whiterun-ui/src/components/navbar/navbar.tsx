@@ -28,7 +28,7 @@ const NavbarGlobal = () => {
                 </StyledLink>
                 </div>
                 <div>
-                <a href="https://discord.gg/Jv9fUCy7" target="_blank" rel="noopener noreferrer">
+                <a href="https://discord.com/invite/gt8HvMgUn5" target="_blank" rel="noopener noreferrer">
                     <Button type="primary" size={"large"} style={{
                         backgroundColor: '#404eed',
                         borderColor: '#404eed',
@@ -76,7 +76,7 @@ const NavbarProtected = () => {
                 </StyledLink>
             </LeftOptions>
             <RightOptions>
-                <a href="https://discord.gg/Jv9fUCy7" target="_blank" rel="noopener noreferrer">
+                <a href="https://discord.com/invite/gt8HvMgUn5" target="_blank" rel="noopener noreferrer">
                     <StyledButton type="primary" size={"large"} style={{
                         backgroundColor: '#404eed',
                         borderColor: '#404eed',

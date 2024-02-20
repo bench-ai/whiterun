@@ -1,7 +1,9 @@
-Generate an image using another image as a starting point <br><br><strong>(Only accepts 1024x1024 for SDXL 1.0 and 512x512 for any other engine)</strong>
+<strong>Generate an image using another image as a starting point</strong>
+<br><strong>(For the input image, only accepts 1024x1024 for SDXL 1.0 and 512x512 for any other engine as the resolution)</strong>
 <br><br><Strong>Inputs:</Strong>
 <br><Strong>Prompt - </Strong>A text object or list
 <br><Strong>Example Prompt Input - </Strong>Can take the output of a <Strong>Image Prompt Operator or Prompt Grouper Operator</Strong>.
+<br>
 <br><Strong>Input Image - </Strong>An Image File
 <br><Strong>Example Input Image - </Strong>Can take the output of a <Strong>Text to Image Operator or Image Operator</Strong>.
 <br><br><Strong>Output - </Strong>An image file
@@ -12,6 +14,7 @@ Generate an image using another image as a starting point <br><br><strong>(Only 
 <br><Strong>Engine - </Strong>Which Stable Diffusion model to use, SDXL 1.0 is recommended for most use cases.
 <br><Strong>Clip Guidance - </Strong>Determines how the model modifies the prompt internally to achieve better results. Only applicable for non-SDXL engines.
 <br><Strong>Sampler - </Strong>Determines patterns used to generate the image. Each sampler outputs a different quality at varying speeds so experimentation is needed.
+<br><Strong>Mask Source - </Strong>Determines whether to use a black or white mask when placing parts of the image.
 <br><Strong>CFG Scale - </Strong>How closely the model follows the given prompt when generating the image, lower
 values mean higher creativity while higher values require more detailed prompts. A good range is between 5 and 12.
 <br><Strong>Seed - </Strong>Value determines noise seed, leave the same if you want to generate the same image

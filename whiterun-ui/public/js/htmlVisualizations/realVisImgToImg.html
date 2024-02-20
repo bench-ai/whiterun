@@ -1,0 +1,49 @@
+<div class="visualization">
+    <div>
+        <div class="real-vis-txt-to-img-name">realVisXLImageToImage</div>
+        <div class="real-vis-to-img-divider">
+            <label class="real-vis-txt-to-img-sampler-title">Sampler:
+                <select class="real-vis-txt-to-img-sampler">
+                    <option value="DPMSolverMultistep">DPM Solver Multistep</option>
+                    <option value="DDIM">DDIM</option>
+                    <option value="HeunDiscrete">Heun Discrete</option>
+                    <option value="KarrasDPM">Karras DPM</option>
+                    <option value="K_EULER_ANCESTRAL">K EULER ANCESTRAL</option>
+                    <option value="K_EULER">K EULER</option>
+                    <option value="PNDM">PNDM</option>
+                </select>
+            </label>
+            <label class="real-vis-txt-to-img-steps-title">Inference Steps:
+                <input onKeyDown="return false" class="real-vis-txt-to-img-steps" type="number" value="40" min="1" max="50"/>
+            </label>
+        </div>
+        <div class="real-vis-to-img-divider">
+            <label class="real-vis-txt-to-img-guidance-title">Guidance Scale:
+                <input onKeyDown="return false" class="real-vis-txt-to-img-guidance" type="number" value="7" min="1" max="30"/>
+            </label>
+            <label class="real-vis-txt-to-img-seed-title">Seed:
+                <input onKeyDown="return false" class="real-vis-txt-to-img-seed" type="number" min="0" max="4294967295"/>
+            </label>
+        </div>
+
+        <div class="real-vis-to-img-divider">
+            <div class="slider-hdr">
+                <label class="upscaler-title">Prompt Strength</label>
+                <input class="upscaler-slider" type="range" min="0" max="1" value="0.7" step="0.1"/>
+                <div class="slider-labels">
+                    <div class="label-left">0</div>
+                    <div class="slider-weight-display">0.7</div>
+                    <div class="label-right">1</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="real-vis-to-img-divider">
+            <label class="real-vis-txt-to-img-safety-title">Disable Safety Filter 😏:
+                <input onKeyDown="return false" class="real-vis-txt-to-img-safety" type="checkbox"/>
+                <span class="checkmark"></span>
+            </label>
+        </div>
+
+    </div>
+</div>

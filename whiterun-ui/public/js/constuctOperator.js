@@ -155,6 +155,64 @@ export async function collectOperatorMetaData(name){
       operatorTooltip = await fetchTooltipContent("realVisTextToImage");
       break;
 
+    case "python":
+      viz = await fetchHTML('pythonViz');
+      dataList = [{}, {}]
+      operatorTitle = "Python Operator"
+      operatorLogo = "assets/python-logo.svg";
+      operatorLogo = "assets/python-logo.svg";
+      operatorTooltip = "A dynamic Operator that executes Python code<br><Strong>Input - " +
+          "</Strong>User Defined<br><Strong>Output - </Strong>User Defined";
+      break;
+
+    case "realVisXLImageToImage":
+      viz = await fetchHTML("realVisImgToImg");
+      dataList = await fetchJSON("real_vis_img_to_img");
+      operatorTitle = "RealVisXL Image to Image Operator";
+      operatorLogo = "assets/image-logo.svg";
+      operatorTooltip = await fetchTooltipContent("realVisImgToImg")
+      break;
+
+    case "realVisXLMasking":
+      viz = await fetchHTML("realVisMasking");
+      dataList = await fetchJSON("real_vis_masking");
+      operatorTitle = "RealVISXL Masking Operator";
+      operatorLogo = "assets/image-logo.svg";
+      operatorTooltip = await fetchTooltipContent("realVisMasking")
+      break;
+
+    case "photoMaker":
+      viz = await fetchHTML("photomaker");
+      dataList = await fetchJSON("photomaker");
+      operatorTitle = "Photomaker Image to Image Operator";
+      operatorLogo = "assets/image-logo.svg";
+      operatorTooltip = await fetchTooltipContent("photomaker")
+      break;
+
+    case "promptMaker":
+      viz = await fetchHTML("promptMaker");
+      dataList = await fetchJSON("prompt_maker");
+      operatorTitle = "Prompt Maker";
+      operatorLogo = "assets/chat-logo.svg";
+      operatorTooltip = await fetchTooltipContent("promptMaker")
+      break;
+
+    case "chatGPT":
+      viz = await fetchHTML("chatGPT");
+      dataList = await fetchJSON("chat_gpt");
+      operatorTitle = "ChatGPT";
+      operatorLogo = "assets/chat-logo.svg";
+      operatorTooltip = await fetchTooltipContent("chatGPT")
+      break;
+
+    case "imageToVideo":
+      viz = await fetchHTML("i2vgen");
+      dataList = await fetchJSON("i2vgen");
+      operatorTitle = "Image to Video";
+      operatorLogo = "assets/video-logo.svg";
+      operatorTooltip = await fetchTooltipContent("i2vgen")
+      break;
+
     default:
       throw new Error("invalid name")
   }
