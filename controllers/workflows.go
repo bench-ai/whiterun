@@ -6,7 +6,6 @@ import (
 	"ApiExecutor/models"
 	"context"
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -71,6 +70,7 @@ func CreateWorkflow(c *gin.Context) {
 		CreatedAt:   now,
 		UpdatedAt:   now,
 		Structure:   nil,
+		IsUniversal: true,
 	}
 
 	builder := db.NewUpdateBuilder()
@@ -173,8 +173,6 @@ func SaveWorkflow(c *gin.Context) {
 
 func GetWorkFlow(c *gin.Context) {
 	id := c.Query("id")
-
-	fmt.Println("here")
 
 	client, err := db.GetDatabaseClient()
 
