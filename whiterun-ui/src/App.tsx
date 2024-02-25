@@ -10,6 +10,7 @@ import {AuthProvider} from "./auth/auth_context";
 import Home from "./views/home/home";
 import ErrorPage from "./views/error_page/error_page";
 import Workbench from './views/workbench/workbench';
+import SimplifiedView from "./views/simplfied_view/simplifiedview";
 
 const App = () => {
 
@@ -37,6 +38,7 @@ const App = () => {
                         {/*<Route path={"/browse"} element={<AppPage/>}/>*/}
                         {/*<Route path={"/protected"} element={<Protected/>}/>*/}
                         <Route path="/workbench" element={<Workbench />} />
+                        <Route path="/generator" element={<SimplifiedView />} />
                         <Route path={"/"} element={<Home/>}/>
                         <Route path={"/login"} element={<Login/>}/>
                         <Route path={"/register"} element={<Register/>}/>

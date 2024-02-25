@@ -8,6 +8,7 @@ import (
 	"ApiExecutor/controllers/replicate"
 	"ApiExecutor/controllers/stability"
 	"ApiExecutor/db"
+	"ApiExecutor/elevenlabs"
 	"ApiExecutor/middleware"
 	"context"
 	"fmt"
@@ -143,6 +144,9 @@ func main() {
 	//GPT
 	r.POST("api/openai/gpt", middleware.CheckExecutionAccess, chatgpt.Gpt)
 	r.POST("api/openai/prompt/generator", middleware.CheckExecutionAccess, chatgpt.PromptGenerator)
+
+	//ELEVEN
+	r.POST("api/eleven/list-voices", elevenlabs.CollectVoiceList)
 
 	if err := r.Run(address); err != nil {
 		fmt.Println("Unable to start server")
