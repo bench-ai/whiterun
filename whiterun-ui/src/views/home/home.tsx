@@ -90,7 +90,7 @@ const Home = () => {
                     <Alert
                         message={<strong>An update to your Workflows</strong>}
                         description="We recently updated how workflows work and therefore, previous workflows no longer work and will have to be
-                        recreated. We aplogize for any inconvenience this has caused."
+                        recreated. We apologize for any inconvenience this has caused."
                         type="info"
                         closable
                         showIcon

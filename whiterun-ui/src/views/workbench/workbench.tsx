@@ -1,11 +1,10 @@
-import {Button, Card, Collapse, Layout, Modal, Spin} from 'antd';
-import Paragraph from 'antd/es/typography/Paragraph';
+import {Button, Card, Collapse, Layout, Spin} from 'antd';
 import Title from 'antd/es/typography/Title';
 import React, {useEffect, useState} from 'react';
 import DragAndDrop from '../../testDnd/dnd';
-import {TutorialCardList, TutorialVideo, TutorialVideoModal} from "./workbench.styles";
+import {HelpModal, TutorialCardList, TutorialVideo} from "./workbench.styles";
 import HelpLogo from "../../assets/helpLogo.svg";
-import DiscordLogo from "../../assets/discordLogo.svg";
+import LearningCenter from "../../components/learning_center/learning_center";
 const {Panel} = Collapse;
 
 const Workbench = () => {
@@ -40,12 +39,6 @@ const Workbench = () => {
             window.removeEventListener('resize', handleResize);
         };
     }, []);
-
-    function parseUrl(){
-        const queryString = window.location.search;
-        const queryParams = new URLSearchParams(queryString);
-        return queryParams.get('id')
-    }
 
     useEffect(() => {
         document.title = 'Workbench - Bench AI';
@@ -157,33 +150,14 @@ const Workbench = () => {
                                     <img src={HelpLogo} alt="Help Logo" style={{color: 'white'}}/>
                                 </Button>
                             </div>
-                            <Modal
-                                title={<Title level={2}>Making a Workflow</Title>}
+                            <HelpModal
                                 visible={isModalOpen}
                                 onCancel={handleCancel}
                                 footer={null}
                                 destroyOnClose={true}
-                                width={800}
                             >
-                                <TutorialVideoModal
-                                    src="https://www.youtube.com/embed/BIsJ18lYyXU?si=mnS0xfsSFTK7iwUa"
-                                    title="YouTube video player" frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    allowFullScreen></TutorialVideoModal>
-                                <Title level={4}>For additional Help:</Title>
-                                <a href="https://discord.com/invite/gt8HvMgUn5" target="_blank" rel="noopener noreferrer">
-                                    <Button style={{
-                                        backgroundColor: '#404eed',
-                                        borderColor: '#404eed',
-                                        fontWeight: 'bold',
-                                        fontSize: '16px',
-                                        display: 'flex',
-                                        color: 'white',}}>
-                                        Discord
-                                        <img src={DiscordLogo} style={{marginLeft: '10px'}}/>
-                                    </Button>
-                                </a>
-                            </Modal>
+                                <LearningCenter/>
+                            </HelpModal>
                         </div>
                     </div>
                     <DragAndDrop/>

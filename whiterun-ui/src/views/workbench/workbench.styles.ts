@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import {Modal} from "antd";
 
 export const TutorialCardList = styled.div`
     display: grid;
@@ -28,3 +29,20 @@ export const TutorialVideoModal = styled.iframe`
         padding-bottom: 0; /* Reset padding for larger screens */
     }
 `;
+
+export const HelpModal = styled(Modal)`
+    min-width: calc(100vw - 500px);
+    max-width: 1000px;
+    padding: 0;
+    min-height: 80vh;
+    max-height: 700px;
+    overflow-y: scroll;
+
+    @media screen and (max-width: 1500px) {
+        min-width: calc(100vw - 10px * 10);
+    }
+    
+    .ant-modal-content {
+        padding: 0;
+    }
+`

@@ -385,6 +385,24 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
   }
 }
 
+editor.zoom_value = 0.2;
+
+async function zoomIn() {
+  editor.zoom_in()
+}
+
+async function zoomOut() {
+  editor.zoom_out()
+}
+
+async function zoomReset() {
+  editor.zoom_reset()
+}
+
+window.zoomIn = zoomIn
+window.zoomOut = zoomOut
+window.zoomReset = zoomReset
+
 async function executeGraph(){
   const playButton = document.getElementById('enabled-play-button');
   playButton.style.display = "none"

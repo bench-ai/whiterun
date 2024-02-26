@@ -19,12 +19,19 @@ const App = () => {
         <>
             <ConfigProvider
                 theme={{
+                    components: {
+                        Menu: {
+                            itemBg: "#0d1117",
+                            activeBarBorderWidth: 0
+                        },
+                    },
                     algorithm: theme.darkAlgorithm,
                     token: {
                         "colorPrimary": "#3fb950",
                         "colorBgBase": "#0d1117",
                         "colorBgContainer": "#12181f"
                     },
+
 
                 }}
             >
