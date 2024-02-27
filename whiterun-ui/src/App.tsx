@@ -21,6 +21,17 @@ const App = () => {
             <ConfigProvider
                 theme={{
                     algorithm: theme.darkAlgorithm,
+                    components: {
+                        Tag: {
+                            colorPrimaryHover: "none",
+                            colorPrimary: "none",
+                            colorBgBase: "white",
+                            colorFillSecondary: "white",
+                            colorTextLightSolid: "white",
+                            colorPrimaryActive: "white"
+
+                        },
+                    },
                     token: {
                         "colorPrimary": "#3fb950",
                         "colorBgBase": "#0d1117",

@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {ButtonRow, ModeButton, ModeHeader, ModeSection} from "./simplifiedview.styles";
 import TextToImage from "./modes/textToImage"
 import GeneratorColumn from "./generators/generatorColumn";
+import SimplifiedInpainting from "./modes/inpainting";
 
 const SimplifiedView = () => {
 
@@ -31,6 +32,9 @@ const SimplifiedView = () => {
         switch (currentMode){
             case "tti":
                 setModeBody(<TextToImage />);
+                break;
+            case "inp":
+                setModeBody(<SimplifiedInpainting />)
                 break;
             default:
                 break;
