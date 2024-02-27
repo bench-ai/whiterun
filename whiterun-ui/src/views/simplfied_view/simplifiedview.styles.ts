@@ -30,22 +30,20 @@ export const TutorialVideoModal = styled.iframe`
 `;
 
 export const ModeSection = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    margin: auto;
+    max-width: 1000px;
 `;
 
 export const ModeHeader = styled.h2`
     font-size: 35px;
     color: white;
     display: flex;
-    justify-content: start;
 `;
 
 export const ButtonRow = styled.div`
    display: flex;
-   justify-content: center;
    flex-wrap: wrap;
+   
 `;
 
 export const ModeButton = styled.div`
@@ -53,15 +51,10 @@ export const ModeButton = styled.div`
     padding: 10px;
     border-radius: 20px;
     border: none;
-    margin-right: 10px;
+    margin-right: 50px;
     margin-bottom: 10px;
     background: white;
     textAlign: 'center';
 `;
 
 
-// .mode-header{
-//     font-size: 35px;
-//     color: white;
-//     text-align: left;
-// }

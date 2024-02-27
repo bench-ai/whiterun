@@ -1,5 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {ButtonRow, ModeButton, ModeHeader, ModeSection} from "./simplifiedview.styles";
+import TextToImage from "./modes/textToImage"
+import GeneratorColumn from "./generators/generatorColumn";
 
 const SimplifiedView = () => {
 
@@ -7,9 +9,10 @@ const SimplifiedView = () => {
         document.title = 'Workbench Lite - Bench AI';
     })
 
-
     const [selectedMode, setSelectedMode] = useState("");
-    const [variableOne, setVariableOne] = useState("");
+    const [modeBody, setModeBody] = useState<React.ReactElement | null>(null);
+    const [generatorColumn, setGeneratorColumn] = useState<React.ReactElement | null>(GeneratorColumn);
+
 
     function addView(currentMode: string) {
         const previousMode = document.getElementById(selectedMode);
@@ -25,29 +28,43 @@ const SimplifiedView = () => {
             mode.style.color = 'white';
         }
 
-        setVariableOne(currentMode);
+        switch (currentMode){
+            case "tti":
+                setModeBody(<TextToImage />);
+                break;
+            default:
+                break;
+        }
+
         setSelectedMode(currentMode);
     }
 
     useEffect(() => {
-        addView("tti")
-    })
+        addView("tti");
+    }, []);
 
     return (
-        <div className="center-container">
+        <div>
             <ModeSection>
                 <ModeHeader>Mode</ModeHeader>
-                <ButtonRow >
-                    <ModeButton id="tti" className="mode-button" onClick={() => addView('tti')}><b>Text To Image</b></ModeButton>
-                    <ModeButton id="iti" className="mode-button" onClick={() => addView('iti')}><b>Image To Image</b></ModeButton>
-                    <ModeButton id="inp" className="mode-button" onClick={() => addView('inp')}><b>Inpaint</b></ModeButton>
-                    <ModeButton id="ups" className="mode-button" onClick={() => addView('ups')}><b>Upscale</b></ModeButton>
-                    <ModeButton id="anm" className="mode-button" onClick={() => addView('anm')}><b>Animate</b></ModeButton>
+                <ButtonRow>
+                    <ModeButton id="tti" className="mode-button" onClick={() => addView('tti')}><b>Text To
+                        Image</b></ModeButton>
+                    <ModeButton id="iti" className="mode-button" onClick={() => addView('iti')}><b>Image To
+                        Image</b></ModeButton>
+                    <ModeButton id="inp" className="mode-button"
+                                onClick={() => addView('inp')}><b>Inpaint</b></ModeButton>
+                    <ModeButton id="ups" className="mode-button"
+                                onClick={() => addView('ups')}><b>Upscale</b></ModeButton>
+                    <ModeButton id="anm" className="mode-button"
+                                onClick={() => addView('anm')}><b>Animate</b></ModeButton>
                 </ButtonRow>
+                <div>
+                    {modeBody}
+                </div>
+                <ModeHeader>Generators</ModeHeader>
+                {generatorColumn}
             </ModeSection>
-            <div className="mode-layout">
-                {variableOne}
-            </div>
         </div>
     );
 };
