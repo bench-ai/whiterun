@@ -7,7 +7,6 @@ import {Content} from "antd/es/layout/layout";
 import {WorkflowList} from "./home.styles";
 import {WorkflowCard} from "../../components/workflow_card/workflow_card";
 import {AddApiForm} from "../app_page/app_page.styles";
-import CardSelector from "../../components/workflow_template_card/template_card_selector";
 
 interface Workflow {
     id: string;

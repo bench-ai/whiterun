@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 
 export const Column = styled.div`
+    margin-top: 40px;
     width: 30%;
     border: 1px solid white;
     color: white;
@@ -16,10 +17,18 @@ export const ModelGrid = styled.div`
     overflow-y: auto;
 `;
 
+export const SelectedGrid = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-gap: 15px;
+    max-height: calc(1 * (260px));
+    margin-bottom: 10px;
+`;
+
 export const ModelHeader = styled.h2`
     border-bottom: 1px white;
     text-decoration: underline;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 `;
 
 export const ModelText = styled.div`
@@ -27,8 +36,7 @@ export const ModelText = styled.div`
     border: 0px;
     color: white;
     font-size: 18px;
-    margin-bottom: 15px;
-`;
+    `;
 
 export const ModelDescription = styled.div`
     background: transparent;
@@ -36,4 +44,5 @@ export const ModelDescription = styled.div`
     color: white;
     font-size: 18px;
     line-height: 20px;
+    margin-top: 15px;
 `;

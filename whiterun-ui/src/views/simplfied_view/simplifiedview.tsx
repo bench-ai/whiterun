@@ -1,10 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {ButtonRow, ModeButton, ModeHeader, ModeSection} from "./simplifiedview.styles";
-import TextToImage from "./modes/textToImage"
+import Prompts from "./prompts/prompts"
 import GeneratorColumn from "./generators/generatorColumn";
 import SimplifiedInpainting from "./modes/inpainting";
 import ImageToImage from "./modes/imageToImage";
 import ImageToVideo from "./modes/imageToVideo";
+import { RootState } from "../../state/store";
+import {change} from "../../state/mode/modeSlice"
+import {useDispatch, useSelector} from "react-redux";
 
 const SimplifiedView = () => {
 
@@ -12,30 +15,20 @@ const SimplifiedView = () => {
         document.title = 'Workbench Lite - Bench AI';
     })
 
-    const [selectedMode, setSelectedMode] = useState("");
-    const [modeBody, setModeBody] = useState<React.ReactElement | null>(null);
-    const [generatorColumn, setGeneratorColumn] = useState<React.ReactElement | null>(GeneratorColumn);
+    const mode = useSelector((state: RootState) => state.mode.value);
+    const dispatch = useDispatch();
 
+    const [modeBody, setModeBody] = useState<React.ReactElement | null>(null);
+    const [generatorColumn, setGeneratorColumn] = useState<React.ReactElement | null>(null);
+    const [prompt, setPrompt] = useState<React.ReactElement | null>(null);
 
     function addView(currentMode: string) {
-        const previousMode = document.getElementById(selectedMode);
-        const mode = document.getElementById(currentMode);
-
-        if (previousMode) {
-            previousMode.style.color = 'black';
-            previousMode.style.background = 'white';
-        }
-
-        if (mode) {
-            mode.style.background = '#53389E';
-            mode.style.color = 'white';
-        }
-
         switch (currentMode){
             case "tti":
-                setModeBody(<TextToImage />);
+                setModeBody(<div></div>)
                 break;
             case "inp":
+                console.log("Switched")
                 setModeBody(<SimplifiedInpainting />)
                 break;
             case "iti":
@@ -48,11 +41,15 @@ const SimplifiedView = () => {
                 break;
         }
 
-        setSelectedMode(currentMode);
+        dispatch(change({
+            name: currentMode
+        }));
     }
 
     useEffect(() => {
-        addView("tti");
+        addView(mode.name);
+        setGeneratorColumn(<GeneratorColumn />);
+        setPrompt(<Prompts />)
     }, []);
 
     return (
@@ -60,19 +57,63 @@ const SimplifiedView = () => {
             <ModeSection>
                 <ModeHeader>Mode</ModeHeader>
                 <ButtonRow>
-                    <ModeButton id="tti" className="mode-button" onClick={() => addView('tti')}><b>Text To
-                        Image</b></ModeButton>
-                    <ModeButton id="iti" className="mode-button" onClick={() => addView('iti')}><b>Image To
-                        Image</b></ModeButton>
-                    <ModeButton id="inp" className="mode-button"
-                                onClick={() => addView('inp')}><b>Inpaint</b></ModeButton>
-                    <ModeButton id="ups" className="mode-button"
-                                onClick={() => addView('ups')}><b>Upscale</b></ModeButton>
-                    <ModeButton id="anm" className="mode-button"
-                                onClick={() => addView('anm')}><b>Animate</b></ModeButton>
+
+                    <ModeButton
+                        onClick={() => addView('tti')}
+                        style={{
+                            backgroundColor: mode.name === "tti" ? '#53389E' : 'white',
+                            color: mode.name === "tti" ? 'white' : 'black'
+                        }}
+                    >
+                        <b>Text To Image</b>
+                    </ModeButton>
+
+                    <ModeButton
+                        onClick={() => addView('iti')}
+                        style={{
+                            backgroundColor: mode.name === "iti" ? '#53389E' : 'white',
+                            color: mode.name === "iti" ? 'white' : 'black'
+                        }}
+                    >
+                        <b>Image To Image</b>
+                    </ModeButton>
+
+                    <ModeButton
+                        onClick={() => addView('inp')}
+                        style={{
+                            backgroundColor: mode.name === "inp" ? '#53389E' : 'white',
+                            color: mode.name === "inp" ? 'white' : 'black'
+                        }}
+                    >
+                        <b>Inpaint</b>
+                    </ModeButton>
+
+                    <ModeButton
+                        onClick={() => addView('ups')}
+                        style={{
+                            backgroundColor: mode.name === "ups" ? '#53389E' : 'white',
+                            color: mode.name === "ups" ? 'white' : 'black'
+                        }}
+                    >
+                        <b>Upscale</b>
+                    </ModeButton>
+
+                    <ModeButton
+                        onClick={() => addView('anm')}
+                        style={{
+                            backgroundColor: mode.name === "anm" ? '#53389E' : 'white',
+                            color: mode.name === "anm" ? 'white' : 'black'
+                        }}
+                    >
+                        <b>Animate</b>
+                    </ModeButton>
+
                 </ButtonRow>
                 <div>
                     {modeBody}
+                </div>
+                <div>
+                    {prompt}
                 </div>
                 <ModeHeader>Generators</ModeHeader>
                 {generatorColumn}
