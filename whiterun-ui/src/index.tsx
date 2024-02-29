@@ -6,6 +6,8 @@ import reportWebVitals from './reportWebVitals';
 import {BrowserRouter} from "react-router-dom";
 import './interceptors/axios';
 import mixpanel from 'mixpanel-browser';
+import {Provider} from "react-redux"
+import {store} from "./state/store"
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -22,7 +24,9 @@ if (mixpanelProjectToken) {
 root.render(
   <React.StrictMode>
       <BrowserRouter>
-          <App />
+          <Provider store={store}>
+              <App />
+          </Provider>
       </BrowserRouter>
   </React.StrictMode>
 );
