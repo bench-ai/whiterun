@@ -406,7 +406,7 @@ const SimplifiedInpainting = () => {
                     </StyledCheckableTag>
                 ))}
             </ButtonRow>
-            <ModeHeader>Image</ModeHeader>
+            <ModeHeader>Upload Image</ModeHeader>
             <UploadContainer>
                 <label htmlFor="fileInput">
                     <InboxOutlined style={{fontSize: "50px", color: "#39a047"}}/>

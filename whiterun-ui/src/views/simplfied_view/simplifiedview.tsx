@@ -3,6 +3,8 @@ import {ButtonRow, ModeButton, ModeHeader, ModeSection} from "./simplifiedview.s
 import TextToImage from "./modes/textToImage"
 import GeneratorColumn from "./generators/generatorColumn";
 import SimplifiedInpainting from "./modes/inpainting";
+import ImageToImage from "./modes/imageToImage";
+import ImageToVideo from "./modes/imageToVideo";
 
 const SimplifiedView = () => {
 
@@ -35,6 +37,12 @@ const SimplifiedView = () => {
                 break;
             case "inp":
                 setModeBody(<SimplifiedInpainting />)
+                break;
+            case "iti":
+                setModeBody(<ImageToImage />)
+                break;
+            case "anm":
+                setModeBody(<ImageToVideo />)
                 break;
             default:
                 break;
