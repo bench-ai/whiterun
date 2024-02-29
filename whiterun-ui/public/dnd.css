@@ -999,6 +999,7 @@ body{
 }
 
 .modal-editor-button {
+  margin-top: 8px;
   background-color: #39a047;
   border: none;
   color: white;

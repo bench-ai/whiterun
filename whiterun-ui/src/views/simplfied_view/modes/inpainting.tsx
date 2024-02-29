@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+    BrushTitle,
     EditButton,
     EditorButtonColumn,
     ImageEditor,
-    ImageEditorSlider,
-    StyledCheckableTag
+    ImageEditorSlider, MaskEditorTitle, SaveButton,
+    StyledCheckableTag, UploadContainer, UploadedFileContainer
 } from './inpainting.styles';
-import { ButtonRow, ModeHeader } from '../simplifiedview.styles';
-import { message, Tag, Upload, UploadProps } from 'antd';
-import { InboxOutlined } from '@ant-design/icons';
-
-const { Dragger } = Upload;
+import {ButtonRow, ModeButton, ModeHeader} from '../simplifiedview.styles';
+import {InboxOutlined, PaperClipOutlined} from '@ant-design/icons';
 
 const SimplifiedInpainting = () => {
-    const { CheckableTag } = Tag;
     const tagsData = ['RealVisXL', 'SDXL'];
     const [selectedTags, setSelectedTags] = useState<string[]>(['Books']);
-    const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+    const [brushSize, setBrushSize] = useState<number>(5);
+    const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
+    const [editedMaskFile, setEditedMaskFile] = useState<File | null>(null);
+    const [editedMaskFileUrl, setEditedMaskFileUrl] = useState<string | null>(null);
 
     useEffect(() => {
         document.title = 'Workbench Lite - Bench AI';
@@ -29,7 +29,32 @@ const SimplifiedInpainting = () => {
         setSelectedTags(nextSelectedTags);
     };
 
-    const showEditModal = (file: Blob | MediaSource) => {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+            if (file instanceof Blob) {
+                setUploadedImageFile(file);
+                imageEditor(file);
+                console.log(uploadedImageFile)
+            }
+        }
+    };
+
+    const handleMaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+            if (file instanceof Blob) {
+                setEditedMaskFile(file);
+                setEditedMaskFileUrl(URL.createObjectURL(file));
+            }
+        }
+    };
+
+    const resetView = () => {
+        addView("createMask")
+    }
+
+    const imageEditor = (file: Blob | MediaSource) => {
         const canvas = document.getElementById('myCanvas') as HTMLCanvasElement;
         const canvas2 = document.getElementById('myCanvas2') as HTMLCanvasElement;
         const outputCanvas = document.getElementById('outputCanvas') as HTMLCanvasElement;
@@ -41,12 +66,13 @@ const SimplifiedInpainting = () => {
         const flipColorsButton = document.getElementById('flipColorsButton') as HTMLButtonElement;
         const resetButton = document.getElementById('resetButton') as HTMLButtonElement;
         const downloadButton = document.getElementById('downloadButton') as HTMLButtonElement;
+        const saveButton = document.getElementById('saveButton') as HTMLButtonElement;
         let img = new Image();
         let isDrawing = false;
         let brushSize = 5; // Initial brush size
         let lastX: number | undefined, lastY: number | undefined;
 
-        // img.src = URL.createObjectURL(this.getVisualProperties('image-input').files[0]);
+        let editedMaskImage;
 
         img.src = URL.createObjectURL(file);
 
@@ -80,12 +106,36 @@ const SimplifiedInpainting = () => {
             ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
             ctx2.fillStyle = "white"; // Set to the same background color as canvas2
             ctx2.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            // Handle mouse events for continuous brush effect
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            brushSizeSlider.addEventListener('input', brushSizeInputListener);
+            resetButton.addEventListener('click', resetButtonClickHandler);
+            downloadButton.addEventListener('click', downloadButtonClickHandler);
+            saveButton.addEventListener('click', saveButtonClickHandler);
+            toggleCanvasButton.addEventListener('click', toggleCanvasButtonClickHandler);
+            flipColorsButton.addEventListener('click', flipColorsButtonClickHandler);
         };
 
-        // Handle mouse events for continuous brush effect
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
+        const closeButton = document.querySelector('.file-input');
+        // @ts-ignore
+        closeButton.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+
+            canvas.removeEventListener('mousedown', startDrawing);
+            canvas.removeEventListener('mouseup', stopDrawing);
+            canvas.removeEventListener('mouseleave', stopDrawing);
+            brushSizeSlider.removeEventListener('input', brushSizeInputListener);
+            resetButton.removeEventListener('click', resetButtonClickHandler);
+            downloadButton.removeEventListener('click', downloadButtonClickHandler);
+            saveButton.removeEventListener('click', saveButtonClickHandler);
+            toggleCanvasButton.removeEventListener('click', toggleCanvasButtonClickHandler);
+            flipColorsButton.removeEventListener('click', flipColorsButtonClickHandler);
+        });
+
 
         function startDrawing(event: any) {
             isDrawing = true;
@@ -154,6 +204,7 @@ const SimplifiedInpainting = () => {
         function brushSizeInputListener() {
             // Update the brush size when the slider value changes
             brushSize = parseInt(brushSizeSlider.value, 10);
+            setBrushSize(brushSize);
         }
 
         // Define the reset button click handler
@@ -179,16 +230,34 @@ const SimplifiedInpainting = () => {
             // Create a download link
             const a = document.createElement('a');
             a.href = dataURL;
-            a.download = 'canvas2_paintbrush.png';
+            a.download = 'mask_file.png';
             a.click();
         }
 
-        brushSizeSlider.addEventListener('input', brushSizeInputListener);
-        resetButton.addEventListener('click', resetButtonClickHandler);
-        downloadButton.addEventListener('click', downloadButtonClickHandler);
+        function saveButtonClickHandler() {
+            // Create a data URL representing the contents of canvas2
+            outputCtx.drawImage(canvas2, 0, 0, outputCanvas.width, outputCanvas.height);
+            const dataURL = outputCanvas.toDataURL("image/png");
+
+            // Convert data URL to Blob
+            const byteString = atob(dataURL.split(',')[1]);
+            const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            const editedMaskBlob = new Blob([ab], { type: mimeString });
+
+            // Set the edited mask file in the state
+            setEditedMaskFile(new File([editedMaskBlob], 'edited_mask.png'));
+            setEditedMaskFileUrl(URL.createObjectURL(editedMaskBlob));
+        }
+
+
 
         // Define the toggle canvas button click handler
-        toggleCanvasButton.addEventListener('click', () => {
+        function toggleCanvasButtonClickHandler() {
             if (canvas.style.display === 'none') {
                 canvas.style.display = 'block';
                 canvas2.style.display = 'none';
@@ -196,10 +265,10 @@ const SimplifiedInpainting = () => {
                 canvas.style.display = 'none';
                 canvas2.style.display = 'block';
             }
-        });
+        }
 
         // Define the flip colors button click handler
-        flipColorsButton.addEventListener('click', () => {
+        function flipColorsButtonClickHandler() {
             // Flip the colors of canvas2
             const currentFillColor = ctx2.fillStyle;
             const currentImageData = ctx2.getImageData(0, 0, canvas2.width, canvas2.height);
@@ -220,46 +289,107 @@ const SimplifiedInpainting = () => {
 
             // Restore the original fill color
             ctx2.fillStyle = currentFillColor;
-        });
+        }
     };
 
+    useEffect(() => {
+        console.log(editedMaskFile);
+    }, [editedMaskFile]);
 
-    const props: UploadProps = {
-        name: 'file',
-        multiple: false,
-        listType: 'picture',
-        beforeUpload: (file) => {
-            const isPNG = file.type === 'image/png';
-            const isJpeg = file.type === 'image/jpeg';
-            if (!isPNG && !isJpeg) {
-                message.error(`${file.name} is not a png or jpg file`);
-                return false;
-            } else {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    if (e.target && e.target.result) {
-                        setUploadedImageUrl(e.target.result.toString());
-                        showEditModal(file);
-                    }
-                };
-                reader.readAsDataURL(file);
-                return false;
-            }
-        },
-        onChange(info) {
-            const { status } = info.file;
-            if (status !== 'uploading') {
-                console.log(info.file, info.fileList);
-            }
-            if (status === 'done') {
-                message.success(`${info.file.name} file uploaded successfully.`);
-            } else if (status === 'error') {
-                message.error(`${info.file.name} file upload failed.`);
-            }
-        },
-        onDrop(e) {
-            console.log('Dropped files', e.dataTransfer.files);
-        },
+    const [selectedMode, setSelectedMode] = useState("");
+
+    function addView(currentMode: string) {
+        console.log("entered")
+        const previousMode = document.getElementById(selectedMode);
+        const mode = document.getElementById(currentMode);
+
+        if (previousMode) {
+            previousMode.style.color = 'black';
+            previousMode.style.background = 'white';
+        }
+
+        if (mode) {
+            mode.style.background = '#53389E';
+            mode.style.color = 'white';
+        }
+
+        switch (currentMode) {
+            case "createMask":
+                break;
+            case "uploadMask":
+                break;
+            default:
+                break;
+        }
+
+        setSelectedMode(currentMode);
+    }
+
+    useEffect(() => {
+        addView("createMask");
+    }, []);
+
+    const renderMaskEditor = () => {
+        // Your mask editor JSX goes here
+        return (
+            <ImageEditor>
+                <div style={{display: "flex", flexWrap: "wrap"}}>
+                    <EditorButtonColumn>
+                        <MaskEditorTitle>Mask Editor</MaskEditorTitle>
+                        <EditButton id="resetButton">Reset Edits</EditButton>
+                        <EditButton id="toggleCanvasButton">Toggle Mask Preview</EditButton>
+                        <EditButton id="flipColorsButton">Flip Mask Output Color</EditButton>
+                        <div style={{marginTop: "10px"}}>
+                            <BrushTitle htmlFor="brushSizeSlider">Brush Size:</BrushTitle>
+                            <ImageEditorSlider type="range" className="modal-editor-slider" id="brushSizeSlider" min="1"
+                                               max="20"
+                                               step="1" value={brushSize}/>
+                        </div>
+                        <div style={{marginTop: "auto"}}>
+                            <EditButton id="downloadButton">Download Edits</EditButton>
+
+                            <SaveButton id="saveButton">Save Edits</SaveButton>
+                        </div>
+                    </EditorButtonColumn>
+                    <div>
+                        <canvas id="myCanvas" width="400" height="400" style={{border: "1px solid #000"}}></canvas>
+                        <canvas id="myCanvas2" width="400" height="400"
+                                style={{border: "1px solid #000", display: "none"}}></canvas>
+                        <canvas id="outputCanvas" width="400" height="400"
+                                style={{border: "1px solid #000", display: "none"}}></canvas>
+                    </div>
+                </div>
+            </ImageEditor>
+        );
+    };
+
+    const renderUploadArea = () => {
+        // Your upload area JSX goes here
+        console.log(editedMaskFile)
+        return (
+            <div style={{margin: "auto", minWidth: "300px", maxWidth: "60%"}}>
+                <UploadContainer style={{marginTop: "20px"}}>
+                    <label htmlFor="maskInput">
+                        <InboxOutlined style={{fontSize: "50px", color: "#39a047"}}/>
+                        <h2 style={{color: "#c0c1c2", fontSize: "18px"}}>Click in this area to upload a masking
+                            file</h2>
+                        <p style={{color: "#5c5f63", fontSize: "14px"}}>Accepts .jpg & .png files</p>
+                        <input
+                            id="maskInput"
+                            className="mask-input"
+                            type="file"
+                            accept=".jpg, .jpeg, .png"
+                            onChange={(e) => handleMaskChange(e)}
+                        />
+                    </label>
+                </UploadContainer>
+                <UploadedFileContainer visible={editedMaskFile !== null}>
+                    <PaperClipOutlined style={{marginRight: "15px"}}/>
+                    Uploaded File: {editedMaskFile !== null ? editedMaskFile.name : 'No file uploaded'}
+                </UploadedFileContainer>
+
+            </div>
+        );
     };
 
     return (
@@ -277,54 +407,43 @@ const SimplifiedInpainting = () => {
                 ))}
             </ButtonRow>
             <ModeHeader>Image</ModeHeader>
-            <Dragger {...props}>
-                <p className="ant-upload-drag-icon">
-                    <InboxOutlined />
-                </p>
-                <p className="ant-upload-text">Click or drag file to this area to upload</p>
-                <p className="ant-upload-hint">
-                    Support for a single or bulk upload. Strictly prohibited from uploading company data or other banned
-                    files.
-                </p>
-            </Dragger>
-            {uploadedImageUrl && (
-                <div style={{ marginTop: '20px', backgroundImage: `url(${uploadedImageUrl})`, backgroundSize: 'cover' }}>
-                    {/* You can customize the styles as needed */}
-                    <p>Uploaded Image</p>
+            <UploadContainer>
+                <label htmlFor="fileInput">
+                    <InboxOutlined style={{fontSize: "50px", color: "#39a047"}}/>
+                    <h2 style={{color: "#c0c1c2", fontSize: "18px"}}>Click in this area to upload a file</h2>
+                    <p style={{color: "#5c5f63", fontSize: "14px"}}>Accepts .jpg & .png files</p>
+                    <input
+                        id="fileInput"
+                        className="file-input"
+                        type="file"
+                        accept=".jpg, .jpeg, .png"
+                        onChange={(e) => handleFileChange(e)}
+                        onClick={resetView}
+                    />
+                </label>
+            </UploadContainer>
+            <UploadedFileContainer visible={uploadedImageFile !== null}>
+                <PaperClipOutlined style={{marginRight: "15px"}}/>
+                Uploaded File: {uploadedImageFile !== null ? uploadedImageFile.name : 'No file uploaded'}
+            </UploadedFileContainer>
+            <ModeHeader>Mask</ModeHeader>
+            <ButtonRow>
+                <ModeButton id="createMask" onClick={() => addView('createMask')} style={{marginRight: "20px"}}><b>Create
+                    a
+                    Mask</b></ModeButton>
+                <ModeButton id="uploadMask" onClick={() => addView('uploadMask')} style={{marginRight: "20px"}}><b>Upload
+                    a
+                    Mask</b></ModeButton>
+            </ButtonRow>
+            {selectedMode === 'createMask' ? renderMaskEditor() : null}
+            {selectedMode === 'uploadMask' ? renderUploadArea() : null}
+            {editedMaskFileUrl && (
+                <div>
+                    <h2>Edited Mask</h2>
+                    <img src={editedMaskFileUrl} alt="Edited Mask" />
                 </div>
             )}
-            <ModeHeader>Mask</ModeHeader>
-            <ImageEditor>
-                <div style={{ display: "flex", flexWrap: "wrap" }}>
-                    <EditorButtonColumn>
-                        <div className="modal-editor-divider">
-                            <EditButton id="resetButton">Reset Edits</EditButton>
-                        </div>
-                        <div className="modal-editor-divider">
-                            <EditButton id="toggleCanvasButton">Toggle Mask Preview</EditButton>
-                        </div>
-                        <div className="modal-editor-divider">
-                            <EditButton id="flipColorsButton">Flip Mask Output Color</EditButton>
-                        </div>
-                        <div className="modal-editor-divider">
-                            <EditButton id="downloadButton">Download Edits</EditButton>
-                        </div>
-                        <div className="modal-editor-divider">
-                            <label className="modal-editor-title" htmlFor="brushSizeSlider">Brush Size:</label>
-                            <ImageEditorSlider type="range" className="modal-editor-slider" id="brushSizeSlider" min="1"
-                                               max="20"
-                                               step="1" value="5" />
-                        </div>
-                    </EditorButtonColumn>
-                    <div>
-                        <canvas id="myCanvas" width="400" height="400" style={{ border: "1px solid #000" }}></canvas>
-                        <canvas id="myCanvas2" width="400" height="400"
-                                style={{ border: "1px solid #000", display: "none" }}></canvas>
-                        <canvas id="outputCanvas" width="400" height="400"
-                                style={{ border: "1px solid #000", display: "none" }}></canvas>
-                    </div>
-                </div>
-            </ImageEditor>
+
         </div>
     );
 };
