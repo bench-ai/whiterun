@@ -54,7 +54,9 @@ const GeneratorSlice = createSlice({
                     return parseInt(key)
             });
 
-            if (keyList.length !== 5){
+            if (keyList.length === 0){
+                state.value[0] = action.payload
+            }else if (keyList.length !== 5){
                 const maxKey = Math.max(...keyList) + 1
                 state.value[maxKey] = action.payload
             }

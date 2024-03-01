@@ -3,13 +3,16 @@ import modeReducer from "./mode/modeSlice"
 import promptReducer from "./prompt/promptSlice"
 import generatorReducer from "./generator/generatorSlice"
 import alertReducer from "./alerts/alertsSlice"
+import resultReducer from "./results/resultSlice"
+
 
 export const store = configureStore({
     reducer: {
         mode: modeReducer,
         prompt: promptReducer,
         generator: generatorReducer,
-        alert: alertReducer
+        alert: alertReducer,
+        result: resultReducer
     },
 });
 

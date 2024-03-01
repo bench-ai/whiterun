@@ -1,14 +1,13 @@
 import {ModeButton} from "../simplifiedview.styles";
 import {useDispatch, useSelector} from "react-redux";
-import {RootState} from "../../../state/store";
+import {AppDispatch, RootState} from "../../../state/store";
 import {enhancePrompt} from "./requests/chatgpt";
 import {resetAlert, updateAlert} from "../../../state/alerts/alertsSlice"
-import {GeneratorsMap} from "../../../state/generator/generatorSlice";
-import {Option} from "../../../state/generator/generatorSlice"
-import {ImageRequest, textToImage} from "./requests/apiHandler";
+import {GeneratorsMap, Option} from "../../../state/generator/generatorSlice";
+import {Result, appendTTIResultAsync, reset, increment} from "../../../state/results/resultSlice"
 
-export interface RestructuredGeneratorMap{
-    [key: number]:{
+export interface RestructuredGeneratorMap {
+    [key: number]: {
         name: string
         settings: {
             [key: string]: string | number | boolean
@@ -18,13 +17,13 @@ export interface RestructuredGeneratorMap{
 
 const restructureSettings = (optionArr: Option[]) => {
 
-    const optionMap: { [key: string]: string | number | boolean} = {}
+    const optionMap: { [key: string]: string | number | boolean } = {}
 
     optionArr.forEach(opt => {
-        switch (opt.type){
+        switch (opt.type) {
             case "numbox":
             case "range":
-                if (opt.value){
+                if (opt.value) {
                     optionMap[opt.name] = opt.value
                 }
                 break
@@ -34,7 +33,7 @@ const restructureSettings = (optionArr: Option[]) => {
                 }
                 break
             case "list":
-                if (opt.options){
+                if (opt.options) {
                     optionMap[opt.name] = opt.options[0]
                 }
                 break
@@ -65,15 +64,24 @@ const GenerateButton = () => {
     const mode = useSelector((state: RootState) => state.mode.value);
     const prompt = useSelector((state: RootState) => state.prompt.value);
     const generatorsMap = useSelector((state: RootState) => state.generator.value);
-    const dispatch = useDispatch();
+    const result = useSelector((state: RootState) => state.result.value);
+    const dispatch = useDispatch<AppDispatch>();
 
     const funcExecute = async () => {
 
         let positivePrompt = prompt.positivePrompt
+        let enhancedPrompt = ""
         let negativePrompt = prompt.negativePrompt
 
-        if(prompt.enhance){
-            if(!prompt.promptStyle){
+        if (Object.keys(generatorsMap).length === 0){
+            return [
+                "No Generators have been selected",
+                "A Generator is required to generate images. Hit the plus button to select a generator"
+            ]
+        }
+
+        if (prompt.enhance) {
+            if (!prompt.promptStyle) {
                 return [
                     "No prompt style was selected",
                     "Prompt styles are near the enhance switch. This will guide the prompt to" +
@@ -82,56 +90,58 @@ const GenerateButton = () => {
             }
 
             const promptResponse = await enhancePrompt(prompt.positivePrompt, prompt.promptStyle)
-            if (!promptResponse.success){
+            if (!promptResponse.success) {
                 return [
                     "Cannot generate prompt",
                     promptResponse.error ? promptResponse.error : "Critical Error unable to generate a response"
                 ]
             }
 
-            if (!promptResponse.response){
+            if (!promptResponse.response) {
                 return [
                     "Cannot generate prompt",
                     "Critical Error unable to generate a response"
                 ]
-            }else{
-                positivePrompt = promptResponse.response[0]
+            } else {
+                enhancedPrompt = promptResponse.response[0]
             }
         }
 
-        switch (mode.name){
-            case "tti":
+        const resMap = restructureMap(generatorsMap)
 
-                const resMap = restructureMap(generatorsMap)
-                const requestList: Promise<ImageRequest>[] = []
+        Object.keys(resMap).forEach(k => {
+            const res: Result = {
+                name: resMap[parseInt(k)].name,
+                settings: resMap[parseInt(k)].settings,
+                positivePrompt: positivePrompt,
+                negativePrompt: negativePrompt,
+                enhanced: prompt.enhance
+            }
 
-                Object.keys(resMap).forEach(k => {
-                    requestList.push(
-                        textToImage(
-                            positivePrompt,
-                            negativePrompt,
-                            resMap[parseInt(k)].name,
-                            resMap[parseInt(k)].settings)
-                    )
-                })
+            if (prompt.enhance) {
+                res.enhancedPrompt = enhancedPrompt
+                res.promptStyle = prompt.promptStyle
+            }
 
-                for (let i = 0; i < requestList.length; i++){
-                    console.log(await requestList[i])
-                }
-
-                break
-            default:
-                console.error("in unknown case")
-        }
+            switch (mode.name) {
+                case "tti":
+                    dispatch(increment())
+                    dispatch(appendTTIResultAsync(res))
+                    break
+                default:
+                    console.error("in unknown case")
+            }
+        })
 
         return ["success"]
     }
 
     const executeWrapper = async () => {
         dispatch(resetAlert())
+        dispatch(reset())
         const responseArr = await funcExecute()
 
-        if (responseArr.length == 2){
+        if (responseArr.length == 2) {
             dispatch(updateAlert({
                 message: responseArr[0],
                 description: responseArr[1],
@@ -142,15 +152,15 @@ const GenerateButton = () => {
 
     return (
         <ModeButton
-            onClick={executeWrapper}
+            onClick={() => (result.resultArr.length === result.pendingCount) ? executeWrapper() : null}
             style={{
-                backgroundColor: '#53389E',
-                color: 'white',
+                backgroundColor: result.resultArr.length === result.pendingCount ? '#53389E': '#999',
+                color: result.resultArr.length === result.pendingCount ? 'white' : '#666',
                 marginTop: '50px',
                 maxWidth: '250px',
                 textAlign: 'center',
                 fontSize: '30px',
-                cursor: 'pointer',
+                cursor: result.resultArr.length === result.pendingCount ? 'pointer': 'not-allowed',
             }}
         >
             <b>Generate</b>
