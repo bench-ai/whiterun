@@ -27,11 +27,11 @@ const Prompts = () => {
 
     const menu = (
         <Menu onClick={({ key }) => onSelect(key)}>
-            <Menu.Item key="Photorealistic">Photorealistic</Menu.Item>
-            <Menu.Item key="Oil Painting">Oil Painting</Menu.Item>
-            <Menu.Item key="Anime">Anime</Menu.Item>
-            <Menu.Item key="Fantasy">Fantasy</Menu.Item>
-            <Menu.Item key="Neonpunk">Neonpunk</Menu.Item>
+            <Menu.Item key="photorealistic">Photorealistic</Menu.Item>
+            <Menu.Item key="oilpainting">Oil Painting</Menu.Item>
+            <Menu.Item key="anime">Anime</Menu.Item>
+            <Menu.Item key="fantasy">Fantasy</Menu.Item>
+            <Menu.Item key="neonpunk">Neonpunk</Menu.Item>
         </Menu>
     );
 

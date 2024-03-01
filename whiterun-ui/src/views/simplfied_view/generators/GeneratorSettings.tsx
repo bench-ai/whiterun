@@ -115,7 +115,7 @@ const SettingOption: FC<SettingOption> = ({id, option, pos}) => {
 
     }else if(option.type === "switch"){
         data = <Switch
-            defaultChecked={true}
+            defaultChecked={option.on}
             onChange={(value) => updateSwitch(value, )}/>
 
     }else if((option.type === "list") && option.options){

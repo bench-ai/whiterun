@@ -2,9 +2,11 @@ import React, {useEffect, useState} from 'react';
 import {ButtonRow, ModeButton, ModeHeader, ModeSection} from "./simplifiedview.styles";
 import Prompts from "./prompts/prompts"
 import GeneratorColumn from "./generators/generatorColumn";
-import { RootState } from "../../state/store";
+import GenerateButton from "./generate/generate";
+import {RootState} from "../../state/store";
 import {change} from "../../state/mode/modeSlice"
 import {useDispatch, useSelector} from "react-redux";
+import {Alert} from "antd";
 
 const SimplifiedView = () => {
 
@@ -13,15 +15,17 @@ const SimplifiedView = () => {
     })
 
     const mode = useSelector((state: RootState) => state.mode.value);
+    const alert = useSelector((state: RootState) => state.alert.value);
     const dispatch = useDispatch();
 
     const [modeBody, setModeBody] = useState<React.ReactElement | null>(null);
     const [generatorColumn, setGeneratorColumn] = useState<React.ReactElement | null>(null);
     const [prompt, setPrompt] = useState<React.ReactElement | null>(null);
+    const [genButton, setButton] = useState<React.ReactElement | null>(null);
 
 
     function addView(currentMode: string) {
-        switch (mode.name){
+        switch (mode.name) {
             case "tti":
                 break;
             default:
@@ -35,13 +39,24 @@ const SimplifiedView = () => {
 
     useEffect(() => {
         addView(mode.name);
-        setGeneratorColumn(<GeneratorColumn />);
-        setPrompt(<Prompts />)
+        setGeneratorColumn(<GeneratorColumn/>);
+        setPrompt(<Prompts/>)
+        setButton(<GenerateButton/>)
     }, []);
 
     return (
         <div>
             <ModeSection>
+                {alert.level != "calm" && (
+                    <Alert
+                        message={<strong>{alert.message}</strong>}
+                        description={alert.description}
+                        type="error"
+                        closable
+                        showIcon
+                        style={{marginTop: "20px"}}
+                    />
+                )}
                 <ModeHeader>Mode</ModeHeader>
                 <ButtonRow>
 
@@ -104,6 +119,9 @@ const SimplifiedView = () => {
                 </div>
                 <ModeHeader>Generators</ModeHeader>
                 {generatorColumn}
+                <div>
+                    {genButton}
+                </div>
             </ModeSection>
         </div>
     );

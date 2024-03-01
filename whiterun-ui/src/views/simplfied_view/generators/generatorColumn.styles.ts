@@ -1,20 +1,15 @@
 import styled from 'styled-components';
 
 export const Column = styled.div`
-    margin-top: 40px;
-    width: 30%;
-    border: 1px solid white;
-    color: white;
-    border-radius: 10px; /* Adjust the radius as needed */
 `;
 
 export const ModelGrid = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(325px, 1fr));
-    grid-template-columns: repeat(1, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     grid-gap: 15px;
-    max-height: calc(1 * (260px));
     overflow-y: auto;
+    margin: 20px;
+    max-height: 500px;
 `;
 
 export const SelectedGrid = styled.div`

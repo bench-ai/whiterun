@@ -55,6 +55,7 @@ export const ModeButton = styled.div`
     margin-bottom: 10px;
     background: white;
     textAlign: 'center';
+    user-select: none;
 `;
 
 

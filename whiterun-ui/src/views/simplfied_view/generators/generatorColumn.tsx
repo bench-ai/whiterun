@@ -37,17 +37,30 @@ const GeneratorCard: FC<Generator> = ({
                                           onClick
                                       }) => {
 
-    const difficultySentence = `Difficulty: ${difficulty}`
+    const difficultySentence = `${difficulty}`
+
+    let fontColor = 'white';
+
+    if (difficulty === 'easy') {
+        fontColor = 'green';
+    } else if (difficulty === 'medium') {
+        fontColor = 'orange';
+    } else if (difficulty === 'hard') {
+        fontColor = 'red';
+    }
 
     return (
         <Card
             onClick={onClick}
             hoverable={true}
             bordered={false}
-            style={{width: 250, marginTop: 20, marginLeft: 20}}>
+            style={{maxWidth: 400}}>
             <div>
                 <ModelHeader style={{marginTop: -20, borderBottom: 1}}>{name}</ModelHeader>
-                <ModelText>{difficultySentence}</ModelText>
+                <div style={{display: "flex"}}>
+                    <ModelText>Difficulty:&nbsp;</ModelText>
+                    <ModelText style={{color: fontColor,}}>{difficultySentence}</ModelText>
+                </div>
                 <ModelDescription>{description}</ModelDescription>
             </div>
         </Card>
@@ -222,7 +235,16 @@ const GeneratorColumn = () => {
                 <AddCard onClick={() => changeDisplayOptions(true)}/>
             </SelectedGrid>
 
-            {displayOptions && (
+            <Modal
+                title={<h2 style={{fontSize: 35, margin: "0 0 0 25px"}}>Select your Generators</h2>}
+                visible={displayOptions}
+                onCancel={() => changeDisplayOptions(false)}
+                footer={null}
+                style={{
+                    minWidth: "75%",
+                }}
+                bodyStyle={{maxHeight: "600px"}}
+            >
                 <Column>
                     <div style={{
                         display: "flex",
@@ -230,13 +252,6 @@ const GeneratorColumn = () => {
                         alignItems: "right",
                         padding: "10px"
                     }}>
-                        <CloseOutlined style={
-                            {
-                                fontSize: '40px',
-                                color: 'white'
-                            }
-                        }
-                                       onClick={() => changeDisplayOptions(false)}/>
                     </div>
                     <ModelGrid>
                         {generatorJson.map((obj) => (
@@ -249,7 +264,7 @@ const GeneratorColumn = () => {
                         ))}
                     </ModelGrid>
                 </Column>
-            )}
+            </Modal>
         </div>
     );
 };
