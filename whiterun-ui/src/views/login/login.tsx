@@ -16,13 +16,16 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [error, setError] = useState(false);
-    const { login } = useAuth();
+    const { login, isLoggedIn } = useAuth();
     const navigate = useNavigate();
 
     const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
 
     useEffect(() => {
         document.title = 'Sign In - Bench AI';
+        if (isLoggedIn) {
+            navigate('/');
+        }
     })
 
     const submit = async () => {

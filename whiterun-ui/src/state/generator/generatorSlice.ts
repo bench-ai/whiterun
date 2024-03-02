@@ -18,6 +18,10 @@ export interface Generator {
     settings: Option[],
 }
 
+export interface GeneratorOptionMap{
+    [key: string]: Generator[];
+}
+
 export interface GeneratorsMap {
     [key: number]: Generator;
 }
@@ -65,6 +69,9 @@ const GeneratorSlice = createSlice({
             const keyList = Object.keys(action.payload)
             const mainKey = parseInt(keyList[0])
             state.value[mainKey] = action.payload[mainKey]
+        },
+        reset: (state) => {
+            state.value = initialState.value
         }
     },
 });
@@ -74,4 +81,5 @@ export default GeneratorSlice.reducer;
 export const {
     removeGenerator,
     addGenerator,
-    updateGenerator} = GeneratorSlice.actions
+    updateGenerator,
+    reset} = GeneratorSlice.actions

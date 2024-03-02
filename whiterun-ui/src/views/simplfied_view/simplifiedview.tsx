@@ -7,6 +7,12 @@ import {RootState} from "../../state/store";
 import {change} from "../../state/mode/modeSlice"
 import {useDispatch, useSelector} from "react-redux";
 import {Alert} from "antd";
+import SimplifiedViewImagesDisplay
+    from "../../components/simplified_view_images_display/simplified_view_images_display";
+import SimplifiedInpainting from "./modes/inpainting";
+import ImageToImage from "./modes/imageToImage";
+import ImageToVideo from "./modes/imageToVideo";
+import {reset} from "../../state/generator/generatorSlice"
 
 const SimplifiedView = () => {
 
@@ -25,16 +31,28 @@ const SimplifiedView = () => {
 
 
     function addView(currentMode: string) {
-        switch (mode.name) {
+        switch (currentMode) {
             case "tti":
+                setModeBody(<div></div>)
+                break;
+            case "inp":
+                setModeBody(<SimplifiedInpainting/>)
+                break;
+            case "iti":
+                setModeBody(<ImageToImage/>)
+                break;
+            case "anm":
+                setModeBody(<ImageToVideo/>)
                 break;
             default:
                 break;
         }
 
         dispatch(change({
-            name: currentMode
+            name: currentMode,
+            image: []
         }));
+        dispatch(reset())
     }
 
     useEffect(() => {
@@ -57,6 +75,7 @@ const SimplifiedView = () => {
                         style={{marginTop: "20px"}}
                     />
                 )}
+                <SimplifiedViewImagesDisplay/>
                 <ModeHeader>Mode</ModeHeader>
                 <ButtonRow>
 

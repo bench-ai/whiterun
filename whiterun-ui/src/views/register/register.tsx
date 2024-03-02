@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Link, Navigate} from "react-router-dom";
+import {Link, Navigate, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {Alert, Button, Col, Form, Input, Layout, Row, Typography} from "antd";
 import {
@@ -23,6 +23,7 @@ import BenchLogoBig from "../../assets/bench.svg";
 import mixpanel from 'mixpanel-browser';
 
 import Title from "antd/es/typography/Title";
+import {useAuth} from "../../auth/auth_context";
 
 const Register = () => {
 
@@ -36,6 +37,8 @@ const Register = () => {
     const [, setMessage] = useState('');
     const [error, setError] = useState(false);
     const [, setValidPassword] = useState(false);
+    const { isLoggedIn } = useAuth();
+    const navigate = useNavigate();
     const [form] = Form.useForm();
     const [fulfilledRequirements, setFulfilledRequirements] = useState<string[]>([]);
 
@@ -48,7 +51,10 @@ const Register = () => {
     useEffect(() => {
         document.title = 'Create an Account - Bench AI';
         mixpanel.track("Register Page Viewed");
-    },[])
+        if (isLoggedIn) {
+            navigate('/');
+        }
+    },[isLoggedIn])
 
     const checkForm = (): boolean => {
         if (password !== confirmPassword) {

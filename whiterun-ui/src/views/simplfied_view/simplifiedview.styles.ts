@@ -56,6 +56,10 @@ export const ModeButton = styled.div`
     background: white;
     textAlign: 'center';
     user-select: none;
+    
+    &:hover {
+        filter: brightness(75%);
+    }
 `;
 
 

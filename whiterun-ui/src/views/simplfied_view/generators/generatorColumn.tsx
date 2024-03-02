@@ -1,14 +1,14 @@
 import React, {FC, useEffect, useState} from 'react';
 import {Column, ModelDescription, ModelGrid, ModelHeader, ModelText, SelectedGrid} from "./generatorColumn.styles";
 import {Card, Modal} from "antd";
-import generatorJson from "./json/textToImage.json"
-import {CloseOutlined, PlusOutlined, MinusOutlined, SettingOutlined} from '@ant-design/icons';
+import generators from "./json/generators.json"
+import {PlusOutlined, MinusOutlined, SettingOutlined} from '@ant-design/icons';
 import SettingModal from "./GeneratorSettings";
 import {Option} from "../../../state/generator/generatorSlice";
 
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../../state/store";
-import {removeGenerator, addGenerator, updateGenerator} from "../../../state/generator/generatorSlice"
+import {removeGenerator, addGenerator, updateGenerator, GeneratorOptionMap} from "../../../state/generator/generatorSlice"
 
 
 
@@ -154,9 +154,12 @@ const SelectedGeneratorCard: FC<SelectedGenerator> = ({name, settings, onClick, 
 const GeneratorColumn = () => {
 
     const generatorMap = useSelector((state: RootState) => state.generator.value);
+    const mode = useSelector((state: RootState) => state.mode.value);
     const dispatch = useDispatch();
     const [displayOptions, setDisplayOptions] =
         useState(false);
+
+    const generatorJson: GeneratorOptionMap = generators
 
     function handleWorkflowCard(name: string,
                                 difficulty: string,
@@ -200,26 +203,33 @@ const GeneratorColumn = () => {
     };
 
     useEffect(() => {
-        const typedDataObject = generatorJson[0] as {
-            name: string,
-            settings: Option[],
-            difficulty: string
-            description: string
-        };
 
-        if (generatorMap.hasOwnProperty(0)){
-            if (generatorMap[0]["name"] === "none"){
-                dispatch(updateGenerator({
-                    0: {
-                        name: typedDataObject.name,
-                        difficulty: typedDataObject.difficulty,
-                        description: typedDataObject.description,
-                        settings: typedDataObject.settings
-                    }
-                }))
+        console.log("triggered")
+
+        if (generatorJson[mode.name].length > 1) {
+            const typedDataObject = generatorJson[mode.name][0] as {
+                name: string,
+                settings: Option[],
+                difficulty: string
+                description: string
+            };
+
+            if (generatorMap.hasOwnProperty(0)) {
+                if (generatorMap[0]["name"] === "none") {
+                    dispatch(updateGenerator({
+                        0: {
+                            name: typedDataObject.name,
+                            difficulty: typedDataObject.difficulty,
+                            description: typedDataObject.description,
+                            settings: typedDataObject.settings
+                        }
+                    }))
+                }
             }
+        }else{
+            dispatch(removeGenerator(0))
         }
-    }, []);
+    }, [generatorMap]);
 
     return (
         <div>
@@ -254,7 +264,7 @@ const GeneratorColumn = () => {
                     }}>
                     </div>
                     <ModelGrid>
-                        {generatorJson.map((obj) => (
+                        {generatorJson[mode.name].map((obj) => (
                             <GeneratorCard
                                 description={obj["description"]}
                                 name={obj["name"]}
