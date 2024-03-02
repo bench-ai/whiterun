@@ -107,9 +107,14 @@ const SelectedGeneratorCard: FC<SelectedGenerator> = ({name, settings, onClick, 
             <div
                 style={{
                     display: "flex",
-                    justifyContent: "right",
-                    alignItems: "right",
+                    justifyContent: "space-between",
+                    marginBottom: "10px"
                 }}>
+                <MinusOutlined
+                    style={{
+                        fontSize: '20px',
+                    }}
+                    onClick={onClick}/>
                 <SettingOutlined
                     style={{
                         fontSize: '20px',
@@ -117,18 +122,6 @@ const SelectedGeneratorCard: FC<SelectedGenerator> = ({name, settings, onClick, 
                     onClick={() => {
                         changeDisplayOptions(true);
                     }}/>
-            </div>
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "left",
-                    alignItems: "left",
-                }}>
-                <MinusOutlined
-                    style={{
-                        fontSize: '20px',
-                    }}
-                    onClick={onClick}/>
             </div>
             <div>
                 <h2 style={{
@@ -206,7 +199,7 @@ const GeneratorColumn = () => {
 
         console.log("triggered")
 
-        if (generatorJson[mode.name].length > 1) {
+        if (generatorJson[mode.name].length > 0) {
             const typedDataObject = generatorJson[mode.name][0] as {
                 name: string,
                 settings: Option[],

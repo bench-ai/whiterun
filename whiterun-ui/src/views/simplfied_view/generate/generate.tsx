@@ -28,7 +28,8 @@ const restructureSettings = (optionArr: Option[]) => {
                 }
                 break
             case "switch":
-                if (opt.on) {
+                if (opt.on !== undefined) {
+                    console.log("Switch Test 1: "+ opt.on + typeof(opt.on))
                     optionMap[opt.name] = opt.on
                 }
                 break
@@ -110,6 +111,7 @@ const GenerateButton = () => {
         const resMap = restructureMap(generatorsMap)
 
         Object.keys(resMap).forEach(k => {
+            console.log("Negative: " + negativePrompt)
             const res: Result = {
                 name: resMap[parseInt(k)].name,
                 settings: resMap[parseInt(k)].settings,

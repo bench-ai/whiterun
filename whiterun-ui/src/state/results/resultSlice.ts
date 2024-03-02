@@ -61,6 +61,7 @@ export const appendTTIResultAsync = createAsyncThunk(
             posP = res.enhancedPrompt
         }
 
+        console.log("Settings test"+res.settings)
         const result = await textToImage(
             posP,
             res.negativePrompt,

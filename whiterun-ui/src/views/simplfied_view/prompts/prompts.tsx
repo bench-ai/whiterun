@@ -17,7 +17,7 @@ const Prompts = () => {
     };
 
     const handleNegChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-        const text: string | undefined = event.target.value === "" ? event.target.value : undefined
+        const text: string | undefined = event.target.value === "" ? undefined : event.target.value
         dispatch(updateNegativePrompt(text))
     };
 

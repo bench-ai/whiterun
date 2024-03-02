@@ -104,6 +104,7 @@ const SettingOption: FC<SettingOption> = ({id, option, pos}) => {
                        value={option.value}
                        min={option.start}
                        max={option.stop}
+                       step={option.stop === 1 ? 0.1 : undefined}
                        onChange={(value) => updateRange(value, )}/>
 
 
