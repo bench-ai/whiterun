@@ -204,8 +204,6 @@ const GeneratorColumn = () => {
 
     useEffect(() => {
 
-        console.log("triggered")
-
         if (generatorJson[mode.name].length > 1) {
             const typedDataObject = generatorJson[mode.name][0] as {
                 name: string,
@@ -247,7 +245,7 @@ const GeneratorColumn = () => {
 
             <Modal
                 title={<h2 style={{fontSize: 35, margin: "0 0 0 25px"}}>Select your Generators</h2>}
-                visible={displayOptions}
+                open={displayOptions}
                 onCancel={() => changeDisplayOptions(false)}
                 footer={null}
                 style={{
