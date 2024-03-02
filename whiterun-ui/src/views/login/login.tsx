@@ -23,9 +23,6 @@ const Login = () => {
 
     useEffect(() => {
         document.title = 'Sign In - Bench AI';
-        if (isLoggedIn) {
-            navigate('/');
-        }
     })
 
     const submit = async () => {

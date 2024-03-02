@@ -24,13 +24,12 @@ export const textToImage = async (
                 generator["resolution"] as string)
         case "SDXL":
             return await SDXL(
-                generator["clip"] as string,
                 generator["sampler"] as string,
-                generator["guidance"] as string,
-                generator["seed"] as string,
-                generator["steps"] as string,
+                generator["guidance"] as number,
+                generator["steps"] as number,
                 positivePrompt,
-                negativePrompt
+                negativePrompt,
+                generator["seed"] as number,
             )
         case "realvisxl-v2.0":
             return await RealVisXL(

@@ -5,13 +5,12 @@ const baseURL =
     process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
 
 export const SDXL = async (
-    clip: string,
     sampler: string,
-    guidance: string,
-    seed: string,
-    steps: string,
+    guidance: number,
+    steps: number,
     positivePrompt: string,
     negativePrompt?: string,
+    seed?: number,
 ) => {
     const apiResponse: ImageRequest = {
         success: true
@@ -19,23 +18,27 @@ export const SDXL = async (
 
     try {
         const textPrompts = negativePrompt
-            ? [positivePrompt, negativePrompt]
-            : [positivePrompt];
+            ? [{"text": positivePrompt, "weight": 2}, {"text": negativePrompt, "weight": -2}]
+            : [{"text": positivePrompt, "weight": 2}];
+
 
         const response = await axios.post(
-            `${baseURL}/dall-e/text-to-image`,
+            `${baseURL}/stability/text-to-image`,
             {
                 "height": 1024,
                 "width": 1024,
+                "engine_id": "SDXL_v1.0",
                 "text_prompts": textPrompts,
-                "clip_guidance_preset": clip,
+                "clip_guidance_preset": "NONE",
                 "sampler": sampler,
                 "cfg_scale": guidance,
                 "seed": seed,
                 "steps": steps,
+                "style_preset": "photographic"
             },
             {withCredentials: true}
         );
+
 
         apiResponse.response = response.data["url"]
     } catch (error) {

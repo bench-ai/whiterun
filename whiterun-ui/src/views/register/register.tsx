@@ -37,8 +37,6 @@ const Register = () => {
     const [, setMessage] = useState('');
     const [error, setError] = useState(false);
     const [, setValidPassword] = useState(false);
-    const { isLoggedIn } = useAuth();
-    const navigate = useNavigate();
     const [form] = Form.useForm();
     const [fulfilledRequirements, setFulfilledRequirements] = useState<string[]>([]);
 
@@ -51,10 +49,7 @@ const Register = () => {
     useEffect(() => {
         document.title = 'Create an Account - Bench AI';
         mixpanel.track("Register Page Viewed");
-        if (isLoggedIn) {
-            navigate('/');
-        }
-    },[isLoggedIn])
+    },[])
 
     const checkForm = (): boolean => {
         if (password !== confirmPassword) {
