@@ -8,7 +8,7 @@ import {change} from "../../state/mode/modeSlice"
 import {useDispatch, useSelector} from "react-redux";
 import {Alert} from "antd";
 import SimplifiedViewImagesDisplay
-    from "../../components/simplified_view_images_display/simplified_view_images_display";
+    from "./display/simplified_view_images_display";
 import SimplifiedInpainting from "./modes/inpainting";
 import ImageToImage from "./modes/imageToImage";
 import ImageToVideo from "./modes/imageToVideo";

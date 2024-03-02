@@ -240,7 +240,7 @@ const GeneratorColumn = () => {
 
             <Modal
                 title={<h2 style={{fontSize: 35, margin: "0 0 0 25px"}}>Select your Generators</h2>}
-                visible={displayOptions}
+                open={displayOptions}
                 onCancel={() => changeDisplayOptions(false)}
                 footer={null}
                 style={{

@@ -23,7 +23,6 @@ export const RealVisXL = async (
 
 
     try {
-        console.log("Filter" + safety_filter)
         const payload: Record<string, any> = {
             mode: "text",
             prompt: positivePrompt,
@@ -32,9 +31,7 @@ export const RealVisXL = async (
             num_inference_steps: steps,
             disable_safety_checker: !safety_filter, //Flipped safety_filter to match ui
         };
-        console.log("tried")
         if (negativePrompt) {
-            console.log("Inputted")
             payload.negative_prompt = negativePrompt;
         }
 
@@ -55,7 +52,6 @@ export const RealVisXL = async (
                 `${response.data["url"]}`,
                 {withCredentials: true}
             );
-
             status = processResponse.status;
 
             if (status === 202) {
@@ -67,7 +63,7 @@ export const RealVisXL = async (
                 }
                 await new Promise(resolve => setTimeout(resolve, 10000));
             } else if (status === 200) {
-                return await processResponse.data["url"]
+                apiResponse.response = await processResponse.data["url"]
             }
         } while (status === 202);
 

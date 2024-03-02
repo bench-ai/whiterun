@@ -18,7 +18,6 @@ export const textToImage = async (
     switch(name){
         case "DALLE-3":
 
-            console.log(positivePrompt, generator["quality"],  generator["style"], generator["resolution"])
             return await DallE3(generator["quality"] as string,
                 positivePrompt,
                 generator["style"] as string,
@@ -34,10 +33,6 @@ export const textToImage = async (
                 negativePrompt
             )
         case "realvisxl-v2.0":
-            console.log("trying")
-            console.log(negativePrompt)
-            console.log("Filter Part One: " + typeof[generator["safety_filter"]])
-            console.log("The final test" + (generator["safety_filter"] as boolean))
             return await RealVisXL(
                 generator["sampler"] as string,
                 generator["steps"] as number,
