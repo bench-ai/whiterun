@@ -21,13 +21,15 @@ interface resultState {
     value: {
         resultArr: Result[],
         pendingCount: number
+        enhancing: boolean
     }
 }
 
 const initialState: resultState = {
     value:{
         resultArr: [],
-        pendingCount: 0
+        pendingCount: 0,
+        enhancing: false
     }
 }
 
@@ -38,9 +40,16 @@ const resultSlice = createSlice({
         reset: (state) => {
             state.value.resultArr = []
             state.value.pendingCount = 0
+            state.value.enhancing = false
         },
         increment: (state) => {
             state.value.pendingCount++
+        },
+        switchTrue: (state) => {
+            state.value.enhancing = true
+        },
+        switchFalse: (state) => {
+            state.value.enhancing = false
         }
     },
     extraReducers : (builder) => {
@@ -85,4 +94,9 @@ export const appendTTIResultAsync = createAsyncThunk(
 
 export default resultSlice.reducer;
 
-export const {reset, increment} = resultSlice.actions
+export const {
+    reset,
+    increment,
+    switchTrue,
+    switchFalse,
+} = resultSlice.actions

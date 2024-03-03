@@ -4,7 +4,7 @@ import {AppDispatch, RootState} from "../../../state/store";
 import {enhancePrompt} from "./requests/chatgpt";
 import {resetAlert, updateAlert} from "../../../state/alerts/alertsSlice"
 import {GeneratorsMap, Option} from "../../../state/generator/generatorSlice";
-import {Result, appendTTIResultAsync, reset, increment} from "../../../state/results/resultSlice"
+import {Result, appendTTIResultAsync, reset, increment, switchTrue, switchFalse} from "../../../state/results/resultSlice"
 
 export interface RestructuredGeneratorMap {
     [key: number]: {
@@ -89,8 +89,11 @@ const GenerateButton = () => {
                 ]
             }
 
+            dispatch(switchTrue()) //true
             const promptResponse = await enhancePrompt(prompt.positivePrompt, prompt.promptStyle)
+
             if (!promptResponse.success) {
+                dispatch(switchFalse()) //false
                 return [
                     "Cannot generate prompt",
                     promptResponse.error ? promptResponse.error : "Critical Error unable to generate a response"
@@ -98,6 +101,7 @@ const GenerateButton = () => {
             }
 
             if (!promptResponse.response) {
+                dispatch(switchFalse()) //false
                 return [
                     "Cannot generate prompt",
                     "Critical Error unable to generate a response"
@@ -115,7 +119,7 @@ const GenerateButton = () => {
                 settings: resMap[parseInt(k)].settings,
                 positivePrompt: positivePrompt,
                 negativePrompt: negativePrompt,
-                enhanced: prompt.enhance
+                enhanced: prompt.enhance,
             }
 
             if (prompt.enhance) {
@@ -133,6 +137,9 @@ const GenerateButton = () => {
             }
         })
 
+        // console.log(result.enhancing)
+        dispatch(switchFalse())
+
         return ["success"]
     }
 
@@ -141,7 +148,7 @@ const GenerateButton = () => {
         dispatch(reset())
         const responseArr = await funcExecute()
 
-        if (responseArr.length == 2) {
+        if (responseArr.length === 2) {
             dispatch(updateAlert({
                 message: responseArr[0],
                 description: responseArr[1],
@@ -152,15 +159,15 @@ const GenerateButton = () => {
 
     return (
         <ModeButton
-            onClick={() => (result.resultArr.length === result.pendingCount) ? executeWrapper() : null}
+            onClick={() => ((result.resultArr.length === result.pendingCount) && !result.enhancing) ? executeWrapper() : null}
             style={{
-                backgroundColor: result.resultArr.length === result.pendingCount ? '#53389E': '#999',
-                color: result.resultArr.length === result.pendingCount ? 'white' : '#666',
+                backgroundColor: ((result.resultArr.length === result.pendingCount) && !result.enhancing) ? '#53389E': '#999',
+                color: ((result.resultArr.length === result.pendingCount) && !result.enhancing) ? 'white' : '#666',
                 marginTop: '50px',
                 maxWidth: '250px',
                 textAlign: 'center',
                 fontSize: '30px',
-                cursor: result.resultArr.length === result.pendingCount ? 'pointer': 'not-allowed',
+                cursor: ((result.resultArr.length === result.pendingCount) && !result.enhancing) ? 'pointer': 'not-allowed',
             }}
         >
             <b>Generate</b>
