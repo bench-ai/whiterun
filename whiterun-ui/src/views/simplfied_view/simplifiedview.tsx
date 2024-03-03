@@ -13,6 +13,7 @@ import SimplifiedInpainting from "./modes/inpainting";
 import ImageToImage from "./modes/imageToImage";
 import ImageToVideo from "./modes/imageToVideo";
 import {reset} from "../../state/generator/generatorSlice"
+import UpscaleImage from "./modes/upscaleImage";
 
 const SimplifiedView = () => {
 
@@ -43,6 +44,9 @@ const SimplifiedView = () => {
                 break;
             case "anm":
                 setModeBody(<ImageToVideo/>)
+                break;
+            case "ups":
+                setModeBody(<UpscaleImage/>)
                 break;
             default:
                 break;

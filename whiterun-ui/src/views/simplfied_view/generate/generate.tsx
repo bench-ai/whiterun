@@ -4,7 +4,7 @@ import {AppDispatch, RootState} from "../../../state/store";
 import {enhancePrompt} from "./requests/chatgpt";
 import {resetAlert, updateAlert} from "../../../state/alerts/alertsSlice"
 import {GeneratorsMap, Option} from "../../../state/generator/generatorSlice";
-import {Result, appendTTIResultAsync, reset, increment} from "../../../state/results/resultSlice"
+import {Result, appendTTIResultAsync, reset, increment, appendUPSResultAsync} from "../../../state/results/resultSlice"
 
 export interface RestructuredGeneratorMap {
     [key: number]: {
@@ -117,7 +117,9 @@ const GenerateButton = () => {
                 settings: resMap[parseInt(k)].settings,
                 positivePrompt: positivePrompt,
                 negativePrompt: negativePrompt,
-                enhanced: prompt.enhance
+                enhanced: prompt.enhance,
+                mask: mode.mask,
+                image: mode.image
             }
 
             if (prompt.enhance) {
@@ -125,10 +127,13 @@ const GenerateButton = () => {
                 res.promptStyle = prompt.promptStyle
             }
 
+            dispatch(increment())
             switch (mode.name) {
                 case "tti":
-                    dispatch(increment())
                     dispatch(appendTTIResultAsync(res))
+                    break
+                case "ups":
+                    dispatch(appendUPSResultAsync(res))
                     break
                 default:
                     console.error("in unknown case")

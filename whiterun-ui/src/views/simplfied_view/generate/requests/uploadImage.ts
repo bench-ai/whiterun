@@ -26,10 +26,17 @@ export async function uploadImage(fileInput: File){
 
     try {
         const response = await axios.post(
+
             `${baseURL}/upload/image`,
                 formData
             ,
-            {withCredentials: true}
+            {
+                withCredentials: true,
+                timeout: 10000,
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
         );
         uploadResponse.response = response.data["key"];
 

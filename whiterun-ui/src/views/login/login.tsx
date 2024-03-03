@@ -26,8 +26,6 @@ const Login = () => {
     })
 
     const submit = async () => {
-
-        console.log("in here")
         try {
             console.log(baseURL);
             const {data} = await axios.post(
