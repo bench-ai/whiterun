@@ -1,14 +1,6 @@
 import styled from 'styled-components'
 import {ModeButton} from "../simplifiedview.styles";
 
-export const GeneratedContainerList = styled.div`
-    margin-top: 30px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    grid-gap: 50px;
-    justify-items: left;
-`;
-
 export const GeneratedCard = styled.div`
     padding: 30px;
     border: 1px solid white;
@@ -29,3 +21,15 @@ export const GeneratedCardDownload = styled(ModeButton)`
     color: white;
     font-weight: bold;
 `;
+
+export const DisabledPrompt = styled.textarea.attrs({ rows: 10 })`
+    height: 100%;
+    width: 80%; 
+    resize: none;
+`
+
+export const DisabledError = styled.textarea.attrs({ rows: 3 })`
+    height: 100%;
+    width: 80%; 
+    resize: none;
+`
