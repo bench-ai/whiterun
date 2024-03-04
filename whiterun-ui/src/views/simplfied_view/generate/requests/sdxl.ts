@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import {ImageRequest} from "./apiHandler";
 
 const baseURL =
@@ -17,6 +17,8 @@ export const SDXL = async (
     }
 
     try {
+
+        console.log("here")
         const textPrompts = negativePrompt
             ? [{"text": positivePrompt, "weight": 2}, {"text": negativePrompt, "weight": -2}]
             : [{"text": positivePrompt, "weight": 2}];
@@ -39,11 +41,16 @@ export const SDXL = async (
             {withCredentials: true}
         );
 
-
         apiResponse.response = response.data["url"]
     } catch (error) {
+        let err = error as AxiosError
         apiResponse.success = false
-        apiResponse.error = (error as Error).message
+
+        if (err.response){
+            apiResponse.error = err.response.data as string
+        }else{
+            apiResponse.error = "request failed"
+        }
     }
 
     return apiResponse

@@ -50,6 +50,26 @@ func UploadImageFile(c *gin.Context) {
 	}
 }
 
+func DownloadFileLink(c *gin.Context) {
+
+	fileId := c.Query("fileId")
+
+	if fileId == "" {
+		c.String(http.StatusBadRequest, "id not provided")
+		return
+	}
+
+	err, url := cloud.GetPresignedURL(fileId)
+
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to generate file url")
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"url": url,
+		})
+	}
+}
+
 func validateFileType(fileName string) error {
 
 	validExtensions := []string{

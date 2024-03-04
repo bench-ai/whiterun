@@ -539,6 +539,51 @@
   ],
   "tti": [
     {
+      "name": "SDXL",
+      "difficulty": "medium",
+      "description": "Stable Diffusion XL the best general purpose SD model, choose a different XL model if you want tailored styles",
+      "settings": [
+        {
+          "name": "sampler",
+          "type": "list",
+          "options": [
+            "DDIM",
+            "DDPM",
+            "K_DPMPP_2M",
+            "K_DPMPP_2S_ANCESTRAL",
+            "K_DPM_2",
+            "K_DPM_2_ANCESTRAL",
+            "K_EULER",
+            "K_EULER_ANCESTRAL",
+            "K_HEUN",
+            "K_LMS"
+          ]
+        },
+        {
+          "name": "steps",
+          "type": "range",
+          "start": 10,
+          "stop": 50,
+          "def": 30,
+          "value": 30
+        },
+        {
+          "name": "guidance",
+          "type": "range",
+          "start": 1,
+          "stop": 35,
+          "def": 7,
+          "value": 7
+        },
+        {
+          "name": "seed",
+          "type": "numbox",
+          "start": 0,
+          "stop": 4294967295
+        }
+      ]
+    },
+    {
       "name": "DALLE-3",
       "difficulty": "easy",
       "description": "A easy to use all rounder generator, does not require complex prompts",
@@ -587,51 +632,6 @@
             "SLOWEST"
           ]
         },
-        {
-          "name": "sampler",
-          "type": "list",
-          "options": [
-            "DDIM",
-            "DDPM",
-            "K_DPMPP_2M",
-            "K_DPMPP_2S_ANCESTRAL",
-            "K_DPM_2",
-            "K_DPM_2_ANCESTRAL",
-            "K_EULER",
-            "K_EULER_ANCESTRAL",
-            "K_HEUN",
-            "K_LMS"
-          ]
-        },
-        {
-          "name": "steps",
-          "type": "range",
-          "start": 10,
-          "stop": 50,
-          "def": 30,
-          "value": 30
-        },
-        {
-          "name": "guidance",
-          "type": "range",
-          "start": 1,
-          "stop": 35,
-          "def": 7,
-          "value": 7
-        },
-        {
-          "name": "seed",
-          "type": "numbox",
-          "start": 0,
-          "stop": 4294967295
-        }
-      ]
-    },
-    {
-      "name": "SDXL",
-      "difficulty": "medium",
-      "description": "Stable Diffusion XL the best general purpose SD model, choose a different XL model if you want tailored styles",
-      "settings": [
         {
           "name": "sampler",
           "type": "list",

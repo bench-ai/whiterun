@@ -13,7 +13,50 @@ import SimplifiedInpainting from "./modes/inpainting";
 import ImageToImage from "./modes/imageToImage";
 import ImageToVideo from "./modes/imageToVideo";
 import {reset} from "../../state/generator/generatorSlice"
+import {reset as resultReset} from "../../state/results/resultSlice"
 import UpscaleImage from "./modes/upscaleImage";
+
+
+const ModeView = () => {
+    const mode = useSelector((state: RootState) => state.mode.value);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(change({
+            name: mode.name,
+            image: mode.image,
+            mask: mode.mask
+        }));
+        dispatch(reset());
+        dispatch(resultReset());
+    }, [mode.name]);
+
+    let modeBody: React.ReactElement = <div></div>
+
+    switch (mode.name) {
+        case "tti":
+            modeBody = <div></div>
+            break;
+        case "inp":
+            modeBody = <SimplifiedInpainting/>
+            break;
+        case "iti":
+            modeBody = <ImageToImage/>
+            break;
+        case "anm":
+            modeBody = <ImageToVideo/>
+            break;
+        case "ups":
+            modeBody = <UpscaleImage/>
+            break;
+        default:
+            break;
+    }
+
+    return(
+        modeBody
+    )
+}
 
 const SimplifiedView = () => {
 
@@ -23,44 +66,25 @@ const SimplifiedView = () => {
 
     const mode = useSelector((state: RootState) => state.mode.value);
     const alert = useSelector((state: RootState) => state.alert.value);
+
     const dispatch = useDispatch();
 
-    const [modeBody, setModeBody] = useState<React.ReactElement | null>(null);
-    const [generatorColumn, setGeneratorColumn] = useState<React.ReactElement | null>(null);
-    const [prompt, setPrompt] = useState<React.ReactElement | null>(null);
-    const [genButton, setButton] = useState<React.ReactElement | null>(null);
+    const [generatorColumn, setGeneratorColumn] =
+        useState<React.ReactElement | null>(null);
+    const [prompt, setPrompt] =
+        useState<React.ReactElement | null>(null);
+    const [genButton, setButton] =
+        useState<React.ReactElement | null>(null);
 
 
     function addView(currentMode: string) {
-        switch (currentMode) {
-            case "tti":
-                setModeBody(<div></div>)
-                break;
-            case "inp":
-                setModeBody(<SimplifiedInpainting/>)
-                break;
-            case "iti":
-                setModeBody(<ImageToImage/>)
-                break;
-            case "anm":
-                setModeBody(<ImageToVideo/>)
-                break;
-            case "ups":
-                setModeBody(<UpscaleImage/>)
-                break;
-            default:
-                break;
-        }
-
         dispatch(change({
             name: currentMode,
             image: []
         }));
-        dispatch(reset())
     }
 
     useEffect(() => {
-        addView(mode.name);
         setGeneratorColumn(<GeneratorColumn/>);
         setPrompt(<Prompts/>)
         setButton(<GenerateButton/>)
@@ -69,15 +93,17 @@ const SimplifiedView = () => {
     return (
         <div>
             <ModeSection>
-                {alert.level != "calm" && (
-                    <Alert
-                        message={<strong>{alert.message}</strong>}
-                        description={alert.description}
-                        type="error"
-                        closable
-                        showIcon
-                        style={{marginTop: "20px"}}
-                    />
+                {alert.level !== "calm" && (
+                    <>
+                        {console.log("Alert level:", alert.level)}
+                        <Alert
+                            message={<strong>{alert.message}</strong>}
+                            description={alert.description}
+                            type="error"
+                            showIcon
+                            style={{marginTop: "20px", marginBottom: "30px"}}
+                        />
+                    </>
                 )}
                 <SimplifiedViewImagesDisplay/>
                 <ModeHeader>Mode</ModeHeader>
@@ -135,7 +161,7 @@ const SimplifiedView = () => {
 
                 </ButtonRow>
                 <div>
-                    {modeBody}
+                    <ModeView/>
                 </div>
                 <div>
                     {prompt}

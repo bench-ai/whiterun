@@ -367,7 +367,6 @@ func processReplicateImage(imageId string) (int, string) {
 	}
 
 	if err := json.NewDecoder(pResponse.Body).Decode(&dataBody); err != nil {
-		fmt.Println(err)
 		return http.StatusInternalServerError, "unable to process and handle request"
 	} else {
 

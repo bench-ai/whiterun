@@ -2,18 +2,23 @@ import React, {FC, useEffect, useState} from 'react';
 import {InfoCircleOutlined, LoadingOutlined, PictureOutlined} from "@ant-design/icons";
 import {Carousel, Dropdown, Menu, Modal, Spin, Switch} from "antd";
 import {
+    ContinueButton,
     DisabledError,
     DisabledPrompt,
     GeneratedCard,
     GeneratedCardDownload,
-    GeneratedCardHeader
+    GeneratedCardHeader,
+    Header2
 } from "./simplified_view_images_display_styles";
-
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../../state/store";
 import {Result} from "../../../state/results/resultSlice";
-
 import styled from "styled-components";
+import {downloadImage} from "../generate/requests/uploadImage";
+import modeJson from "./display.json"
+import {change} from "../../../state/mode/modeSlice"
+import {resetAlert, updateAlert} from "../../../state/alerts/alertsSlice"
+import {WarningAmberOutlined} from "@mui/icons-material";
 
 interface display {
     name: string
@@ -21,6 +26,10 @@ interface display {
     result?: Result
     index?: number
     func?: (num: number, state: boolean) => void
+}
+
+interface Alter {
+    func: (str: string) => void
 }
 
 interface info {
@@ -42,6 +51,46 @@ const ModeSettings: FC<info> = ({result}) => {
         </Menu>
     );
 
+    const [imageListData, setImageListData] = useState<string[]>([]);
+    const [maskData, setMask] = useState<string[]>([]);
+
+
+    useEffect(() => {
+        const fetchImageList = async () => {
+            if (!result.image) {
+                setImageListData([]);
+            } else {
+                const data = await imageList(result.image)
+                setImageListData(data);
+            }
+
+            if (!result.mask) {
+                setMask([]);
+            } else {
+                const data = await imageList([result.mask])
+                setMask(data);
+            }
+        };
+
+        fetchImageList();
+    }, [result]);
+
+    const imageList = async (imageList: string[]): Promise<string[]> => {
+
+        const retData: string[] = []
+        const data = imageList.map(async (image) => {
+            return downloadImage(image)
+        })
+        for (const prom of data) {
+            const up = await prom
+            if (up.success) {
+                retData.push(up.response ? up.response : "")
+            } else {
+                retData.push(up.error ? up.error : "")
+            }
+        }
+        return retData
+    }
 
     return (
         <div style={
@@ -52,12 +101,56 @@ const ModeSettings: FC<info> = ({result}) => {
                 backgroundColor: 'transparent'
             }}>
             <h1>Generation Info</h1>
-            <h2>Error</h2>
+
+            <Header2>Base Image</Header2>
+            {(imageListData.length > 0) &&
+                <div>
+                    {imageListData.map((obj) => {
+                        return (
+                            <img
+                                src={obj}
+                                alt={"referenceImage"}
+                                style={{maxWidth: '80%', maxHeight: '80%', width: 'auto', height: 'auto'}}
+                            />
+                        );
+                    })}
+                </div>
+            }
+            {(imageListData.length == 0) &&
+                <input
+                    disabled={true}
+                    value={"None"}
+                />
+            }
+
+            <Header2>Mask</Header2>
+            {(maskData.length > 0) &&
+                <div>
+                    {maskData.map((obj) => {
+                        return (
+                            <img
+                                src={obj}
+                                alt={"referenceImage"}
+                                style={{maxWidth: '80%', maxHeight: '80%', width: 'auto', height: 'auto'}}
+                            />
+                        );
+                    })}
+                </div>
+            }
+
+            {(maskData.length == 0) &&
+                <input
+                    disabled={true}
+                    value={"None"}
+                />
+            }
+
+            <Header2>Error</Header2>
             <DisabledError disabled={true}>
                 {result.error ? result.error : "None"}
             </DisabledError>
 
-            <h2>Prompt Settings</h2>
+            <Header2>Prompt Settings</Header2>
 
             <h3>Positive Prompt</h3>
             <DisabledPrompt disabled={true}>
@@ -69,7 +162,7 @@ const ModeSettings: FC<info> = ({result}) => {
                 {result.negativePrompt}
             </DisabledPrompt>
 
-            <h2>Enhanced Prompt Settings</h2>
+            <Header2>Enhanced Prompt Settings</Header2>
 
             <h3>Is Enhanced?</h3>
             <input
@@ -116,7 +209,7 @@ const VisualDisplay: FC<display> = (
         }
     };
 
-    console.log(result === undefined, index)
+    console.log(result)
 
     return (
         <GeneratedCard>
@@ -159,14 +252,21 @@ const VisualDisplay: FC<display> = (
                     </div>
                 )
                 }
-                {result &&
+                {result?.result &&
                     (<img src={result.result}
                           alt="Generated Image"
                           style={{maxWidth: "300px", margin: "5px auto"}}>
                     </img>)
                 }
-
-                {(result) &&
+                {(result?.error) && (<WarningAmberOutlined
+                    style={
+                        {
+                            fontSize: '250px',
+                            color: "white"
+                        }
+                    }/>)
+                }
+                {(result?.result) &&
                     (<GeneratedCardDownload
                         onClick={openLinkInNewTab}
                     >
@@ -180,14 +280,14 @@ const VisualDisplay: FC<display> = (
                        maxHeight: '400px',
                    }}
             >
-                {(result && result.result) &&
+                {(result) &&
                     <ModeSettings
                         result={result}
                     />
                 }
             </Modal>
 
-            {(result && (index !== undefined) && func) &&
+            {(result?.result && (index !== undefined) && func) &&
 
                 (<div>
                 <span
@@ -201,16 +301,58 @@ const VisualDisplay: FC<display> = (
                 >
                 Select
                 </span>
-                        <Switch
-                            defaultChecked={false}
-                            onChange={(value) => {func(index, value)}}
-                            style={{marginRight: '20px'}}/>
-                    </div>)
+                    <Switch
+                        defaultChecked={false}
+                        onChange={(value) => {
+                            func(index, value)
+                        }}
+                        style={{marginRight: '20px'}}/>
+                </div>)
             }
         </GeneratedCard>
     )
         ;
 };
+
+const Continue: FC<Alter> = ({func}) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const modeButtonList: { [key: string]: string[] } = modeJson;
+    const mode = useSelector((state: RootState) => state.mode.value)
+
+    return (
+        <div>
+            <ContinueButton
+                onClick={() => setIsModalOpen(true)}
+                style={{
+                    marginTop:"40px"
+                }}
+            >
+                Continue
+            </ContinueButton>
+
+            <Modal open={isModalOpen} footer={null}
+                   onCancel={() => setIsModalOpen(false)}
+                   style={{
+                       maxHeight: '400px',
+                   }}
+            >
+                {
+                    modeButtonList[mode.name].map((obj) => {
+                        return (
+                            <button
+                                onClick={() => {
+                                    func(obj)
+                                    setIsModalOpen(false)
+                                }}
+                            >
+                                {obj}
+                            </button>
+                        );
+                    })
+                }
+            </Modal>
+        </div>);
+}
 
 
 const SimplifiedViewImagesDisplay = () => {
@@ -219,6 +361,7 @@ const SimplifiedViewImagesDisplay = () => {
     const results = useSelector((state: RootState) => state.result.value)
     const [displayArr, setDisplayArr] = useState<display[]>([]);
     const selectedArr = [false, false, false, false, false];
+    const dispatch = useDispatch();
 
     useEffect(() => {
         const tempDisplayArr: display[] = []
@@ -249,6 +392,52 @@ const SimplifiedViewImagesDisplay = () => {
         selectedArr[num] = state
     };
 
+    const transfer = (value: string) => {
+
+        dispatch(resetAlert())
+        if(!selectedStatus()){
+
+            console.log("here")
+            dispatch(updateAlert({
+                message: "Please Select Images",
+                description: "Images must be selected before continuing. Hit the select switch" +
+                    " on the images you like",
+                level: "error"
+            }))
+        }else{
+            const dataList: string[] = []
+
+            selectedArr.forEach((obj, index) => {
+                if (obj) {
+                    const result = results.resultArr[index].result
+                    if (result) {
+                        const strArr = result.split("amazonaws.com/")
+                        const fileName = strArr[1].split("?")[0]
+                        dataList.push(fileName)
+                    }
+                }
+            })
+
+            dispatch(change({
+                    name: value,
+                    image: dataList,
+                }
+            ))
+        }
+    }
+
+    const selectedStatus = () => {
+
+        let status = false
+        selectedArr.forEach((sel) => {
+            if(sel){
+                status = sel
+            }
+        })
+
+        return status
+    }
+
     const CarouselWrapper = styled(Carousel)`
  > .slick-dots li button {
     background: white;
@@ -259,26 +448,33 @@ const SimplifiedViewImagesDisplay = () => {
 `;
 
     return (
-        <CarouselWrapper
-            style={
-                {
-                    color: "white",
+        <div>
+            <CarouselWrapper
+                style={
+                    {
+                        color: "white",
+                    }
                 }
+            >
+                {displayArr.map((obj, index) => {
+                    return (
+                        <VisualDisplay
+                            name={obj.name}
+                            pending={obj.pending}
+                            result={obj.result}
+                            index={index}
+                            func={updateSelected}
+                        />
+                    );
+                })}
+            </CarouselWrapper>
+
+            {((results.pendingCount === results.resultArr.length) && (results.resultArr.length > 0)) &&
+                (<Continue
+                    func={transfer}
+                />)
             }
-        >
-            {displayArr.map((obj, index) => {
-                console.log("Current Object:", obj); // Log obj here
-                return (
-                    <VisualDisplay
-                        name={obj.name}
-                        pending={obj.pending}
-                        result={obj.result}
-                        index = {index}
-                        func = {updateSelected}
-                    />
-                );
-            })}
-        </CarouselWrapper>
+        </div>
     );
 };
 

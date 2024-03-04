@@ -121,12 +121,13 @@ func main() {
 
 	// upload
 	r.POST("api/upload/image", middleware.CheckExecutionAccess, controllers.UploadImageFile)
+	r.GET("api/download/image", middleware.CheckExecutionAccess, controllers.DownloadFileLink)
 
 	// Dall E
 	r.POST("api/dall-e/text-to-image", middleware.CheckExecutionAccess, dalle.TextToImage)
 
-	//Replicate
-	r.GET("api/replicate/", replicate.CollectReplicateImage)
+	////Replicate
+	//r.GET("api/replicate/", replicate.CollectReplicateImage)
 
 	// Realistic Vision
 	r.POST("api/replicate/realvisxl2/text-to-image", middleware.CheckExecutionAccess, replicate.RealVizTextToImage)

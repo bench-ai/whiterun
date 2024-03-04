@@ -22,14 +22,31 @@ export const GeneratedCardDownload = styled(ModeButton)`
     font-weight: bold;
 `;
 
+export const ContinueButton = styled(ModeButton)`
+    font-size: 25px;
+    max-width: 200px;
+    margin: 15px auto;
+    background-color: #53389E;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    color: white;
+    margin-top: 15px;
+    font-weight: bold;
+`;
+
+export const Header2 = styled.h2`
+    text-decoration: underline;
+`;
+
 export const DisabledPrompt = styled.textarea.attrs({ rows: 10 })`
     height: 100%;
     width: 80%; 
     resize: none;
-`
+`;
 
 export const DisabledError = styled.textarea.attrs({ rows: 3 })`
     height: 100%;
     width: 80%; 
     resize: none;
-`
+`;
