@@ -4,6 +4,7 @@ import {SDXL} from "./sdxl";
 import {RealVisXL} from "./realVisXL";
 import {SDV2} from "./sdV2";
 import {UpscaleESRGAN} from "./upscaleEsrgan";
+import {UpscaleControlNet} from "./controlNet";
 
 export interface ImageRequest {
     success: boolean
@@ -70,6 +71,21 @@ export const upscale = async (
     switch(name){
         case "Stable Diffusion":
             return await UpscaleESRGAN(
+                image,
+            )
+        case "ControlNet Tile Upscaler":
+            return await UpscaleControlNet(
+                positivePrompt,
+                generator["resolution"] as string,
+                generator["base_image_resemblance"] as number,
+                generator["creativity"] as number,
+                generator["hdr"] as number,
+                generator["sampler"] as string,
+                generator["steps"] as number,
+                generator["guidance"] as number,
+                generator["guess_mode"] as boolean,
+                generator["seed"] as number,
+                negativePrompt,
                 image,
             )
         default:

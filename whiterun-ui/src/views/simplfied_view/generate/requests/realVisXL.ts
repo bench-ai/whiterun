@@ -1,5 +1,6 @@
 import axios, {AxiosResponse} from "axios";
 import {ImageRequest} from "./apiHandler";
+import {checkStatusAndRetry} from "./replicateStatusRetry";
 
 const baseURL =
     process.env.REACT_APP_DEV === "true"
@@ -18,8 +19,6 @@ export const RealVisXL = async (
     const apiResponse: ImageRequest = {
         success: true,
     };
-
-    const startTime = Date.now();
 
 
     try {
@@ -45,27 +44,20 @@ export const RealVisXL = async (
             {withCredentials: true}
         );
 
-        let status;
-
-        do {
-            const processResponse = await axios.get(
+        const processedUrl = await checkStatusAndRetry(response, async () => {
+            return await axios.get(
                 `${response.data["url"]}`,
                 {withCredentials: true}
             );
-            status = processResponse.status;
+        });
 
-            if (status === 202) {
-                const elapsedTime = Date.now() - startTime;
-                if (elapsedTime >= 600000) {
-                    apiResponse.success = false;
-                    apiResponse.error = "Response Timed Out";
-                    break;
-                }
-                await new Promise(resolve => setTimeout(resolve, 10000));
-            } else if (status === 200) {
-                apiResponse.response = await processResponse.data["url"]
-            }
-        } while (status === 202);
+        if (processedUrl === undefined) {
+            apiResponse.success = false;
+            apiResponse.error = "Response Timed Out";
+        } else {
+            apiResponse.response = processedUrl;
+        }
+
 
     } catch (error) {
         apiResponse.success = false;

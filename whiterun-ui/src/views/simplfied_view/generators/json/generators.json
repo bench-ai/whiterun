@@ -24,8 +24,8 @@
           "name": "resolution",
           "type": "list",
           "options": [
-            "2048x2048",
-            "2560x2560"
+            "2048",
+            "2560"
           ]
         },
         {
@@ -62,7 +62,7 @@
         },
         {
           "name": "seed",
-          "type": "numbox",
+          "type": "number",
           "start": 0,
           "stop": 4294967295
         },

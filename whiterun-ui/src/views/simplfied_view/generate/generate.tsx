@@ -144,11 +144,91 @@ const GenerateButton = () => {
                 case "tti":
                     dispatch(appendTTIResultAsync(res))
                     break
-                case "ups":
-                    dispatch(appendUPSResultAsync(res))
-                    break
+                // case "ups":
+                //     dispatch(appendUPSResultAsync(res))
+                //     break
                 default:
                     console.error("in unknown case")
+            }
+        })
+
+        // console.log(result.enhancing)
+        dispatch(switchFalse())
+
+        return ["success"]
+    }
+
+
+    const funcExecuteImages = async () => {
+
+        let positivePrompt = prompt.positivePrompt
+        let enhancedPrompt = ""
+        let negativePrompt = prompt.negativePrompt
+
+        if (Object.keys(generatorsMap).length === 0){
+            return [
+                "No Generators have been selected",
+                "A Generator is required to generate images. Hit the plus button to select a generator"
+            ]
+        }
+
+        if (prompt.enhance) {
+            if (!prompt.promptStyle) {
+                return [
+                    "No prompt style was selected",
+                    "Prompt styles are near the enhance switch. This will guide the prompt to" +
+                    "stick closely to the style you provide"
+                ]
+            }
+
+            dispatch(switchTrue()) //true
+            const promptResponse = await enhancePrompt(prompt.positivePrompt, prompt.promptStyle)
+
+            if (!promptResponse.success) {
+                dispatch(switchFalse()) //false
+                return [
+                    "Cannot generate prompt",
+                    promptResponse.error ? promptResponse.error : "Critical Error unable to generate a response"
+                ]
+            }
+
+            if (!promptResponse.response) {
+                dispatch(switchFalse()) //false
+                return [
+                    "Cannot generate prompt",
+                    "Critical Error unable to generate a response"
+                ]
+            } else {
+                enhancedPrompt = promptResponse.response[0]
+            }
+        }
+
+        const resMap = restructureMap(generatorsMap)
+
+        mode.image.forEach((image, index) => {
+            console.log("Negative: " + negativePrompt);
+            const res: Result = {
+                name: resMap[index]?.name || '', // Using optional chaining and providing a default value
+                settings: resMap[index]?.settings || {},
+                positivePrompt: positivePrompt,
+                negativePrompt: negativePrompt,
+                enhanced: prompt.enhance,
+                mask: mode.mask,
+                image: mode.image,
+            };
+
+            if (prompt.enhance) {
+                res.enhancedPrompt = enhancedPrompt;
+                res.promptStyle = prompt.promptStyle;
+            }
+
+            dispatch(increment());
+            switch (mode.name) {
+                case "ups":
+                    dispatch(appendUPSResultAsync(res));
+                    break;
+                default:
+                    console.error("in unknown case");
             }
         })
 
@@ -161,9 +241,24 @@ const GenerateButton = () => {
     const executeWrapper = async () => {
         dispatch(resetAlert())
         dispatch(reset())
-        const responseArr = await funcExecute()
 
-        if (responseArr.length === 2) {
+        let responseArr;
+
+        switch (mode.name) {
+            case "tti":
+                responseArr = await funcExecute()
+                break
+            case "ups":
+                console.log("Execute Images")
+                responseArr = await funcExecuteImages()
+                break
+            default:
+
+
+        }
+
+
+        if (responseArr && responseArr.length === 2) {
             dispatch(updateAlert({
                 message: responseArr[0],
                 description: responseArr[1],
