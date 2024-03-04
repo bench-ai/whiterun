@@ -1,16 +1,18 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {ModeHeader} from "../simplifiedview.styles";
 import {UploadContainer, UploadedFileContainer} from "./inpainting.styles";
-import {InboxOutlined, PaperClipOutlined, ArrowLeftOutlined, ArrowRightOutlined} from "@ant-design/icons";
+import {InboxOutlined, ArrowLeftOutlined, ArrowRightOutlined} from "@ant-design/icons";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "../../../state/store";
-import {appendAsyncImage, reset, del} from "../../../state/mode/modeSlice";
-import {Button, Carousel, message} from 'antd';
+import {appendAsyncImage, del} from "../../../state/mode/modeSlice";
+import {Button, message} from 'antd';
 import {ImageContainer, ImageUploadCarousel} from "./upscaleImage.styles";
 import {DeleteOutlined} from "@mui/icons-material";
+import {downloadImage} from "../generate/requests/uploadImage";
 
 const UpscaleImage = () => {
     const mode = useSelector((state: RootState) => state.mode.value);
+    const generatorsMap = useSelector((state: RootState) => state.generator.value);
 
     const [imageURLs, setImageURLs] = useState<string[]>([]);
     const dispatch = useDispatch<AppDispatch>();
@@ -20,21 +22,23 @@ const UpscaleImage = () => {
 
         if (files) {
 
+            if (Object.keys(generatorsMap).length > 1){
+                message.error('Maximum limit reached. You can upload at most 1 images. When' +
+                    ' using more than one generator');
+                return;
+            }
+
             // Check the limit before adding new images
-            if (imageURLs.length + files.length > 5) {
+            if (mode.image.length + files.length > 5) {
                 message.error('Maximum limit reached. You can upload at most 5 images.');
                 return;
             }
 
-            // dispatch(reset());
-
             // Iterate through the selected files
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-
                 if (file instanceof Blob) {
                     dispatch(appendAsyncImage(file));
-                    setImageURLs((prevURLs) => [...prevURLs, URL.createObjectURL(file)]);
                 }
             }
         }
@@ -47,9 +51,35 @@ const UpscaleImage = () => {
         setImageURLs(updatedURLs);
     };
 
+    useEffect(() => {
+
+        const imagePromiseFunc = async () => {
+            const promiseArr = mode.image.map((key) => {
+                return downloadImage(key)
+            })
+
+            const stringArr: string[] = []
+
+            for (const key of promiseArr) {
+                const response = (await key)
+                if (response.response){
+                    stringArr.push(response.response)
+                }else{
+                    stringArr.push("")
+                }
+            }
+
+            setImageURLs(stringArr)
+        }
+
+        imagePromiseFunc()
+
+    }, [mode.image]);
+
     return (
         <div>
             <ModeHeader>Upload Image</ModeHeader>
+
             <UploadContainer>
                 <label htmlFor="fileInput">
                     <InboxOutlined style={{ fontSize: '50px', color: '#39a047' }} />
@@ -67,10 +97,10 @@ const UpscaleImage = () => {
                     />
                 </label>
             </UploadContainer>
+
             <UploadedFileContainer visible={mode.image.length > 0}>
-                {imageURLs.length > 0 && (
+                {mode.image.length > 0 && (
                     <ImageUploadCarousel
-                        key={imageURLs.join()}  // Add a key to force re-render when imageURLs changes
                         arrows
                         nextArrow={<ArrowRightOutlined />}
                         prevArrow={<ArrowLeftOutlined />}

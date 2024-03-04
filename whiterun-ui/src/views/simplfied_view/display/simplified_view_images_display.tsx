@@ -209,8 +209,6 @@ const VisualDisplay: FC<display> = (
         }
     };
 
-    console.log(result)
-
     return (
         <GeneratedCard>
             {(result) &&
@@ -359,6 +357,7 @@ const SimplifiedViewImagesDisplay = () => {
 
     const generatorMap = useSelector((state: RootState) => state.generator.value);
     const results = useSelector((state: RootState) => state.result.value)
+    const mode = useSelector((state: RootState) => state.mode.value)
     const [displayArr, setDisplayArr] = useState<display[]>([]);
     const selectedArr = [false, false, false, false, false];
     const dispatch = useDispatch();
@@ -367,12 +366,22 @@ const SimplifiedViewImagesDisplay = () => {
         const tempDisplayArr: display[] = []
         const pending = (results.pendingCount !== results.resultArr.length)
 
-        Object.keys(generatorMap).forEach((k, index) => {
-            tempDisplayArr.push({
-                name: generatorMap[parseInt(k)].name,
-                pending: pending,
+        if ((mode.image.length > 1) && (Object.keys(generatorMap).length == 1)){
+            const firstGen = parseInt(Object.keys(generatorMap)[0])
+            mode.image.forEach((_) => {
+                tempDisplayArr.push({
+                    name: generatorMap[firstGen].name,
+                    pending: pending,
+                })
             })
-        })
+        }else if (Object.keys(generatorMap).length > 0){
+            Object.keys(generatorMap).forEach((k) => {
+                tempDisplayArr.push({
+                    name: generatorMap[parseInt(k)].name,
+                    pending: pending,
+                })
+            })
+        }
 
         results.resultArr.forEach(result => {
             let completed = false
@@ -386,7 +395,7 @@ const SimplifiedViewImagesDisplay = () => {
 
         setDisplayArr(tempDisplayArr)
 
-    }, [generatorMap, results.resultArr, results.pendingCount]);
+    }, [generatorMap, results.resultArr, results.pendingCount, mode.image]);
 
     const updateSelected = (num: number, state: boolean) => {
         selectedArr[num] = state
@@ -469,7 +478,7 @@ const SimplifiedViewImagesDisplay = () => {
                 })}
             </CarouselWrapper>
 
-            {((results.pendingCount === results.resultArr.length) && (results.resultArr.length > 0)) &&
+            {((results.pendingCount === results.resultArr.length) && (results.resultArr.length > 0) && Object.keys(generatorMap).length > 0) &&
                 (<Continue
                     func={transfer}
                 />)

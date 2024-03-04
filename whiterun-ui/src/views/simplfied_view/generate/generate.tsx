@@ -76,54 +76,59 @@ const GenerateButton = () => {
     const result = useSelector((state: RootState) => state.result.value);
     const dispatch = useDispatch<AppDispatch>();
 
-    const funcExecute = async () => {
-
+    const checkPromptAndGenerators = async (): Promise<[string, string, string | undefined]> => {
         let positivePrompt = prompt.positivePrompt
         let enhancedPrompt = ""
         let negativePrompt = prompt.negativePrompt
 
         if (Object.keys(generatorsMap).length === 0){
-            return [
-                "No Generators have been selected",
-                "A Generator is required to generate images. Hit the plus button to select a generator"
-            ]
+            throw new Error(
+                "No Generators have been selected | A Generator is required to generate images. " +
+                "Hit the plus button to select a generator")
         }
 
         if (prompt.enhance) {
             if (!prompt.promptStyle) {
-                return [
-                    "No prompt style was selected",
+                throw new Error(
+                    "No prompt style was selected |" +
                     "Prompt styles are near the enhance switch. This will guide the prompt to" +
-                    "stick closely to the style you provide"
-                ]
+                    "stick closely to the style you provide")
             }
 
-            dispatch(switchTrue()) //true
+            dispatch(switchTrue())
             const promptResponse = await enhancePrompt(prompt.positivePrompt, prompt.promptStyle)
 
             if (!promptResponse.success) {
                 dispatch(switchFalse()) //false
-                return [
-                    "Cannot generate prompt",
+                throw new Error(
+                    "Cannot generate prompt |" +
                     promptResponse.error ? promptResponse.error : "Critical Error unable to generate a response"
-                ]
+                )
             }
 
             if (!promptResponse.response) {
                 dispatch(switchFalse()) //false
-                return [
-                    "Cannot generate prompt",
+                throw new Error(
+                    "Cannot generate prompt |" +
                     "Critical Error unable to generate a response"
-                ]
+                )
             } else {
                 enhancedPrompt = promptResponse.response[0]
             }
         }
 
+        return [positivePrompt, enhancedPrompt, negativePrompt]
+    }
+
+    const generateMultiGenerator = async (
+        positivePrompt: string,
+        negativePrompt: string | undefined,
+        enhancedPrompt: string
+    ) => {
+
         const resMap = restructureMap(generatorsMap)
 
         Object.keys(resMap).forEach(k => {
-            console.log("Negative: " + negativePrompt)
             const res: Result = {
                 name: resMap[parseInt(k)].name,
                 settings: resMap[parseInt(k)].settings,
@@ -144,119 +149,88 @@ const GenerateButton = () => {
                 case "tti":
                     dispatch(appendTTIResultAsync(res))
                     break
-                // case "ups":
-                //     dispatch(appendUPSResultAsync(res))
-                //     break
+                case "ups":
+                    dispatch(appendUPSResultAsync(res));
+                    break;
                 default:
                     console.error("in unknown case")
             }
         })
-
-        // console.log(result.enhancing)
         dispatch(switchFalse())
-
         return ["success"]
     }
 
-
-    const funcExecuteImages = async () => {
-
-        let positivePrompt = prompt.positivePrompt
-        let enhancedPrompt = ""
-        let negativePrompt = prompt.negativePrompt
-
-        if (Object.keys(generatorsMap).length === 0){
-            return [
-                "No Generators have been selected",
-                "A Generator is required to generate images. Hit the plus button to select a generator"
-            ]
-        }
-
-        if (prompt.enhance) {
-            if (!prompt.promptStyle) {
-                return [
-                    "No prompt style was selected",
-                    "Prompt styles are near the enhance switch. This will guide the prompt to" +
-                    "stick closely to the style you provide"
-                ]
-            }
-
-            dispatch(switchTrue()) //true
-            const promptResponse = await enhancePrompt(prompt.positivePrompt, prompt.promptStyle)
-
-            if (!promptResponse.success) {
-                dispatch(switchFalse()) //false
-                return [
-                    "Cannot generate prompt",
-                    promptResponse.error ? promptResponse.error : "Critical Error unable to generate a response"
-                ]
-            }
-
-            if (!promptResponse.response) {
-                dispatch(switchFalse()) //false
-                return [
-                    "Cannot generate prompt",
-                    "Critical Error unable to generate a response"
-                ]
-            } else {
-                enhancedPrompt = promptResponse.response[0]
-            }
-        }
+    const generateMultiImage = async (
+        positivePrompt: string,
+        negativePrompt: string | undefined,
+        enhancedPrompt: string
+    ) => {
 
         const resMap = restructureMap(generatorsMap)
+        const firstKey = Object.keys(resMap)[0]
 
-        mode.image.forEach((image, index) => {
-            console.log("Negative: " + negativePrompt);
+        mode.image.forEach(image => {
+
             const res: Result = {
-                name: resMap[index]?.name || '', // Using optional chaining and providing a default value
-                settings: resMap[index]?.settings || {},
+                name: resMap[parseInt(firstKey)].name,
+                settings: resMap[parseInt(firstKey)].settings,
                 positivePrompt: positivePrompt,
                 negativePrompt: negativePrompt,
                 enhanced: prompt.enhance,
                 mask: mode.mask,
-                image: mode.image,
-            };
-
-            if (prompt.enhance) {
-                res.enhancedPrompt = enhancedPrompt;
-                res.promptStyle = prompt.promptStyle;
+                image: [image]
             }
 
-            dispatch(increment());
+            if (prompt.enhance) {
+                res.enhancedPrompt = enhancedPrompt
+                res.promptStyle = prompt.promptStyle
+            }
+
+            dispatch(increment())
             switch (mode.name) {
                 case "ups":
                     dispatch(appendUPSResultAsync(res));
                     break;
                 default:
-                    console.error("in unknown case");
+                    console.error("in unknown case")
             }
         })
 
-        // console.log(result.enhancing)
         dispatch(switchFalse())
-
         return ["success"]
     }
+
+    const funcExecute = async () => {
+        let positivePrompt: string = ""
+        let enhancedPrompt: string = ""
+        let negativePrompt: string | undefined = ""
+
+        try{
+            const promptArray = await checkPromptAndGenerators()
+            positivePrompt = promptArray[0]
+            enhancedPrompt = promptArray[1]
+            negativePrompt = promptArray[2]
+        }catch (error){
+            const err = error as Error
+            return err.message.split("|")
+        }
+
+        console.log(mode.image.length)
+
+        if (mode.image.length > 1){
+            return await generateMultiImage(positivePrompt, negativePrompt, enhancedPrompt)
+        }else{
+            return await generateMultiGenerator(positivePrompt, negativePrompt, enhancedPrompt)
+        }
+    }
+
 
     const executeWrapper = async () => {
         dispatch(resetAlert())
         dispatch(reset())
 
         let responseArr;
-
-        switch (mode.name) {
-            case "tti":
-                responseArr = await funcExecute()
-                break
-            case "ups":
-                console.log("Execute Images")
-                responseArr = await funcExecuteImages()
-                break
-            default:
-
-
-        }
-
+        responseArr = await funcExecute()
 
         if (responseArr && responseArr.length === 2) {
             dispatch(updateAlert({

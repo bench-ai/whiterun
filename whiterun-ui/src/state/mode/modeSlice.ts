@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {uploadImage, UploadResponse} from "../../views/simplfied_view/generate/requests/uploadImage";
+import {downloadImage, uploadImage, UploadResponse} from "../../views/simplfied_view/generate/requests/uploadImage";
 
 interface Mode {
     name: string
@@ -37,7 +37,9 @@ const modeSlice = createSlice({
     extraReducers: (builder) => {
         builder.addCase(appendAsyncImage.fulfilled, (state, action: PayloadAction<UploadResponse>) => {
             if (action.payload.success && action.payload.response) {
-                state.value.image.push(action.payload.response)
+                if (state.value.image.length <= 5){
+                    state.value.image.push(action.payload.response)
+                }
             }
         })
     }

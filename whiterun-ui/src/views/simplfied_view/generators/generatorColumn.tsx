@@ -235,7 +235,7 @@ const GeneratorColumn = () => {
                         id={parseInt(key)}
                     />);
                 })}
-                {mode.image.length < 2 && (
+                {(mode.image.length < 2 || Object.keys(generatorMap).length == 0) && (
                     <AddCard onClick={() => changeDisplayOptions(true)} />
                 )}
             </SelectedGrid>
