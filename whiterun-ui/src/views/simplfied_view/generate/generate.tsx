@@ -11,7 +11,7 @@ import {
     increment,
     switchTrue,
     switchFalse,
-    appendUPSResultAsync
+    appendUPSResultAsync, appendANMResultAsync
 } from "../../../state/results/resultSlice"
 
 export interface RestructuredGeneratorMap {
@@ -37,7 +37,6 @@ const restructureSettings = (optionArr: Option[]) => {
                 break
             case "switch":
                 if (opt.on !== undefined) {
-                    console.log("Switch Test 1: "+ opt.on + typeof(opt.on))
                     optionMap[opt.name] = opt.on
                 }
                 break
@@ -152,6 +151,9 @@ const GenerateButton = () => {
                 case "ups":
                     dispatch(appendUPSResultAsync(res));
                     break;
+                case "anm":
+                    dispatch(appendANMResultAsync(res));
+                    break;
                 default:
                     console.error("in unknown case")
             }
@@ -191,6 +193,9 @@ const GenerateButton = () => {
                 case "ups":
                     dispatch(appendUPSResultAsync(res));
                     break;
+                case "anm":
+                    dispatch(appendANMResultAsync(res));
+                    break;
                 default:
                     console.error("in unknown case")
             }
@@ -214,8 +219,6 @@ const GenerateButton = () => {
             const err = error as Error
             return err.message.split("|")
         }
-
-        console.log(mode.image.length)
 
         if (mode.image.length > 1){
             return await generateMultiImage(positivePrompt, negativePrompt, enhancedPrompt)

@@ -44,7 +44,7 @@ const ModeView = () => {
             modeBody = <ImageToImage/>
             break;
         case "anm":
-            modeBody = <ImageToVideo/>
+            modeBody = <UpscaleImage/>
             break;
         case "ups":
             modeBody = <UpscaleImage/>
