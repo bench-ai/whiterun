@@ -27,6 +27,7 @@ body{
   flex-grow: 1;
   margin: 0 15px 15px 0;
   min-width: 350px;
+  position: relative;
 }
 
 .operator-categories {
@@ -934,7 +935,38 @@ body{
   width: 50px;
 }
 
-/*------------------------------*/
+/*------Zoom Board------------*/
+
+.zoom-container {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  padding: 5px 10px;
+  background: #232e3e;
+  border-radius: 6px;
+  border-right: 1px solid var(--border-color);
+  z-index: 5;
+}
+
+.zoom-button {
+  background-color: #232e3e;
+  box-sizing: border-box;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.zoom-button img {
+  height: 25px;
+  width: 25px;
+}
+
+.zoom-button:hover {
+  background-color: #485563;
+}
+
+/*-------------------------*/
 
 .conn-removed-pu{
   padding: 10px;

@@ -37,7 +37,7 @@ const NavbarGlobal = () => {
                         display: 'flex',
                         alignItems: 'center'
                     }}>
-                        <img src={DiscordLogo}></img>
+                        <img src={DiscordLogo} alt="Discord Logo"></img>
                     </Button>
                 </a>
                 </div>
@@ -81,7 +81,7 @@ const NavbarProtected = () => {
                         backgroundColor: '#404eed',
                         borderColor: '#404eed',
                     }}>
-                        <img src={DiscordLogo}></img>
+                        <img src={DiscordLogo} alt="Discord Logo"></img>
                     </StyledButton>
                 </a>
                 <StyledButton type="primary" size="large" loading={signOutLoading} onClick={signout}>
