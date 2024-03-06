@@ -202,6 +202,7 @@ const VisualDisplay: FC<display> = (
     }
 ) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const mode = useSelector((state: RootState) => state.mode.value)
 
     const openLinkInNewTab = () => {
         if (result && result.result) {
@@ -250,12 +251,18 @@ const VisualDisplay: FC<display> = (
                     </div>
                 )
                 }
-                {result?.result &&
+                {(result?.result && (mode.name !== "anm")) &&
                     (<img src={result.result}
                           alt="Generated Image"
                           style={{maxWidth: "300px", margin: "5px auto"}}>
                     </img>)
                 }
+                {(result?.result && mode.name === "anm") && (
+                    <video controls style={{ maxWidth: "80%", height: "auto" }}>
+                        <source src={result.result} type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
+                )}
                 {(result?.error) && (<WarningAmberOutlined
                     style={
                         {

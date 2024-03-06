@@ -62,7 +62,7 @@
         },
         {
           "name": "seed",
-          "type": "number",
+          "type": "numbox",
           "start": 0,
           "stop": 4294967295
         },

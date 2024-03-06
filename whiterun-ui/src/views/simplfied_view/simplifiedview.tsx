@@ -10,8 +10,6 @@ import {Alert, FloatButton, Tour, TourProps} from "antd";
 import SimplifiedViewImagesDisplay
     from "./display/simplified_view_images_display";
 import SimplifiedInpainting from "./modes/inpainting";
-import ImageToImage from "./modes/imageToImage";
-import ImageToVideo from "./modes/imageToVideo";
 import {reset} from "../../state/generator/generatorSlice"
 import {reset as resultReset} from "../../state/results/resultSlice"
 import UpscaleImage from "./modes/upscaleImage";
@@ -42,10 +40,10 @@ const ModeView = () => {
             modeBody = <SimplifiedInpainting/>
             break;
         case "iti":
-            modeBody = <ImageToImage/>
+            modeBody = <UpscaleImage/>
             break;
         case "anm":
-            modeBody = <ImageToVideo/>
+            modeBody = <UpscaleImage/>
             break;
         case "ups":
             modeBody = <UpscaleImage/>
@@ -186,15 +184,15 @@ const SimplifiedView = () => {
                         <b>Image To Image</b>
                     </ModeButton>
 
-                    <ModeButton
-                        onClick={() => addView('inp')}
-                        style={{
-                            backgroundColor: mode.name === "inp" ? '#53389E' : 'white',
-                            color: mode.name === "inp" ? 'white' : 'black'
-                        }}
-                    >
-                        <b>Inpaint</b>
-                    </ModeButton>
+                    {/*<ModeButton*/}
+                    {/*    onClick={() => addView('inp')}*/}
+                    {/*    style={{*/}
+                    {/*        backgroundColor: mode.name === "inp" ? '#53389E' : 'white',*/}
+                    {/*        color: mode.name === "inp" ? 'white' : 'black'*/}
+                    {/*    }}*/}
+                    {/*>*/}
+                    {/*    <b>Inpaint</b>*/}
+                    {/*</ModeButton>*/}
 
                     <ModeButton
                         onClick={() => addView('ups')}

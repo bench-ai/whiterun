@@ -22,7 +22,7 @@ const UpscaleImage = () => {
 
         if (files) {
 
-            if (Object.keys(generatorsMap).length > 1){
+            if (Object.keys(generatorsMap).length > 1 && ((imageURLs.length > 0) || (files.length > 1))){
                 message.error('Maximum limit reached. You can upload at most 1 images. When' +
                     ' using more than one generator');
                 return;

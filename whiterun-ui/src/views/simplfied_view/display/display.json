@@ -2,14 +2,12 @@
   "tti": [
     "ups",
     "anm",
-    "iti",
-    "inp"
+    "iti"
   ],
   "iti": [
     "ups",
     "anm",
-    "iti",
-    "inp"
+    "iti"
   ],
   "ups": [
     "anm"
@@ -19,5 +17,6 @@
     "inp",
     "ups",
     "anm"
-  ]
+  ],
+  "anm": []
 }

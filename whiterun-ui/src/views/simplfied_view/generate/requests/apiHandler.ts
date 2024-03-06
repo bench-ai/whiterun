@@ -1,4 +1,3 @@
-import axios from "axios";
 import {DallE3} from "./dalle3";
 import {SDXL} from "./sdxl";
 import {RealVisXL} from "./realVisXL";
@@ -6,6 +5,7 @@ import {SDV2} from "./sdV2";
 import {UpscaleESRGAN} from "./upscaleEsrgan";
 import {UpscaleControlNet} from "./controlNet";
 import {Photomaker} from "./photomaker";
+import {i2vgen} from "./i2vgen";
 
 export interface ImageRequest {
     success: boolean
@@ -97,6 +97,30 @@ export const upscale = async (
     }
 };
 
+export const animate = async (
+    positivePrompt: string,
+    negativePrompt: string | undefined,
+    name: string,
+    image: string[] | undefined,
+    generator: { [p: string]: string | number | boolean }
+) => {
+    switch (name) {
+        case "imageToVideo":
+            return await i2vgen(
+                positivePrompt,
+                generator["guidance"] as number,
+                generator["steps"] as number,
+                image,
+                generator["max_frames"] as number,
+                generator["seed"] as number,
+            )
+        default:
+            const imageReq: ImageRequest = {
+                success: false
+            }
+            return imageReq
+    }
+};
 export const imageToImage = async (
     positivePrompt: string,
     negativePrompt: string | undefined,
@@ -149,7 +173,6 @@ export const imageToImage = async (
                 image,
                 positivePrompt,
                 negativePrompt,
-                generator["seed"] as number,
             )
         default:
             const imageReq: ImageRequest = {
