@@ -1,4 +1,4 @@
-import React, {ChangeEvent, useState} from 'react';
+import React, {ChangeEvent, MutableRefObject, useRef, useState} from 'react';
 import {Collapse, Switch, Dropdown, Menu} from 'antd';
 import {ModeHeader} from "../simplifiedview.styles";
 import {Enhancement, Prompt, Text} from "./prompts.styles";
@@ -7,7 +7,12 @@ import {RootState} from "../../../state/store";
 import {switchEnhance, changeStyle, updatePositivePrompt, updateNegativePrompt} from "../../../state/prompt/promptSlice"
 const { Panel } = Collapse;
 
-const Prompts = () => {
+interface PromptsProps {
+    refNegative: MutableRefObject<null>;
+    enhanceTour: MutableRefObject<null>;
+}
+
+const Prompts: React.FC<PromptsProps> = ({ refNegative, enhanceTour }) => {
 
     const prompt = useSelector((state: RootState) => state.prompt.value);
     const dispatch = useDispatch();
@@ -46,6 +51,7 @@ const Prompts = () => {
                 onChange={handlePosChange}
                 value={prompt.positivePrompt}
             />
+            <div ref={refNegative}>
             <Collapse ghost>
                 <Panel header="Negative Prompt" key="1">
                     <Prompt
@@ -54,7 +60,8 @@ const Prompts = () => {
                     ></Prompt>
                 </Panel>
             </Collapse>
-            <Enhancement>
+            </div>
+            <Enhancement ref={enhanceTour}>
                 <Text>Enhance Prompt</Text>
                 <Switch defaultChecked={prompt.enhance} onChange={onChange} style={{ marginRight: '20px' }}/>
                 {prompt.enhance && (

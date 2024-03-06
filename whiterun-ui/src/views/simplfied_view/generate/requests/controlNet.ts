@@ -26,9 +26,6 @@ export const UpscaleControlNet = async (
 
     if (image) {
         try {
-            console.log("hello")
-            console.log(resolution)
-            console.log(Number(resolution))
             const payload: Record<string, any> = {
                 prompt: prompt,
                 image: image[0],

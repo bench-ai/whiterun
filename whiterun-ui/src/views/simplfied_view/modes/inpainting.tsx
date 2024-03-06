@@ -11,8 +11,6 @@ import {ButtonRow, ModeButton, ModeHeader} from '../simplifiedview.styles';
 import {InboxOutlined, PaperClipOutlined} from '@ant-design/icons';
 
 const SimplifiedInpainting = () => {
-    const tagsData = ['RealVisXL', 'SDXL'];
-    const [selectedTags, setSelectedTags] = useState<string[]>(['Books']);
     const [brushSize, setBrushSize] = useState<number>(5);
     const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
     const [editedMaskFile, setEditedMaskFile] = useState<File | null>(null);
@@ -21,13 +19,6 @@ const SimplifiedInpainting = () => {
     useEffect(() => {
         document.title = 'Workbench Lite - Bench AI';
     }, []);
-
-    const handleChange = (tag: string, checked: boolean) => {
-        const nextSelectedTags = checked
-            ? [...selectedTags, tag]
-            : selectedTags.filter((t) => t !== tag);
-        setSelectedTags(nextSelectedTags);
-    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files && e.target.files[0];
@@ -394,18 +385,6 @@ const SimplifiedInpainting = () => {
 
     return (
         <div>
-            <ModeHeader>Generators</ModeHeader>
-            <ButtonRow>
-                {tagsData.map((tag) => (
-                    <StyledCheckableTag
-                        key={tag}
-                        checked={selectedTags.includes(tag)}
-                        onChange={(checked) => handleChange(tag, checked)}
-                    >
-                        {tag}
-                    </StyledCheckableTag>
-                ))}
-            </ButtonRow>
             <ModeHeader>Upload Image</ModeHeader>
             <UploadContainer>
                 <label htmlFor="fileInput">

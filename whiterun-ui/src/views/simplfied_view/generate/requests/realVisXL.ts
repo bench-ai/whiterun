@@ -15,6 +15,8 @@ export const RealVisXL = async (
     positivePrompt: string,
     negativePrompt?: string,
     seed?: number,
+    image?: string[] | undefined,
+    promptStrength?: number,
 ) => {
     const apiResponse: ImageRequest = {
         success: true,
@@ -38,11 +40,27 @@ export const RealVisXL = async (
             payload.seed = seed;
         }
 
-        const response: AxiosResponse = await axios.post(
-            `${baseURL}/replicate/realvisxl2/text-to-image`,
-            payload,
-            {withCredentials: true}
-        );
+        let response: AxiosResponse<any, any>;
+
+        if (image && promptStrength) {
+            payload.image = image[0];
+            payload.prompt_strength = promptStrength;
+            payload.mode = "image"
+
+            response = await axios.post(
+                `${baseURL}/replicate/realvisxl2/text-to-image`,
+                payload,
+                {withCredentials: true}
+            );
+
+
+        } else {
+            response = await axios.post(
+                `${baseURL}/replicate/realvisxl2/text-to-image`,
+                payload,
+                {withCredentials: true}
+            );
+        }
 
         const processedUrl = await checkStatusAndRetry(response, async () => {
             return await axios.get(

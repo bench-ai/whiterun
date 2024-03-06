@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {ButtonRow, ModeButton, ModeHeader, ModeSection} from "./simplifiedview.styles";
 import Prompts from "./prompts/prompts"
 import GeneratorColumn from "./generators/generatorColumn";
@@ -6,7 +6,7 @@ import GenerateButton from "./generate/generate";
 import {RootState} from "../../state/store";
 import {change} from "../../state/mode/modeSlice"
 import {useDispatch, useSelector} from "react-redux";
-import {Alert} from "antd";
+import {Alert, FloatButton, Tour, TourProps} from "antd";
 import SimplifiedViewImagesDisplay
     from "./display/simplified_view_images_display";
 import SimplifiedInpainting from "./modes/inpainting";
@@ -15,6 +15,7 @@ import ImageToVideo from "./modes/imageToVideo";
 import {reset} from "../../state/generator/generatorSlice"
 import {reset as resultReset} from "../../state/results/resultSlice"
 import UpscaleImage from "./modes/upscaleImage";
+import {QuestionCircleOutlined, BankOutlined} from "@ant-design/icons";
 
 
 const ModeView = () => {
@@ -84,11 +85,64 @@ const SimplifiedView = () => {
         }));
     }
 
+
+
+    const ref1 = useRef(null);
+    const ref2 = useRef(null);
+    const ref3 = useRef(null);
+    const ref4 = useRef(null);
+    const ref5 = useRef(null);
+    const ref6 = useRef(null);
+    const refNegative = useRef(null);
+    const enhanceTour = useRef(null);
+
     useEffect(() => {
         setGeneratorColumn(<GeneratorColumn/>);
-        setPrompt(<Prompts/>)
+        setPrompt(<Prompts refNegative={refNegative} enhanceTour={enhanceTour}/>)
         setButton(<GenerateButton/>)
     }, []);
+
+    const [open, setOpen] = useState<boolean>(false);
+
+    const steps: TourProps['steps'] = [
+        {
+            title: 'Start off with selecting a Mode',
+            description: 'The mode determines what kind of operations you want to do involving images.',
+            target: () => ref1.current,
+        },
+        {
+            title: 'Prompts Section',
+            description: 'Determines the prompt you want the model to follow when generating the image. Negative Prompt determines ' +
+                "what you don't want to see. The Enhance Prompt option makes the inputted prompt more detailed through AI, generating " +
+            "better images",
+            target: () => ref2.current,
+        },
+        {
+            title: 'Negative Prompt',
+            description: 'Input what you want to avoid seeing',
+            target: () => refNegative.current,
+        },
+        {
+            title: 'Enhance Prompt',
+            description: 'The Enhance Prompt option makes the inputted prompt more detailed through AI, generating better images',
+            target: () => enhanceTour.current,
+        },
+        {
+            title: 'Generate',
+            description: 'When ready to generate your image, hit the Generate button',
+            target: () => ref3.current,
+        },
+        {
+            title: 'See your Generated Image',
+            description: 'Once ready, generated images will appear here with an option to select the generated image as ' +
+                'the base image for another mode operation',
+            target: () => ref4.current,
+        },
+        {
+            title: 'Enjoy!',
+            target: () => null,
+        },
+    ];
 
     return (
         <div>
@@ -105,7 +159,10 @@ const SimplifiedView = () => {
                         />
                     </>
                 )}
+                <div ref={ref4}>
                 <SimplifiedViewImagesDisplay/>
+                </div>
+                <div ref={ref1}>
                 <ModeHeader>Mode</ModeHeader>
                 <ButtonRow>
 
@@ -160,18 +217,28 @@ const SimplifiedView = () => {
                     </ModeButton>
 
                 </ButtonRow>
+                </div>
                 <div>
                     <ModeView/>
                 </div>
-                <div>
+                <div ref={ref2}>
                     {prompt}
+                    {/*<Prompts refNegative={refNegative} />*/}
                 </div>
-                <ModeHeader>Generators</ModeHeader>
+                <ModeHeader ref={ref5}>Generators</ModeHeader>
                 {generatorColumn}
-                <div>
+                <div ref={ref3}>
                     {genButton}
                 </div>
             </ModeSection>
+            <Tour open={open} onClose={() => setOpen(false)} steps={steps} mask={{
+                color: 'rgba(18, 23, 31, .95)',
+            }}/>
+            <FloatButton.Group shape="square" style={{ right: 24 }}>
+                <FloatButton icon={<QuestionCircleOutlined />} type="primary" onClick={() => setOpen(true)} tooltip="Guided Tour"/>
+                <FloatButton icon={<BankOutlined />} type="primary" tooltip="Learning Center"/>
+                <FloatButton.BackTop visibilityHeight={0} type="primary" />
+            </FloatButton.Group>
         </div>
     );
 };

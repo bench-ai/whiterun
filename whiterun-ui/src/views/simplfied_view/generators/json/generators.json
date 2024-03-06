@@ -128,18 +128,6 @@
       "description": "All rounder in taking a base image and generating a new image while keeping characteristics from the base image. Based off Stable Diffusion XL",
       "settings": [
         {
-          "name": "clip",
-          "type": "list",
-          "options": [
-            "FAST_BLUE",
-            "FAST_GREEN",
-            "SIMPLE",
-            "SLOW",
-            "SLOWER",
-            "SLOWEST"
-          ]
-        },
-        {
           "name": "sampler",
           "type": "list",
           "options": [
@@ -192,18 +180,6 @@
       "difficulty": "hard",
       "description": "All rounder in taking a base image and generating a new image while keeping characteristics from the base image. Based off Stable Diffusion XL",
       "settings": [
-        {
-          "name": "clip",
-          "type": "list",
-          "options": [
-            "FAST_BLUE",
-            "FAST_GREEN",
-            "SIMPLE",
-            "SLOW",
-            "SLOWER",
-            "SLOWEST"
-          ]
-        },
         {
           "name": "sampler",
           "type": "list",
@@ -312,6 +288,23 @@
       "description": "Takes a portrait and sketch of a person and generates a new portrait in a specified art style",
       "difficulty": "medium",
       "settings": [
+        {
+          "name": "style",
+          "type": "list",
+          "options": [
+            "Photographic (Default)",
+            "(No style)",
+            "Cinematic",
+            "Disney Charactor",
+            "Digital Art",
+            "Fantasy art",
+            "Neonpunk",
+            "Enhance",
+            "Comic book",
+            "Lowpoly",
+            "Line art"
+          ]
+        },
         {
           "name": "steps",
           "type": "range",

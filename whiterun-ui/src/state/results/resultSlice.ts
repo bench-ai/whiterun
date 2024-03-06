@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {textToImage, upscale} from "../../views/simplfied_view/generate/requests/apiHandler";
+import {imageToImage, textToImage, upscale} from "../../views/simplfied_view/generate/requests/apiHandler";
 
 export interface Result {
     name: string
@@ -63,6 +63,11 @@ const resultSlice = createSlice({
                 action.payload
             )
         })
+        builder.addCase(appendITIResultAsync.fulfilled, (state, action: PayloadAction<Result>) => {
+            state.value.resultArr.push(
+                action.payload
+            )
+        })
     }
 });
 
@@ -105,6 +110,37 @@ export const appendUPSResultAsync = createAsyncThunk(
         }
 
         const result = await upscale(
+            posP,
+            res.negativePrompt,
+            res.name,
+            res.image,
+            res.settings
+        )
+
+        const finalResult: Result = {
+            ...res,
+            settings: {...res.settings},
+            result: result.response,
+        }
+
+        if (!result.success){
+            finalResult.error = result.error
+        }
+
+        return finalResult
+    }
+)
+
+export const appendITIResultAsync = createAsyncThunk(
+    "result/appendITIResultAsync",
+    async (res: Result) => {
+
+        let posP = res.positivePrompt
+        if (res.enhanced && res.enhancedPrompt){
+            posP = res.enhancedPrompt
+        }
+
+        const result = await imageToImage (
             posP,
             res.negativePrompt,
             res.name,

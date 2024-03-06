@@ -5,6 +5,7 @@ import {RealVisXL} from "./realVisXL";
 import {SDV2} from "./sdV2";
 import {UpscaleESRGAN} from "./upscaleEsrgan";
 import {UpscaleControlNet} from "./controlNet";
+import {Photomaker} from "./photomaker";
 
 export interface ImageRequest {
     success: boolean
@@ -87,6 +88,68 @@ export const upscale = async (
                 generator["seed"] as number,
                 negativePrompt,
                 image,
+            )
+        default:
+            const imageReq: ImageRequest = {
+                success: false
+            }
+            return imageReq
+    }
+};
+
+export const imageToImage = async (
+    positivePrompt: string,
+    negativePrompt: string | undefined,
+    name: string,
+    image: string[] | undefined,
+    generator: { [p: string]: string | number | boolean }
+) => {
+    switch(name){
+        case "SDXL":
+            return await SDXL(
+                generator["sampler"] as string,
+                generator["guidance"] as number,
+                generator["steps"] as number,
+                positivePrompt,
+                negativePrompt,
+                generator["seed"] as number,
+                image,
+                generator["image_strength"] as number,
+            )
+        case "SD2.1":
+            return await SDV2(
+                generator["sampler"] as string,
+                generator["guidance"] as number,
+                generator["steps"] as number,
+                positivePrompt,
+                negativePrompt,
+                generator["seed"] as number,
+                image,
+                generator["image_strength"] as number,
+            )
+        case "RealVisXL":
+            return await RealVisXL(
+                generator["sampler"] as string,
+                generator["steps"] as number,
+                generator["guidance"] as number,
+                generator["safety_filter"] as boolean,
+                positivePrompt,
+                negativePrompt,
+                generator["seed"] as number,
+                image,
+                generator["prompt_strength"] as number,
+            )
+        case "Photomaker":
+            return await Photomaker (
+                generator["style"] as string,
+                generator["steps"] as number,
+                generator["style_strength"] as number,
+                generator["guidance"] as number,
+                generator["safety_filter"] as boolean,
+                image,
+                positivePrompt,
+                negativePrompt,
+                generator["seed"] as number,
             )
         default:
             const imageReq: ImageRequest = {

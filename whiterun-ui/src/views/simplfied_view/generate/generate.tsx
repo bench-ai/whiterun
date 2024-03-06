@@ -11,7 +11,7 @@ import {
     increment,
     switchTrue,
     switchFalse,
-    appendUPSResultAsync
+    appendUPSResultAsync, appendITIResultAsync
 } from "../../../state/results/resultSlice"
 
 export interface RestructuredGeneratorMap {
@@ -152,6 +152,9 @@ const GenerateButton = () => {
                 case "ups":
                     dispatch(appendUPSResultAsync(res));
                     break;
+                case "iti":
+                    dispatch(appendITIResultAsync(res));
+                    break;
                 default:
                     console.error("in unknown case")
             }
@@ -191,6 +194,10 @@ const GenerateButton = () => {
                 case "ups":
                     dispatch(appendUPSResultAsync(res));
                     break;
+                case "iti":
+                    console.log("trying")
+                    dispatch(appendITIResultAsync(res));
+                    break
                 default:
                     console.error("in unknown case")
             }
