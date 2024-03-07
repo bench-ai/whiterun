@@ -1,9 +1,7 @@
 export class Drawflowoverride extends Drawflow {
 
   removeNodeId(id) {
-    console.log("here doggie")
     var removeNode = this.dispatch('nodeBeforeRemoved', id);
-    console.log("finished doggie")
 
     if(removeNode === true) {
 

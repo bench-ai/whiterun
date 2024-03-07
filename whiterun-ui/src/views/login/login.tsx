@@ -16,7 +16,7 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [error, setError] = useState(false);
-    const { login } = useAuth();
+    const { login, isLoggedIn } = useAuth();
     const navigate = useNavigate();
 
     const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
@@ -26,8 +26,6 @@ const Login = () => {
     })
 
     const submit = async () => {
-
-        console.log("in here")
         try {
             console.log(baseURL);
             const {data} = await axios.post(

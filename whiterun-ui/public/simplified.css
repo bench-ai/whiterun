@@ -1,0 +1,31 @@
+.mode-header{
+    font-size: 35px;
+    color: white;
+    text-align: left;
+}
+
+.mode-button{
+    font-size: 24px;
+    padding: 10px;
+    border-radius: 20px;
+    border: none;
+    margin-right: 35px;
+    margin-bottom: 10px;
+}
+
+#mode-text-to-image{
+    background: #53389E;
+    color: white;
+}
+
+.mode-section {
+    display: flex; /* Set width of the div */
+    padding: 20px;
+    justify-content: center;
+    /* Add any additional styling you need */
+}
+
+/*.center-container {*/
+/*    display: flex; !* Center the inline-block element *!*/
+/*    justify-content: center*/
+/*}*/

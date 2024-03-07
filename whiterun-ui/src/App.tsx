@@ -10,6 +10,8 @@ import {AuthProvider} from "./auth/auth_context";
 import Home from "./views/home/home";
 import ErrorPage from "./views/error_page/error_page";
 import Workbench from './views/workbench/workbench';
+import SimplifiedView from "./views/simplfied_view/simplifiedview";
+import ProtectedRoutes from "./components/protected_routes/protected_routes";
 
 const App = () => {
 
@@ -19,6 +21,12 @@ const App = () => {
         <>
             <ConfigProvider
                 theme={{
+                    components: {
+                        Menu: {
+                            itemBg: "#0d1117",
+                            activeBarBorderWidth: 0
+                        },
+                    },
                     algorithm: theme.darkAlgorithm,
                     token: {
                         "colorPrimary": "#3fb950",
@@ -26,17 +34,19 @@ const App = () => {
                         "colorBgContainer": "#12181f"
                     },
 
+
                 }}
             >
                 <AuthProvider>
                     <Navbar/>
                     <Routes>
                         {/*<Route element={<ProtectedRoutes/>}>*/}
-                            {/*<Route path={"/browse"} element={<AppPage/>}/>*/}
+                        {/*    <Route path={"/workbench/lite"} element={<SimplifiedView/>}/>*/}
                         {/*</Route>*/}
                         {/*<Route path={"/browse"} element={<AppPage/>}/>*/}
                         {/*<Route path={"/protected"} element={<Protected/>}/>*/}
                         <Route path="/workbench" element={<Workbench />} />
+                        <Route path="/workbench/lite" element={<SimplifiedView />} />
                         <Route path={"/"} element={<Home/>}/>
                         <Route path={"/login"} element={<Login/>}/>
                         <Route path={"/register"} element={<Register/>}/>

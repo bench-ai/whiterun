@@ -407,6 +407,18 @@ const DragAndDrop = () => {
           <img src="assets/save-logo.svg" alt="Save Button" onclick="saveDrawFlow()">
         </button>
       </div>
+      
+      <div class="zoom-container">
+        <button class="zoom-button">
+           <img src="assets/zoom-out-logo.svg" alt="Zoom Out Button" onclick="zoomOut()">
+        </button>
+        <button class="zoom-button">
+           <img src="assets/search-logo.svg" alt="Reset Zoom Button" onclick="zoomReset()">
+        </button>
+        <button class="zoom-button">
+           <img src="assets/zoom-in-logo.svg" alt="Zoom In Button" onclick="zoomIn()">
+        </button>
+      </div>
     </div>
   </div>
 

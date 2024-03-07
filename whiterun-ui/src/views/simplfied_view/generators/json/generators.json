@@ -1,0 +1,716 @@
+{
+  "ups": [
+    {
+      "name": "Stable Diffusion",
+      "difficulty": "easy",
+      "description": "Takes an image and upscales its resolution",
+      "settings": []
+    },
+    {
+      "name": "ControlNet Tile Upscaler",
+      "difficulty": "hard",
+      "description": "Takes an image and upscales its resolution and generates added detail to the base image",
+      "settings": [
+        {
+          "name": "sampler",
+          "type": "list",
+          "options": [
+            "DPMSolverMultistep",
+            "K_EULER_ANCESTRAL",
+            "K_EULER"
+          ]
+        },
+        {
+          "name": "resolution",
+          "type": "list",
+          "options": [
+            "2048",
+            "2560"
+          ]
+        },
+        {
+          "name": "base_image_resemblance",
+          "type": "range",
+          "start": 0,
+          "stop": 1,
+          "def": 0.5,
+          "value": 0.5
+        },
+        {
+          "name": "guidance",
+          "type": "range",
+          "start": 1,
+          "stop": 30,
+          "def": 7,
+          "value": 7
+        },
+        {
+          "name": "hdr",
+          "type": "range",
+          "start": 0,
+          "stop": 1,
+          "def": 0.7,
+          "value": 0.7
+        },
+        {
+          "name": "creativity",
+          "type": "range",
+          "start": 0,
+          "stop": 1,
+          "def": 0.5,
+          "value": 0.5
+        },
+        {
+          "name": "seed",
+          "type": "numbox",
+          "start": 0,
+          "stop": 4294967295
+        },
+        {
+          "name": "steps",
+          "type": "range",
+          "start": 10,
+          "stop": 50,
+          "def": 30,
+          "value": 30
+        },
+        {
+          "name": "guess_mode",
+          "type": "switch",
+          "on": false
+        }
+      ]
+    }
+  ],
+  "anm": [
+    {
+      "name": "imageToVideo",
+      "difficulty": "easy",
+      "description": "Turns an image into a short video and uses a prompt to guide the video generation",
+      "settings": [
+        {
+          "name": "max_frames",
+          "type": "range",
+          "start": 1,
+          "stop": 30,
+          "def": 16,
+          "value": 16
+        },
+        {
+          "name": "steps",
+          "type": "range",
+          "start": 1,
+          "stop": 40,
+          "def": 35,
+          "value": 35
+        },
+        {
+          "name": "guidance",
+          "type": "range",
+          "start": 1,
+          "stop": 20,
+          "def": 9,
+          "value": 9
+        },
+        {
+          "name": "seed",
+          "type": "numbox",
+          "start": 0,
+          "stop": 4294967295
+        }
+      ]
+    }
+  ],
+  "iti": [
+    {
+      "name": "SDXL",
+      "difficulty": "hard",
+      "description": "All rounder in taking a base image and generating a new image while keeping characteristics from the base image. Based off Stable Diffusion XL",
+      "settings": [
+        {
+          "name": "sampler",
+          "type": "list",
+          "options": [
+            "DDIM",
+            "DDPM",
+            "K_DPMPP_2M",
+            "K_DPMPP_2S_ANCESTRAL",
+            "K_DPM_2",
+            "K_DPM_2_ANCESTRAL",
+            "K_EULER",
+            "K_EULER_ANCESTRAL",
+            "K_HEUN",
+            "K_LMS"
+          ]
+        },
+        {
+          "name": "guidance",
+          "type": "range",
+          "start": 1,
+          "stop": 35,
+          "def": 7,
+          "value": 7
+        },
+        {
+          "name": "seed",
+          "type": "numbox",
+          "start": 0,
+          "stop": 4294967295
+        },
+        {
+          "name": "steps",
+          "type": "range",
+          "start": 10,
+          "stop": 50,
+          "def": 30,
+          "value": 30
+        },
+        {
+          "name": "image_strength",
+          "type": "range",
+          "start": 0,
+          "stop": 1,
+          "def": 0.35,
+          "value": 0.35
+        }
+      ]
+    },
+    {
+      "name": "SD2.1",
+      "difficulty": "hard",
+      "description": "All rounder in taking a base image and generating a new image while keeping characteristics from the base image. Based off Stable Diffusion XL",
+      "settings": [
+        {
+          "name": "sampler",
+          "type": "list",
+          "options": [
+            "DDIM",
+            "DDPM",
+            "K_DPMPP_2M",
+            "K_DPMPP_2S_ANCESTRAL",
+            "K_DPM_2",
+            "K_DPM_2_ANCESTRAL",
+            "K_EULER",
+            "K_EULER_ANCESTRAL",
+            "K_HEUN",
+            "K_LMS"
+          ]
+        },
+        {
+          "name": "guidance",
+          "type": "range",
+          "start": 1,
+          "stop": 35,
+          "def": 7,
+          "value": 7
+        },
+        {
+          "name": "seed",
+          "type": "numbox",
+          "start": 0,
+          "stop": 4294967295
+        },
+        {
+          "name": "steps",
+          "type": "range",
+          "start": 10,
+          "stop": 50,
+          "def": 30,
+          "value": 30
+        },
+        {
+          "name": "image_strength",
+          "type": "range",
+          "start": 0,
+          "stop": 1,
+          "def": 0.35,
+          "value": 0.35
+        }
+      ]
+    },
+    {
+      "name": "RealVisXL",
+      "difficulty": "hard",
+      "description": "Geared towards generating realistic images, takes a base image and generates a new image while keeping characteristics from the base image.",
+      "settings": [
+        {
+          "name": "sampler",
+          "type": "list",
+          "options": [
+            "DPMSolverMultistep",
+            "DDIM",
+            "HeunDiscrete",
+            "KarrasDPM",
+            "K_EULER_ANCESTRAL",
+            "K_EULER",
+            "PNDM"
+          ]
+        },
+        {
+          "name": "steps",
+          "type": "range",
+          "start": 1,
+          "stop": 50,
+          "def": 40,
+          "value": 40
+        },
+        {
+          "name": "guidance",
+          "type": "range",
+          "start": 1,
+          "stop": 30,
+          "def": 7,
+          "value": 7
+        },
+        {
+          "name": "seed",
+          "type": "numbox",
+          "start": 0,
+          "stop": 4294967295
+        },
+        {
+          "name": "prompt_strength",
+          "type": "range",
+          "start": 0,
+          "stop": 1,
+          "def": 0.7,
+          "value": 0.7
+        },
+        {
+          "name": "safety_filter",
+          "type": "switch",
+          "on": true
+        }
+      ]
+    },
+    {
+      "name": "Photomaker",
+      "description": "Takes a portrait and sketch of a person and generates a new portrait in a specified art style",
+      "difficulty": "medium",
+      "settings": [
+        {
+          "name": "style",
+          "type": "list",
+          "options": [
+            "Photographic (Default)",
+            "(No style)",
+            "Cinematic",
+            "Disney Charactor",
+            "Digital Art",
+            "Fantasy art",
+            "Neonpunk",
+            "Enhance",
+            "Comic book",
+            "Lowpoly",
+            "Line art"
+          ]
+        },
+        {
+          "name": "steps",
+          "type": "range",
+          "start": 1,
+          "stop": 40,
+          "def": 20,
+          "value": 20
+        },
+        {
+          "name": "style_strength",
+          "type": "range",
+          "start": 15,
+          "stop": 50,
+          "def": 20,
+          "value": 20
+        },
+        {
+          "name": "guidance",
+          "type": "range",
+          "start": 1,
+          "stop": 10,
+          "def": 5,
+          "value": 5
+        },
+        {
+          "name": "seed",
+          "type": "numbox",
+          "start": 0,
+          "stop": 4294967295
+        },
+        {
+          "name": "safety_filter",
+          "type": "switch",
+          "on": true
+        }
+      ]
+    }
+  ],
+  "inp": [
+    {
+      "name": "SD2.1",
+      "difficulty": "hard",
+      "description": "All rounder masking operator based off Stable Diffusion 2.1",
+      "settings": [
+        {
+          "name": "clip",
+          "type": "list",
+          "options": [
+            "FAST_BLUE",
+            "FAST_GREEN",
+            "SIMPLE",
+            "SLOW",
+            "SLOWER",
+            "SLOWEST"
+          ]
+        },
+        {
+          "name": "sampler",
+          "type": "list",
+          "options": [
+            "DDIM",
+            "DDPM",
+            "K_DPMPP_2M",
+            "K_DPMPP_2S_ANCESTRAL",
+            "K_DPM_2",
+            "K_DPM_2_ANCESTRAL",
+            "K_EULER",
+            "K_EULER_ANCESTRAL",
+            "K_HEUN",
+            "K_LMS"
+          ]
+        },
+        {
+          "name": "mask_source",
+          "type": "list",
+          "options": [
+            "MASK_IMAGE_BLACK",
+            "MASK_IMAGE_WHITE"
+          ]
+        },
+        {
+          "name": "guidance",
+          "type": "range",
+          "start": 1,
+          "stop": 35,
+          "def": 7,
+          "value": 7
+        },
+        {
+          "name": "seed",
+          "type": "numbox",
+          "start": 0,
+          "stop": 4294967295
+        },
+        {
+          "name": "steps",
+          "type": "range",
+          "start": 10,
+          "stop": 50,
+          "def": 30,
+          "value": 30
+        }
+      ]
+    },
+    {
+      "name": "SDXL",
+      "difficulty": "hard",
+      "description": "All rounder masking operator based off Stable Diffusion XL",
+      "settings": [
+        {
+          "name": "clip",
+          "type": "list",
+          "options": [
+            "FAST_BLUE",
+            "FAST_GREEN",
+            "SIMPLE",
+            "SLOW",
+            "SLOWER",
+            "SLOWEST"
+          ]
+        },
+        {
+          "name": "sampler",
+          "type": "list",
+          "options": [
+            "DDIM",
+            "DDPM",
+            "K_DPMPP_2M",
+            "K_DPMPP_2S_ANCESTRAL",
+            "K_DPM_2",
+            "K_DPM_2_ANCESTRAL",
+            "K_EULER",
+            "K_EULER_ANCESTRAL",
+            "K_HEUN",
+            "K_LMS"
+          ]
+        },
+        {
+          "name": "mask_source",
+          "type": "list",
+          "options": [
+            "MASK_IMAGE_BLACK",
+            "MASK_IMAGE_WHITE"
+          ]
+        },
+        {
+          "name": "guidance",
+          "type": "range",
+          "start": 1,
+          "stop": 35,
+          "def": 7,
+          "value": 7
+        },
+        {
+          "name": "seed",
+          "type": "numbox",
+          "start": 0,
+          "stop": 4294967295
+        },
+        {
+          "name": "steps",
+          "type": "range",
+          "start": 10,
+          "stop": 50,
+          "def": 30,
+          "value": 30
+        }
+      ]
+    },
+    {
+      "name": "realvisxl-v2.0",
+      "difficulty": "medium",
+      "description": "A Stable Diffusion based masked finetuned towards generating realistic images",
+      "settings": [
+        {
+          "name": "sampler",
+          "type": "list",
+          "options": [
+            "DPMSolverMultistep",
+            "DDIM",
+            "HeunDiscrete",
+            "KarrasDPM",
+            "K_EULER_ANCESTRAL",
+            "K_EULER",
+            "PNDM"
+          ]
+        },
+        {
+          "name": "steps",
+          "type": "range",
+          "start": 1,
+          "stop": 50,
+          "def": 40,
+          "value": 40
+        },
+        {
+          "name": "guidance",
+          "type": "range",
+          "start": 1,
+          "stop": 30,
+          "def": 7,
+          "value": 7
+        },
+        {
+          "name": "seed",
+          "type": "numbox",
+          "start": 0,
+          "stop": 4294967295
+        },
+        {
+          "name": "prompt_strength",
+          "type": "range",
+          "start": 0,
+          "stop": 1,
+          "def": 0.7,
+          "value": 0.7
+        },
+        {
+          "name": "safety_filter",
+          "type": "switch",
+          "on": true
+        }
+      ]
+    }
+  ],
+  "tti": [
+    {
+      "name": "SDXL",
+      "difficulty": "medium",
+      "description": "Stable Diffusion XL the best general purpose SD model, choose a different XL model if you want tailored styles",
+      "settings": [
+        {
+          "name": "sampler",
+          "type": "list",
+          "options": [
+            "DDIM",
+            "DDPM",
+            "K_DPMPP_2M",
+            "K_DPMPP_2S_ANCESTRAL",
+            "K_DPM_2",
+            "K_DPM_2_ANCESTRAL",
+            "K_EULER",
+            "K_EULER_ANCESTRAL",
+            "K_HEUN",
+            "K_LMS"
+          ]
+        },
+        {
+          "name": "steps",
+          "type": "range",
+          "start": 10,
+          "stop": 50,
+          "def": 30,
+          "value": 30
+        },
+        {
+          "name": "guidance",
+          "type": "range",
+          "start": 1,
+          "stop": 35,
+          "def": 7,
+          "value": 7
+        },
+        {
+          "name": "seed",
+          "type": "numbox",
+          "start": 0,
+          "stop": 4294967295
+        }
+      ]
+    },
+    {
+      "name": "DALLE-3",
+      "difficulty": "easy",
+      "description": "A easy to use all rounder generator, does not require complex prompts",
+      "settings": [
+        {
+          "name": "style",
+          "type": "list",
+          "options": [
+            "vivid",
+            "natural"
+          ]
+        },
+        {
+          "name": "resolution",
+          "type": "list",
+          "options": [
+            "1024x1024",
+            "1792x1024",
+            "1024x1792"
+          ]
+        },
+        {
+          "name": "quality",
+          "type": "list",
+          "options": [
+            "standard",
+            "hd"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SD2.1",
+      "difficulty": "hard",
+      "description": "Stable Diffusion 2.1 A generalist model that requires more control for the best outputs",
+      "settings": [
+        {
+          "name": "clip",
+          "type": "list",
+          "options": [
+            "FAST_BLUE",
+            "FAST_GREEN",
+            "SIMPLE",
+            "SLOW",
+            "SLOWER",
+            "SLOWEST"
+          ]
+        },
+        {
+          "name": "sampler",
+          "type": "list",
+          "options": [
+            "DDIM",
+            "DDPM",
+            "K_DPMPP_2M",
+            "K_DPMPP_2S_ANCESTRAL",
+            "K_DPM_2",
+            "K_DPM_2_ANCESTRAL",
+            "K_EULER",
+            "K_EULER_ANCESTRAL",
+            "K_HEUN",
+            "K_LMS"
+          ]
+        },
+        {
+          "name": "steps",
+          "type": "range",
+          "start": 10,
+          "stop": 50,
+          "def": 30,
+          "value": 30
+        },
+        {
+          "name": "guidance",
+          "type": "range",
+          "start": 1,
+          "stop": 35,
+          "def": 7,
+          "value": 7
+        },
+        {
+          "name": "seed",
+          "type": "numbox",
+          "start": 0,
+          "stop": 4294967295
+        }
+      ]
+    },
+    {
+      "name": "realvisxl-v2.0",
+      "difficulty": "medium",
+      "description": "A Stable Diffusion Generator finetuned to create realistic images, especially of human beings",
+      "settings": [
+        {
+          "name": "sampler",
+          "type": "list",
+          "options": [
+            "DPMSolverMultistep",
+            "DDIM",
+            "HeunDiscrete",
+            "KarrasDPM",
+            "K_EULER_ANCESTRAL",
+            "K_EULER",
+            "PNDM"
+          ]
+        },
+        {
+          "name": "steps",
+          "type": "range",
+          "start": 1,
+          "stop": 50,
+          "def": 40,
+          "value": 40
+        },
+        {
+          "name": "guidance",
+          "type": "range",
+          "start": 1,
+          "stop": 30,
+          "def": 7,
+          "value": 7
+        },
+        {
+          "name": "seed",
+          "type": "numbox",
+          "start": 0,
+          "stop": 4294967295
+        },
+        {
+          "name": "safety_filter",
+          "type": "switch",
+          "on": true
+        }
+      ]
+    }
+  ]
+}

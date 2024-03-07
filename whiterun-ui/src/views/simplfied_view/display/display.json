@@ -1,0 +1,22 @@
+{
+  "tti": [
+    "ups",
+    "anm",
+    "iti"
+  ],
+  "iti": [
+    "ups",
+    "anm",
+    "iti"
+  ],
+  "ups": [
+    "anm"
+  ],
+  "inp": [
+    "iti",
+    "inp",
+    "ups",
+    "anm"
+  ],
+  "anm": []
+}

@@ -7,7 +7,6 @@ import {Content} from "antd/es/layout/layout";
 import {WorkflowList} from "./home.styles";
 import {WorkflowCard} from "../../components/workflow_card/workflow_card";
 import {AddApiForm} from "../app_page/app_page.styles";
-import CardSelector from "../../components/workflow_template_card/template_card_selector";
 
 interface Workflow {
     id: string;
@@ -49,7 +48,6 @@ const Home = () => {
     useEffect(() => {
         (async () => {
             try {
-                console.log(`${baseURL}/user/details`);
                 const response = await axios.get(
                     `${baseURL}/user/details`, {
                         withCredentials: true,
@@ -90,7 +88,7 @@ const Home = () => {
                     <Alert
                         message={<strong>An update to your Workflows</strong>}
                         description="We recently updated how workflows work and therefore, previous workflows no longer work and will have to be
-                        recreated. We aplogize for any inconvenience this has caused."
+                        recreated. We apologize for any inconvenience this has caused."
                         type="info"
                         closable
                         showIcon
