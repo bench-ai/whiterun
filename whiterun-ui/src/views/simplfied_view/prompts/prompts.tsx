@@ -5,14 +5,17 @@ import {Enhancement, Prompt, Text} from "./prompts.styles";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../../state/store";
 import {switchEnhance, changeStyle, updatePositivePrompt, updateNegativePrompt} from "../../../state/prompt/promptSlice"
+import {DownOutlined} from '@ant-design/icons';
+import TextArea from "antd/es/input/TextArea";
+
 const { Panel } = Collapse;
 
 interface PromptsProps {
-    refNegative: MutableRefObject<null>;
+    negativeTour: MutableRefObject<null>;
     enhanceTour: MutableRefObject<null>;
 }
 
-const Prompts: React.FC<PromptsProps> = ({ refNegative, enhanceTour }) => {
+const Prompts: React.FC<PromptsProps> = ({ negativeTour, enhanceTour }) => {
 
     const prompt = useSelector((state: RootState) => state.prompt.value);
     const dispatch = useDispatch();
@@ -47,31 +50,37 @@ const Prompts: React.FC<PromptsProps> = ({ refNegative, enhanceTour }) => {
     return (
         <div>
             <ModeHeader>Prompts</ModeHeader>
-            <Prompt
+            <TextArea
                 onChange={handlePosChange}
                 value={prompt.positivePrompt}
+                placeholder="Enter a Positive Prompt Here!"
+                rows={8}
             />
-            <div ref={refNegative}>
+            <div ref={negativeTour}>
             <Collapse ghost>
                 <Panel header="Negative Prompt" key="1">
-                    <Prompt
+                    <TextArea
                         onChange={handleNegChange}
                         value={prompt.negativePrompt}
-                    ></Prompt>
+                        placeholder="Enter a Negative Prompt Here!"
+                        rows={8}
+                    ></TextArea>
                 </Panel>
             </Collapse>
             </div>
             <Enhancement ref={enhanceTour}>
-                <Text>Enhance Prompt</Text>
-                <Switch defaultChecked={prompt.enhance} onChange={onChange} style={{ marginRight: '20px' }}/>
+                <div style={{display: "flex"}}>
+                    <Text>Enhance Prompt</Text>
+                    <Switch defaultChecked={prompt.enhance} onChange={onChange} style={{marginRight: '10px'}}/>
+                </div>
                 {prompt.enhance && (
-                    <Dropdown overlay={menu}>
+                    <Dropdown.Button overlay={menu} icon={<DownOutlined/>}>
                     <span
                         className="ant-dropdown-link"
                         onClick={e => e.preventDefault()}>
                         {prompt.promptStyle ? prompt.promptStyle : "Select a style"}
                     </span>
-                    </Dropdown>
+                    </Dropdown.Button>
                 )}
             </Enhancement>
         </div>

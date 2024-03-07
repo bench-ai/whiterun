@@ -6,7 +6,7 @@ import GenerateButton from "./generate/generate";
 import {RootState} from "../../state/store";
 import {change} from "../../state/mode/modeSlice"
 import {useDispatch, useSelector} from "react-redux";
-import {Alert, FloatButton, Tour, TourProps} from "antd";
+import {FloatButton, Tour, TourProps, message} from "antd";
 import SimplifiedViewImagesDisplay
     from "./display/simplified_view_images_display";
 import SimplifiedInpainting from "./modes/inpainting";
@@ -14,11 +14,27 @@ import {reset} from "../../state/generator/generatorSlice"
 import {reset as resultReset} from "../../state/results/resultSlice"
 import UpscaleImage from "./modes/upscaleImage";
 import {QuestionCircleOutlined, BankOutlined} from "@ant-design/icons";
+import LearningCenter from "../../components/learning_center/learning_center";
+import {HelpModal} from "../workbench/workbench.styles";
+import axios from "axios";
 
 
 const ModeView = () => {
     const mode = useSelector((state: RootState) => state.mode.value);
     const dispatch = useDispatch();
+    const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
+
+    useEffect(() => {
+        (async () => {
+            try {
+                await axios.post(`${baseURL}/auth/test`, {}, {
+                    withCredentials: true,
+                });
+            } catch (e) {
+
+            }
+        })();
+    }, [baseURL]);
 
     useEffect(() => {
         dispatch(change({
@@ -75,6 +91,15 @@ const SimplifiedView = () => {
     const [genButton, setButton] =
         useState<React.ReactElement | null>(null);
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const showModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
 
     function addView(currentMode: string) {
         dispatch(change({
@@ -85,18 +110,17 @@ const SimplifiedView = () => {
 
 
 
-    const ref1 = useRef(null);
-    const ref2 = useRef(null);
-    const ref3 = useRef(null);
-    const ref4 = useRef(null);
-    const ref5 = useRef(null);
-    const ref6 = useRef(null);
-    const refNegative = useRef(null);
-    const enhanceTour = useRef(null);
+    const tourMode = useRef(null);
+    const tourPrompts = useRef(null);
+    const tourGenerate = useRef(null);
+    const tourView = useRef(null);
+    const tourGenerators = useRef(null);
+    const tourNegative = useRef(null);
+    const tourEnhance = useRef(null);
 
     useEffect(() => {
         setGeneratorColumn(<GeneratorColumn/>);
-        setPrompt(<Prompts refNegative={refNegative} enhanceTour={enhanceTour}/>)
+        setPrompt(<Prompts negativeTour={tourNegative} enhanceTour={tourEnhance}/>)
         setButton(<GenerateButton/>)
     }, []);
 
@@ -106,35 +130,41 @@ const SimplifiedView = () => {
         {
             title: 'Start off with selecting a Mode',
             description: 'The mode determines what kind of operations you want to do involving images.',
-            target: () => ref1.current,
+            target: () => tourMode.current,
         },
         {
             title: 'Prompts Section',
-            description: 'Determines the prompt you want the model to follow when generating the image. Negative Prompt determines ' +
-                "what you don't want to see. The Enhance Prompt option makes the inputted prompt more detailed through AI, generating " +
-            "better images",
-            target: () => ref2.current,
+            description: 'Determines the prompt you want the model to follow when generating the image.',
+            target: () => tourPrompts.current,
         },
         {
             title: 'Negative Prompt',
-            description: 'Input what you want to avoid seeing',
-            target: () => refNegative.current,
+            description: 'Input what you want to avoid seeing when generating the image.',
+            target: () => tourNegative.current,
         },
         {
             title: 'Enhance Prompt',
-            description: 'The Enhance Prompt option makes the inputted prompt more detailed through AI, generating better images',
-            target: () => enhanceTour.current,
+            description: 'The Enhance Prompt option makes the inputted prompt more detailed through AI, generating better images.' +
+                ' Selecting a style caters the generated prompt to that style.',
+            target: () => tourEnhance.current,
+        },
+        {
+            title: 'Generators',
+            description: "You can change the model used to generate each image by selecting a generator. You can select multiple generators, " +
+                "each with their own settings for the same image. You can only have one generator when inputting more than one image.",
+            target: () => tourGenerators.current,
         },
         {
             title: 'Generate',
             description: 'When ready to generate your image, hit the Generate button',
-            target: () => ref3.current,
+            target: () => tourGenerate.current,
         },
         {
             title: 'See your Generated Image',
-            description: 'Once ready, generated images will appear here with an option to select the generated image as ' +
-                'the base image for another mode operation',
-            target: () => ref4.current,
+            description: 'Once ready, your generated images will appear here with an option to select the chosen image(s) as ' +
+                'the base image for another operation. You can also click on the info button in the top right to see ' +
+                'all the settings used to generate that image.',
+            target: () => tourView.current,
         },
         {
             title: 'Enjoy!',
@@ -142,25 +172,32 @@ const SimplifiedView = () => {
         },
     ];
 
+    useEffect(() => {
+        if (alert.level !== "calm") {
+            message.open({
+                type: 'error',
+                content: (
+                    <>
+                        <b>{alert.message}</b>
+                        <br/>
+                        <div style={{maxWidth: 400}}>
+                        {alert.description}
+                        </div>
+                    </>
+                ),
+                duration: 10
+            });
+        }
+    }, [alert]);
+
     return (
         <div>
             <ModeSection>
-                {alert.level !== "calm" && (
-                    <>
-                        {console.log("Alert level:", alert.level)}
-                        <Alert
-                            message={<strong>{alert.message}</strong>}
-                            description={alert.description}
-                            type="error"
-                            showIcon
-                            style={{marginTop: "20px", marginBottom: "30px"}}
-                        />
-                    </>
-                )}
-                <div ref={ref4}>
+
+                <div ref={tourView}>
                 <SimplifiedViewImagesDisplay/>
                 </div>
-                <div ref={ref1}>
+                <div ref={tourMode}>
                 <ModeHeader>Mode</ModeHeader>
                 <ButtonRow>
 
@@ -219,13 +256,14 @@ const SimplifiedView = () => {
                 <div>
                     <ModeView/>
                 </div>
-                <div ref={ref2}>
+                <div ref={tourPrompts}>
                     {prompt}
-                    {/*<Prompts refNegative={refNegative} />*/}
                 </div>
-                <ModeHeader ref={ref5}>Generators</ModeHeader>
-                {generatorColumn}
-                <div ref={ref3}>
+                <div ref={tourGenerators}>
+                    <ModeHeader>Generators</ModeHeader>
+                    {generatorColumn}
+                </div>
+                <div ref={tourGenerate}>
                     {genButton}
                 </div>
             </ModeSection>
@@ -234,9 +272,17 @@ const SimplifiedView = () => {
             }}/>
             <FloatButton.Group shape="square" style={{ right: 24 }}>
                 <FloatButton icon={<QuestionCircleOutlined />} type="primary" onClick={() => setOpen(true)} tooltip="Guided Tour"/>
-                <FloatButton icon={<BankOutlined />} type="primary" tooltip="Learning Center"/>
+                <FloatButton icon={<BankOutlined />} type="primary" tooltip="Learning Center" onClick={showModal}/>
                 <FloatButton.BackTop visibilityHeight={0} type="primary" />
             </FloatButton.Group>
+            <HelpModal
+                visible={isModalOpen}
+                onCancel={handleCancel}
+                footer={null}
+                destroyOnClose={true}
+            >
+                <LearningCenter/>
+            </HelpModal>
         </div>
     );
 };

@@ -79,6 +79,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
     const login = async () => {
         setIsLoggedIn(true);
+        console.log("done")
+        console.log(isLoggedIn)
         // Fetch user details upon login
         await onLoad();
     };

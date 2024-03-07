@@ -54,8 +54,8 @@ export const ModeButton = styled.div`
     margin-right: 50px;
     margin-bottom: 10px;
     background: white;
-    textAlign: 'center';
     user-select: none;
+    cursor: pointer;
     
     &:hover {
         filter: brightness(75%);

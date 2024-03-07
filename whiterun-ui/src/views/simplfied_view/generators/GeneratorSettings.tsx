@@ -4,6 +4,7 @@ import {ModelHeader} from "./generatorColumn.styles";
 import {Generator, GeneratorsMap, Option, updateGenerator} from "../../../state/generator/generatorSlice";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../../state/store";
+import {DownOutlined} from "@ant-design/icons";
 
 interface SettingModal {
     id: number
@@ -128,13 +129,13 @@ const SettingOption: FC<SettingOption> = ({id, option, pos}) => {
             </Menu>
         );
 
-        data = <Dropdown overlay={menu}>
+        data = <Dropdown.Button overlay={menu} icon={<DownOutlined/>}>
                     <span
                         className="ant-dropdown-link"
                         onClick={e => e.preventDefault()}>
                         {option.options[0]}
                     </span>
-        </Dropdown>
+        </Dropdown.Button>
     }
     return (
         <div

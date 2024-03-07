@@ -4,7 +4,9 @@ import globalRouter from "../globalRouter";
 const baseURL = process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
 axios.defaults.baseURL = `${baseURL}/`;
 
+
 let isRefreshing = false;
+let isRedirectedToLogin = false;
 let failedRequestsQueue: ((token: string) => void)[] = [];
 
 const retryFailedRequests = (token: string) => {
@@ -28,6 +30,7 @@ axios.interceptors.response.use(
                         {},
                         { withCredentials: true }
                     );
+                    isRefreshing = false;
                     const newToken = response.data.access_token;
 
                     // Update the original request headers with the new token
@@ -37,9 +40,10 @@ axios.interceptors.response.use(
                     retryFailedRequests(newToken);
 
                     return axios(originalRequest);
-                } catch (refreshError) {
-                    // If token refresh fails, navigate to the login page
-                    if (globalRouter && globalRouter.navigate) {
+                } catch (error) {
+                    // If token refresh fails and not already redirected, navigate to the login page
+                    if (!isRedirectedToLogin && globalRouter && globalRouter.navigate) {
+                        isRedirectedToLogin = true;
                         await axios.post(`${baseURL}/auth/logout`, {}, { withCredentials: true });
                         globalRouter.navigate("/login");
                     }
@@ -50,6 +54,19 @@ axios.interceptors.response.use(
                     isRefreshing = false;
                 }
             } else {
+
+                // Check if the error is related to the refresh token endpoint
+                if (originalRequest.url.includes("auth/refresh")) {
+
+                    await axios.post(`${baseURL}/auth/logout`, {}, { withCredentials: true });
+
+                    if (globalRouter && globalRouter.navigate) {
+                        globalRouter.navigate("/login");
+                    } else {
+                        console.error("Global router not available for navigation.");
+                    }
+                }
+
                 // If a token refresh is already in progress, add the request to the queue
                 return new Promise((resolve, reject) => {
                     failedRequestsQueue.push((token) => {

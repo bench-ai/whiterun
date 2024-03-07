@@ -11,6 +11,7 @@ import Home from "./views/home/home";
 import ErrorPage from "./views/error_page/error_page";
 import Workbench from './views/workbench/workbench';
 import SimplifiedView from "./views/simplfied_view/simplifiedview";
+import ProtectedRoutes from "./components/protected_routes/protected_routes";
 
 const App = () => {
 
@@ -40,7 +41,7 @@ const App = () => {
                     <Navbar/>
                     <Routes>
                         {/*<Route element={<ProtectedRoutes/>}>*/}
-                            {/*<Route path={"/browse"} element={<AppPage/>}/>*/}
+                        {/*    <Route path={"/workbench/lite"} element={<SimplifiedView/>}/>*/}
                         {/*</Route>*/}
                         {/*<Route path={"/browse"} element={<AppPage/>}/>*/}
                         {/*<Route path={"/protected"} element={<Protected/>}/>*/}

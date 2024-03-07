@@ -50,3 +50,19 @@ export const DisabledError = styled.textarea.attrs({ rows: 3 })`
     width: 80%; 
     resize: none;
 `;
+
+export const SelectModeContinueButton = styled.button`
+    cursor: pointer;
+    width: 90%;
+    margin-right: 5px;
+    font-weight: bold;
+    font-size: 20px;
+    padding: 5px;
+    border: none;
+    border-radius: 15px;
+    
+    &:hover {
+        background-color: #53389e;
+        color: white;
+    }
+`;

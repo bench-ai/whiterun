@@ -8,7 +8,7 @@ import {
     GeneratedCard,
     GeneratedCardDownload,
     GeneratedCardHeader,
-    Header2
+    Header2, SelectModeContinueButton
 } from "./simplified_view_images_display_styles";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../../state/store";
@@ -212,16 +212,14 @@ const VisualDisplay: FC<display> = (
 
     return (
         <GeneratedCard>
-            {(result) &&
-                (<div style={{display: "flex", justifyContent: "flex-end", alignItems: "flex-start"}}>
+            <GeneratedCardHeader>
+                <h1 style={{color: "white", textOverflow: "ellipsis"}}>{name}</h1>
+                {(result) &&
                     <InfoCircleOutlined
                         style={{color: "white", fontSize: "40px"}}
                         onClick={() => setIsModalOpen(true)}
                     />
-                </div>)
-            }
-            <GeneratedCardHeader>
-                <h1 style={{color: "white", textOverflow: "ellipsis"}}>{name}</h1>
+                }
             </GeneratedCardHeader>
             <div style={{borderTop: "1px solid white", marginBottom: "20px"}}/>
             <div style={{textAlign: "center"}}>
@@ -323,6 +321,13 @@ const Continue: FC<Alter> = ({func}) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const modeButtonList: { [key: string]: string[] } = modeJson;
     const mode = useSelector((state: RootState) => state.mode.value)
+    const modeButtonListExplained: { [key: string]: string } = {
+        "tti": "Text to Image",
+        "iti": "Convert this Image into Another Image",
+        "ups": "Upscale this Image",
+        "inp": "Modify this image with masking",
+        "anm": "Animate this Image"
+    };
 
     return (
         <div>
@@ -339,19 +344,25 @@ const Continue: FC<Alter> = ({func}) => {
                    onCancel={() => setIsModalOpen(false)}
                    style={{
                        maxHeight: '400px',
+                       textAlign: 'center'
                    }}
+                   width={700}
             >
+                <h2 style={{marginTop: 0}}>What would you like to do with this image?</h2>
                 {
-                    modeButtonList[mode.name].map((obj) => {
+                    modeButtonList[mode.name].map((originalName) => {
+                        const modeButtonExplained = modeButtonListExplained[originalName] || originalName;
                         return (
-                            <button
-                                onClick={() => {
-                                    func(obj)
-                                    setIsModalOpen(false)
-                                }}
-                            >
-                                {obj}
-                            </button>
+                            <div key={originalName} style={{marginBottom: '10px'}}>
+                                <SelectModeContinueButton
+                                    onClick={() => {
+                                        func(originalName);
+                                        setIsModalOpen(false);
+                                    }}
+                                >
+                                    {modeButtonExplained}
+                                </SelectModeContinueButton>
+                            </div>
                         );
                     })
                 }

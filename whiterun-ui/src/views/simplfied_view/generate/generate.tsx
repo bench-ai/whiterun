@@ -92,7 +92,7 @@ const GenerateButton = () => {
             if (!prompt.promptStyle) {
                 throw new Error(
                     "No prompt style was selected |" +
-                    "Prompt styles are near the enhance switch. This will guide the prompt to" +
+                    "Prompt styles are near the enhance switch. This will guide the prompt to " +
                     "stick closely to the style you provide")
             }
 
@@ -255,7 +255,13 @@ const GenerateButton = () => {
 
     return (
         <ModeButton
-            onClick={() => ((result.resultArr.length === result.pendingCount) && !result.enhancing) ? executeWrapper() : null}
+            onClick={() => {
+                if ((result.resultArr.length === result.pendingCount) && !result.enhancing) {
+                    executeWrapper();
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+            }}
+
             style={{
                 backgroundColor: ((result.resultArr.length === result.pendingCount) && !result.enhancing) ? '#53389E': '#999',
                 color: ((result.resultArr.length === result.pendingCount) && !result.enhancing) ? 'white' : '#666',

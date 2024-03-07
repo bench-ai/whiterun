@@ -13,7 +13,7 @@ interface PromptState {
 
 const initialState: PromptState = {
     value: {
-        positivePrompt: "Enter a positive Prompt here!",
+        positivePrompt: "",
         enhance: false
     }
 }

@@ -6,18 +6,36 @@ const Changelog = () => {
 
     const items = [
         {
-            label: 'February X, 2024', children:
+            label: 'March 7th, 2024', children:
             <>
-                <b>Learning Center</b>
+                <b>Simplified Workflows with Workbench Lite and more!</b>
                 <p>
-                    This updates adds the learning center, a hub for helping users learn the various tools that Bench AI
-                    has to offer. This can be accessed through when building a workflow and hitting the green question mark
-                    button in the top right of the board. We've also added zoom controls to give users other option to navigate
+                    This update marks a huge update as we add a new major feature called Workbench Lite. This allows for users
+                    to have most of the functionality that the full Workbench / workflow builder has but in a much simpler format. This should
+                    make it easier for users to generate an image without having to build an entire workflow to do so. We still
+                    recommend the Workbench / workflow builder for users that want to have a repeatable workflow and more
+                    fine-tuning over their image generation process.
+                </p>
+                <p>
+                    Some other updates include the learning center, a hub for helping users learn the various tools that Bench AI
+                    has to offer. This can be accessed when building a workflow and hitting the green question mark
+                    button in the top right of the board. It can also be accessed through the simplified workbench in the
+                    bottom right corner of the screen. We've also added zoom controls to give users other option to navigate
                     the board when building workflows.
                 </p>
                 <p>Full list of changes below:</p>
                 <ul>
-                    <li>Added Learning Hub</li>
+                    <li>Added the Workbench Lite</li>
+                    <ul>
+                        <li>Adds most of the functionality of the full Workbench but in a simpler UI.</li>
+                        <li>Allows users to easily modify or create multiple images, using up to 5 model generators at the same
+                        time for single images.</li>
+                        <li>Users can look at the settings used for a generated image to see which settings generated the best
+                        images.</li>
+                        <li>After generating an image, users can continue with the newly made image as the base image
+                        for another image operation, making it easy to do end-to-end image workflows without any friction.</li>
+                    </ul>
+                    <li>Added the Learning Hub</li>
                     <li>Added changelog which can be found in Learning Hub</li>
                     <li>Added zoom controls to board</li>
                 </ul>

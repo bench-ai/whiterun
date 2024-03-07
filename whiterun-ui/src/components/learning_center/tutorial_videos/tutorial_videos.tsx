@@ -22,37 +22,37 @@ const TutorialVideos = () => {
 
     const videoData = [
         {
-            videoLink: "",
+            videoLink: "https://drive.google.com/file/d/1S41O2RKFBn8f6_o2eF2pFswwLBquUHHJ/view?usp=drive_link",
             thumbnailSrc: ThumbnailPhotomaker,
             type: "Video",
             heading: "Learn to use the Photomaker Operator",
         },
         {
-            videoLink: "",
+            videoLink: "https://drive.google.com/file/d/1dS_CHr6fn1SsDnhD53GgxLawf8T_z_ps/view?usp=drive_link",
             thumbnailSrc: ThumbnailImageToImage,
             type: "Video",
             heading: "Learn to use the Image to Image Operator",
         },
         {
-            videoLink: "",
+            videoLink: "https://drive.google.com/file/d/1mTP8Q75CfuxhwmmXJsyAKpB5tuWEoHYc/view?usp=drive_link",
             thumbnailSrc: ThumbnailMasking,
             type: "Video",
             heading: "Learn how to mask images using tools inside the Image Operator",
         },
         {
-            videoLink: "",
+            videoLink: "https://drive.google.com/file/d/1_2jw0TcnGBkWI3G-AXA3LH7O-0T9IsQ7/view?usp=drive_link",
             thumbnailSrc: ThumbnailPromptmaker,
             type: "Video",
             heading: "Learn to use the Promptmaker to Generate Amazing Prompts",
         },
         {
-            videoLink: "",
+            videoLink: "https://drive.google.com/file/d/1E79H1-Sr5-zi9LN7zi_Sg1B3thdUDqxE/view?usp=drive_link",
             thumbnailSrc: ThumbnailRealVisXL,
             type: "Video",
             heading: "Learn to use the RealVisXL Operator to Generate Realistic Images",
         },
         {
-            videoLink: "",
+            videoLink: "https://drive.google.com/file/d/13vC18xsa5LzDDNamh3oKVYu-NeVnyenR/view?usp=drive_link",
             thumbnailSrc: ThumbnailUpscaler,
             type: "Video",
             heading: "Learn to use the Upscale Operator to Improve Image Quality",

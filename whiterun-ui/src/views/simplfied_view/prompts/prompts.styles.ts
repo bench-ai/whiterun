@@ -9,8 +9,11 @@ export const Prompt = styled.textarea.attrs({ rows: 10 })`
 
 export const Enhancement = styled.div`
     color: white;
+    display: flex;
+    align-items: center;
 `;
 
 export const Text = styled.span`
-    margin-right: 30px
+    margin-right: 5px;
+    width: 125px;
 `;
