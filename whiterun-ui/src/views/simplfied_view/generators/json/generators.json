@@ -345,22 +345,10 @@
   ],
   "inp": [
     {
-      "name": "SD2.1",
+      "name": "SDXL",
       "difficulty": "hard",
-      "description": "All rounder masking operator based off Stable Diffusion 2.1",
+      "description": "All rounder masking operator based off Stable Diffusion XL",
       "settings": [
-        {
-          "name": "clip",
-          "type": "list",
-          "options": [
-            "FAST_BLUE",
-            "FAST_GREEN",
-            "SIMPLE",
-            "SLOW",
-            "SLOWER",
-            "SLOWEST"
-          ]
-        },
         {
           "name": "sampler",
           "type": "list",
@@ -375,14 +363,6 @@
             "K_EULER_ANCESTRAL",
             "K_HEUN",
             "K_LMS"
-          ]
-        },
-        {
-          "name": "mask_source",
-          "type": "list",
-          "options": [
-            "MASK_IMAGE_BLACK",
-            "MASK_IMAGE_WHITE"
           ]
         },
         {
@@ -410,22 +390,10 @@
       ]
     },
     {
-      "name": "SDXL",
+      "name": "SD2.1",
       "difficulty": "hard",
-      "description": "All rounder masking operator based off Stable Diffusion XL",
+      "description": "All rounder masking operator based off Stable Diffusion 2.1",
       "settings": [
-        {
-          "name": "clip",
-          "type": "list",
-          "options": [
-            "FAST_BLUE",
-            "FAST_GREEN",
-            "SIMPLE",
-            "SLOW",
-            "SLOWER",
-            "SLOWEST"
-          ]
-        },
         {
           "name": "sampler",
           "type": "list",
@@ -440,14 +408,6 @@
             "K_EULER_ANCESTRAL",
             "K_HEUN",
             "K_LMS"
-          ]
-        },
-        {
-          "name": "mask_source",
-          "type": "list",
-          "options": [
-            "MASK_IMAGE_BLACK",
-            "MASK_IMAGE_WHITE"
           ]
         },
         {
@@ -613,18 +573,6 @@
       "difficulty": "hard",
       "description": "Stable Diffusion 2.1 A generalist model that requires more control for the best outputs",
       "settings": [
-        {
-          "name": "clip",
-          "type": "list",
-          "options": [
-            "FAST_BLUE",
-            "FAST_GREEN",
-            "SIMPLE",
-            "SLOW",
-            "SLOWER",
-            "SLOWEST"
-          ]
-        },
         {
           "name": "sampler",
           "type": "list",

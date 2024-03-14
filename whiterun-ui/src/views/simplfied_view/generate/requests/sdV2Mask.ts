@@ -4,16 +4,15 @@ import {ImageRequest} from "./apiHandler";
 const baseURL =
     process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
 
-export const SDV2 = async (
+export const SDV2Mask = async (
     sampler: string,
     guidance: number,
     steps: number,
     positivePrompt: string,
+    image: string[] | undefined,
+    mask: string | undefined,
     negativePrompt?: string,
     seed?: number,
-    image?: string[] | undefined,
-    imageStrength?: number,
-    mask?: string | undefined,
 ) => {
     const apiResponse: ImageRequest = {
         success: true
@@ -38,13 +37,18 @@ export const SDV2 = async (
             style_preset: "photographic"
         }
 
+        if (image && mask) {
+            payload.init_image = image[0];
+            payload.mask_image = mask;
+            payload.mask_source = "MASK_IMAGE_WHITE"
+        }
+
         const response = await axios.post(
-            `${baseURL}/stability/text-to-image`,
+            `${baseURL}/stability/image-to-image/mask`,
             payload,
             {withCredentials: true}
-        )
+        );
         apiResponse.response = response.data["url"]
-
     } catch (error) {
         apiResponse.success = false
         apiResponse.error = (error as Error).message

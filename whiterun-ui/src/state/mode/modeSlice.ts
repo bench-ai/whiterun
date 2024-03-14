@@ -14,7 +14,8 @@ interface ModeState {
 const initialState: ModeState = {
     value: {
         name: "tti",
-        image: []
+        image: [],
+        mask: ""
     }
 }
 
@@ -32,7 +33,10 @@ const modeSlice = createSlice({
             state.value.image = state.value.image.filter(
                 (_, index) => index != action.payload
             );
-        }
+        },
+        delMask: (state) => {
+            state.value.mask = undefined;
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(appendAsyncImage.fulfilled, (state, action: PayloadAction<UploadResponse>) => {
@@ -40,6 +44,15 @@ const modeSlice = createSlice({
                 if (state.value.image.length <= 5){
                     state.value.image.push(action.payload.response)
                 }
+            }
+        })
+        builder.addCase(appendAsyncMask.fulfilled, (state, action: PayloadAction<UploadResponse>) => {
+            if (action.payload.success && action.payload.response) {
+                console.log("Payload success")
+                    console.log("Setting mask")
+                    state.value.mask = action.payload.response;
+                    console.log(state.value.mask)
+                
             }
         })
     }
@@ -52,5 +65,12 @@ export const appendAsyncImage = createAsyncThunk(
     }
 )
 
+export const appendAsyncMask = createAsyncThunk(
+    "mode/appendAsyncMask",
+    async (res: File) => {
+        return await uploadImage(res);
+    }
+)
+
 export default modeSlice.reducer;
-export const {change, reset, del} = modeSlice.actions
+export const {change, reset, del, delMask} = modeSlice.actions

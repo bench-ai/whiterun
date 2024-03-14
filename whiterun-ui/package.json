@@ -20,6 +20,7 @@
     "@types/react-router-dom": "^5.3.3",
     "antd": "^5.12.4",
     "axios": "^1.6.2",
+    "dompurify": "^3.0.9",
     "drawflow": "^0.0.59",
     "jwt-decode": "^4.0.0",
     "mixpanel": "^0.18.0",
@@ -60,6 +61,7 @@
     ]
   },
   "devDependencies": {
+    "@types/dompurify": "^3.0.5",
     "@types/styled-components": "^5.1.34"
   }
 }

@@ -13,6 +13,7 @@ export const SDXL = async (
     seed?: number,
     image?: string[] | undefined,
     imageStrength?: number,
+    mask?: string | undefined,
 ) => {
     const apiResponse: ImageRequest = {
         success: true
@@ -45,6 +46,18 @@ export const SDXL = async (
             const response = await axios.post(
                 `${baseURL}/stability/image-to-image`,
                     payload,
+                {withCredentials: true}
+            );
+
+            apiResponse.response = response.data["url"]
+        } else if (image && mask) {
+            console.log("Enter mask request")
+            payload.init_image = image[0];
+            payload.mask_image = mask;
+            payload.mask_source = "MASK_IMAGE_BLACK"
+            const response = await axios.post(
+                `${baseURL}/stability/image-to-image/mask`,
+                payload,
                 {withCredentials: true}
             );
 

@@ -22,12 +22,9 @@ export const TutorialVideo = styled.iframe`
 
 export const TutorialVideoModal = styled.iframe`
     width: 100%;
-    height: 250px;
+    max-width: 1000px;
+    height: 500px;
 
-    @media screen and (min-width: 600px) {
-        height: 400px;
-        padding-bottom: 0; /* Reset padding for larger screens */
-    }
 `;
 
 export const HelpModal = styled(Modal)`

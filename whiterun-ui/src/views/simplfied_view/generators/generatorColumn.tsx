@@ -1,8 +1,8 @@
 import React, {FC, useEffect, useState} from 'react';
 import {Column, ModelDescription, ModelGrid, ModelHeader, ModelText, SelectedGrid} from "./generatorColumn.styles";
-import {Card, Modal} from "antd";
+import {Button, Card, Modal, Popover} from "antd";
 import generators from "./json/generators.json"
-import {PlusOutlined, MinusOutlined, SettingOutlined} from '@ant-design/icons';
+import {PlusOutlined, MinusOutlined, SettingOutlined, QuestionCircleOutlined} from '@ant-design/icons';
 import SettingModal from "./GeneratorSettings";
 import {Option} from "../../../state/generator/generatorSlice";
 
@@ -10,8 +10,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../../state/store";
 import {removeGenerator, addGenerator, updateGenerator, GeneratorOptionMap} from "../../../state/generator/generatorSlice"
 
-
-
+import DOMPurify from "dompurify";
 interface Generator {
     name: string,
     difficulty: string,
@@ -30,6 +29,19 @@ interface Add {
     onClick: () => void
 }
 
+export async function fetchTooltipContent(fileName: string){
+    let filePath = `./js/htmlTooltips/simplifiedTooltips/{fileName}Tooltip.html`
+    filePath = filePath.replace("{fileName}", fileName)
+
+    const response = await fetch(filePath);
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch HTML file (status ${response.status})`);
+    }
+
+    return await response.text();
+
+}
 const GeneratorCard: FC<Generator> = ({
                                           description,
                                           difficulty,
@@ -99,6 +111,23 @@ const SelectedGeneratorCard: FC<SelectedGenerator> = ({name, settings, onClick, 
         setDisplayOptions(mode)
     };
 
+    const [tooltipContent, setTooltipContent] = useState<string | null>(null);
+    useEffect(() => {
+        const fetchTooltip = async () => {
+            try {
+                console.log(name)
+                const content = await fetchTooltipContent(name);
+                setTooltipContent(DOMPurify.sanitize(content));
+            } catch (error) {
+                console.error('Error fetching tooltip content:', error);
+            }
+        };
+
+        if (displayOptions) {
+            fetchTooltip();
+        }
+    }, [displayOptions, name]);
+
     return (
         <Card
             hoverable={true}
@@ -131,7 +160,14 @@ const SelectedGeneratorCard: FC<SelectedGenerator> = ({name, settings, onClick, 
                 }}>{name}</h2>
             </div>
                 <Modal
-                    title="Settings"
+                    title={
+                        <div style={{display: "flex", justifyContent: "space-between"}}>
+                            <h2>Settings</h2>
+                            <Popover placement="bottom" content={<div dangerouslySetInnerHTML={{ __html: tooltipContent || '' }} />} trigger="click">
+                                <QuestionCircleOutlined style={{fontSize: "24px"}}/>
+                            </Popover>
+                        </div>
+                    }
                     open={displayOptions}
                     onCancel={()=>changeDisplayOptions(false)}
                     footer={null} // Hide the footer

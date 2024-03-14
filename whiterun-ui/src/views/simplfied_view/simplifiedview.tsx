@@ -221,15 +221,15 @@ const SimplifiedView = () => {
                         <b>Image To Image</b>
                     </ModeButton>
 
-                    {/*<ModeButton*/}
-                    {/*    onClick={() => addView('inp')}*/}
-                    {/*    style={{*/}
-                    {/*        backgroundColor: mode.name === "inp" ? '#53389E' : 'white',*/}
-                    {/*        color: mode.name === "inp" ? 'white' : 'black'*/}
-                    {/*    }}*/}
-                    {/*>*/}
-                    {/*    <b>Inpaint</b>*/}
-                    {/*</ModeButton>*/}
+                    <ModeButton
+                        onClick={() => addView('inp')}
+                        style={{
+                            backgroundColor: mode.name === "inp" ? '#53389E' : 'white',
+                            color: mode.name === "inp" ? 'white' : 'black'
+                        }}
+                    >
+                        <b>Inpaint</b>
+                    </ModeButton>
 
                     <ModeButton
                         onClick={() => addView('ups')}

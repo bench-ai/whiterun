@@ -17,6 +17,10 @@ import ThumbnailMasking from "../../../assets/thumbnails/thumbnailMasking.png";
 import ThumbnailPromptmaker from "../../../assets/thumbnails/thumbnailPromptmaker.png";
 import ThumbnailRealVisXL from "../../../assets/thumbnails/thumbnailRealVisXL.png";
 import ThumbnailUpscaler from "../../../assets/thumbnails/thumbnailUpscaler.png";
+import ThumbnailSimplifiedTextToImage from "../../../assets/thumbnails/thumbnailSimplifiedTextToImage.png";
+import ThumbnailSimplifiedImageToImage from "../../../assets/thumbnails/thumbnailSimplifiedImageToImage.png";
+import ThumbnailSimplifiedInpainting from "../../../assets/thumbnails/thumbnailSimplifiedInpainting.png";
+import ThumbnailSimplifiedUpscale from "../../../assets/thumbnails/thumbnailSimplifiedUpscale.png";
 
 const TutorialVideos = () => {
 
@@ -59,6 +63,33 @@ const TutorialVideos = () => {
         },
     ];
 
+    const videoDataSimple = [
+        {
+            videoLink: "https://drive.google.com/file/d/1kITfihcKe1jQIHcNsNn1fSmMrRQZN5Zv/view?usp=drive_link",
+            thumbnailSrc: ThumbnailSimplifiedTextToImage,
+            type: "Video",
+            heading: "Learn to use the Simplified Text to Image Mode",
+        },
+        {
+            videoLink: "https://drive.google.com/file/d/1NEEm_5wv-gvFOG3BmsulMZKIB56Tit4a/view?usp=drive_link",
+            thumbnailSrc: ThumbnailSimplifiedImageToImage,
+            type: "Video",
+            heading: "Learn to use the Simplified Image to Image Mode",
+        },
+        {
+            videoLink: "https://drive.google.com/file/d/1pq0Se-Sl5whJa0-xYpdlGsAQU8UwB0dL/view?usp=drive_link",
+            thumbnailSrc: ThumbnailSimplifiedInpainting,
+            type: "Video",
+            heading: "Learn to use the Simplified Inpainting Mode",
+        },
+        {
+            videoLink: "https://drive.google.com/file/d/1V1vLUdGTfouevSSJufuxICxzjA6ljCme/view?usp=drive_link",
+            thumbnailSrc: ThumbnailSimplifiedUpscale,
+            type: "Video",
+            heading: "Learn to use the Simplified Upscaling Mode",
+        }
+    ];
+
     return (
         <div>
             <div style={{marginBottom: "30px"}}>
@@ -68,6 +99,56 @@ const TutorialVideos = () => {
 
             <VideoList>
                 {videoData.map((video, index) => (
+                    <VideoContainer key={index}>
+                        <a
+                            href={video.videoLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <VideoCard
+                                hoverable
+                                bordered={false}
+                                style={{maxWidth: 300, position: "relative"}}
+                            >
+                                <TutorialThumbnail
+                                    src={video.thumbnailSrc}
+                                    alt="uh oh"
+                                />
+                                <CenteredPlayButton>
+                                    <PlayCircleFilled style={{fontSize: "60px"}}/>
+                                </CenteredPlayButton>
+                            </VideoCard>
+                        </a>
+                        <SmallHeadingSection
+                            onClick={() =>
+                                window.open(video.videoLink, "_blank")
+                            }
+                        >
+                            <SmallHeading>
+                                {video.type}
+                            </SmallHeading>
+                            <Paragraph
+                                style={{
+                                    fontSize: "14px",
+                                    marginBottom: 0,
+                                    fontWeight: "bold",
+                                    lineHeight: "18px"
+                                }}
+                            >
+                                {video.heading}
+                            </Paragraph>
+                        </SmallHeadingSection>
+                    </VideoContainer>
+                ))}
+            </VideoList>
+
+            <div style={{marginTop: "50px", marginBottom: "30px"}}>
+                <Title level={1} style={{marginTop: "0px", marginBottom: "5px"}}>Learn the Various Modes in Our Simplified Workbench</Title>
+                <p style={{margin: 0}}>Get comfortable in Simplified End-to-End Image Generation</p>
+            </div>
+
+            <VideoList>
+                {videoDataSimple.map((video, index) => (
                     <VideoContainer key={index}>
                         <a
                             href={video.videoLink}

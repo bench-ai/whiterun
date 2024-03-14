@@ -6,6 +6,29 @@ const Changelog = () => {
 
     const items = [
         {
+            label: 'March 15th, 2024', children:
+                <>
+                    <b>Added Inpainting Mode for Simplified Workbench</b>
+                    <p>
+                        This update is a fairly minor one, we've added the ability for Inpainting to the Workbench Simplified Mode.
+                        For those who don't know, inpainting allows users to modify certain parts of an image through a mask while preserving
+                        other parts. Useful for instances where you like the majority of the image but what to change only a specific
+                        part of it.
+                    </p>
+                    <p>
+                        Some other updates include the learning center where we've added additional videos explaining how to use the Simplified
+                        Workbench and its various modes. We've also added tooltips to the generators in the Simplified Workbench, making it easy
+                        for users to understand what each of the settings do for each generator.
+                    </p>
+                    <p>Full list of changes below:</p>
+                    <ul>
+                        <li>Added the Inpainting Mode Workbench Lite</li>
+                        <li>Added additional videos to the Learning Center</li>
+                        <li>Added tooltips for Individual Generators</li>
+                    </ul>
+                </>
+        },
+        {
             label: 'March 7th, 2024', children:
             <>
                 <b>Simplified Workflows with Workbench Lite and more!</b>

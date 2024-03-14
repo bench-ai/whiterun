@@ -4,16 +4,15 @@ import {ImageRequest} from "./apiHandler";
 const baseURL =
     process.env.REACT_APP_DEV === 'true' ? `http://localhost:8080/api` : 'https://app.bench-ai.com/api';
 
-export const SDV2 = async (
+export const SDV2ImgToImg = async (
     sampler: string,
     guidance: number,
     steps: number,
     positivePrompt: string,
+    image: string[] | undefined,
+    imageStrength: number,
     negativePrompt?: string,
     seed?: number,
-    image?: string[] | undefined,
-    imageStrength?: number,
-    mask?: string | undefined,
 ) => {
     const apiResponse: ImageRequest = {
         success: true
@@ -35,14 +34,20 @@ export const SDV2 = async (
             cfg_scale: guidance,
             seed: seed,
             steps: steps,
-            style_preset: "photographic"
+            style_preset: "photographic",
+            image_strength: imageStrength,
+            init_image_mode: "IMAGE_STRENGTH",
+        }
+
+        if (image) {
+            payload.init_image = image[0];
         }
 
         const response = await axios.post(
-            `${baseURL}/stability/text-to-image`,
+            `${baseURL}/stability/image-to-image`,
             payload,
             {withCredentials: true}
-        )
+        );
         apiResponse.response = response.data["url"]
 
     } catch (error) {

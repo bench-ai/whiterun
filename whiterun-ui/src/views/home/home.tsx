@@ -85,15 +85,15 @@ const Home = () => {
         <div>
             <Layout style={{height: "100vh"}}>
                 <Content style={{padding: "0 48px"}}>
-                    <Alert
-                        message={<strong>An update to your Workflows</strong>}
-                        description="We recently updated how workflows work and therefore, previous workflows no longer work and will have to be
-                        recreated. We apologize for any inconvenience this has caused."
-                        type="info"
-                        closable
-                        showIcon
-                        style={{marginTop: "20px"}}
-                    />
+                    {/*<Alert*/}
+                    {/*    message={<strong>An update to your Workflows</strong>}*/}
+                    {/*    description="We recently updated how workflows work and therefore, previous workflows no longer work and will have to be*/}
+                    {/*    recreated. We apologize for any inconvenience this has caused."*/}
+                    {/*    type="info"*/}
+                    {/*    closable*/}
+                    {/*    showIcon*/}
+                    {/*    style={{marginTop: "20px"}}*/}
+                    {/*/>*/}
                     <div>
                         <Title style={{fontSize: '50px', marginBottom: '0'}}>Home</Title>
                         <hr style={{border: '2px solid #3FB950', borderRadius: '5px', width: '65%', marginLeft: '0'}}/>

@@ -421,6 +421,7 @@ const SimplifiedViewImagesDisplay = () => {
 
     const transfer = (value: string) => {
 
+        const trueCount = selectedArr.filter((item) => item === true).length;
         dispatch(resetAlert())
         if(!selectedStatus()){
 
@@ -431,7 +432,14 @@ const SimplifiedViewImagesDisplay = () => {
                     " on the images you like",
                 level: "error"
             }))
-        }else{
+        } else if (trueCount > 1 && value === "inp")  {
+            dispatch(updateAlert({
+                message: "Can Only Select One Image when Masking",
+                description: "Masking operators can only take in one image. Please only select one image before continuing" +
+                    " on the images you like",
+                level: "error"
+            }))
+        } else {
             const dataList: string[] = []
 
             selectedArr.forEach((obj, index) => {

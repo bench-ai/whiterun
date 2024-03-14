@@ -1,18 +1,26 @@
 import axios, {AxiosResponse} from "axios";
 import {ImageRequest} from "./apiHandler";
 import {checkStatusAndRetry} from "./replicateStatusRetry";
+import {switchFalse} from "../../../../state/results/resultSlice";
+import {useDispatch} from "react-redux";
+import {AppDispatch} from "../../../../state/store";
+import {downloadImage} from "./uploadImage";
+import {appendAsyncMask} from "../../../../state/mode/modeSlice";
 
 const baseURL =
     process.env.REACT_APP_DEV === "true"
         ? `http://localhost:8080/api`
         : "https://app.bench-ai.com/api";
 
-export const RealVisXL = async (
+export const RealVisXLMask = async (
     sampler: string,
     steps: number,
     guidance: number,
     safety_filter: boolean,
     positivePrompt: string,
+    image: string[] | undefined,
+    mask: string | undefined,
+    promptStrength: number,
     negativePrompt?: string,
     seed?: number,
 ) => {
@@ -21,14 +29,16 @@ export const RealVisXL = async (
     };
 
 
+
     try {
         const payload: Record<string, any> = {
-            mode: "text",
+            mode: "mask",
             prompt: positivePrompt,
             scheduler: sampler,
             guidance_scale: guidance,
             num_inference_steps: steps,
             disable_safety_checker: !safety_filter, //Flipped safety_filter to match ui
+            prompt_strength: promptStrength
         };
         if (negativePrompt) {
             payload.negative_prompt = negativePrompt;
@@ -38,9 +48,15 @@ export const RealVisXL = async (
             payload.seed = seed;
         }
 
-        let response: AxiosResponse<any, any>;
+        if (image) {
+            payload.image = image[0];
+        }
 
-        response = await axios.post(
+        if (mask) {
+            payload.mask = mask;
+        }
+
+        const response = await axios.post(
             `${baseURL}/replicate/realvisxl2/text-to-image`,
             payload,
             {withCredentials: true}
@@ -64,6 +80,7 @@ export const RealVisXL = async (
     } catch (error) {
         apiResponse.success = false;
         apiResponse.error = (error as Error).message;
+
     }
 
     return apiResponse

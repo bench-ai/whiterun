@@ -5,47 +5,173 @@ import {
     EditorButtonColumn,
     ImageEditor,
     ImageEditorSlider, MaskEditorTitle, SaveButton,
-    StyledCheckableTag, UploadContainer, UploadedFileContainer
+    UploadContainer, UploadedFileContainer
 } from './inpainting.styles';
 import {ButtonRow, ModeButton, ModeHeader} from '../simplifiedview.styles';
-import {InboxOutlined, PaperClipOutlined} from '@ant-design/icons';
+import {ArrowLeftOutlined, ArrowRightOutlined, InboxOutlined, PaperClipOutlined} from '@ant-design/icons';
+import {appendAsyncImage, appendAsyncMask, del, delMask} from "../../../state/mode/modeSlice";
+import {useDispatch, useSelector} from "react-redux";
+import {AppDispatch, RootState} from "../../../state/store";
+import {Button, message} from "antd";
+import {ImageContainer, ImageUploadCarousel} from "./upscaleImage.styles";
+import {DeleteOutlined} from "@mui/icons-material";
+import {downloadImage} from "../generate/requests/uploadImage";
 
 const SimplifiedInpainting = () => {
     const [brushSize, setBrushSize] = useState<number>(5);
-    const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
-    const [editedMaskFile, setEditedMaskFile] = useState<File | null>(null);
-    const [editedMaskFileUrl, setEditedMaskFileUrl] = useState<string | null>(null);
+    const [imageURLs, setImageURLs] = useState<string[]>([]);
+    const [maskImageURLs, setMaskImageURLs] = useState<string[]>([]);
+    const [editedMaskFileUrl, setEditedMaskFileUrl] = useState<string>("");
+    const dispatch = useDispatch<AppDispatch>();
+    const mode = useSelector((state: RootState) => state.mode.value);
+    const generatorsMap = useSelector((state: RootState) => state.generator.value);
 
     useEffect(() => {
         document.title = 'Workbench Lite - Bench AI';
     }, []);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files && e.target.files[0];
-        if (file) {
-            if (file instanceof Blob) {
-                setUploadedImageFile(file);
-                imageEditor(file);
-                console.log(uploadedImageFile)
+        const files = e.target.files;
+
+        if (files) {
+
+            if (Object.keys(generatorsMap).length > 1 && ((imageURLs.length > 0) || (files.length > 1))){
+                message.error('Maximum limit reached. You can upload at most 1 images. When' +
+                    ' using more than one generator');
+                return;
+            }
+
+            // Check the limit before adding new images
+            if (mode.image.length + files.length > 1) {
+                message.error('Maximum limit reached. You can upload at most 1 images.');
+                return;
+            }
+
+            // Iterate through the selected files
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file instanceof Blob) {
+                    dispatch(appendAsyncImage(file));
+                }
             }
         }
     };
 
-    const handleMaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files && e.target.files[0];
-        if (file) {
-            if (file instanceof Blob) {
-                setEditedMaskFile(file);
-                setEditedMaskFileUrl(URL.createObjectURL(file));
+    useEffect(() => {
+        // Delete all images except the first one
+        if (mode.image.length > 1) {
+            const deletedImages = mode.image.slice(1);
+            deletedImages.forEach((imageKey) => {
+                dispatch(del(mode.image.indexOf(imageKey)));
+            });
+        }
+    }, [mode.image]);
+
+    useEffect(() => {
+
+        const imageFunc = async () => {
+            if (mode.image.length == 1) {
+                const response = await downloadImage(mode.image[0]);
+                if (response.response) {
+                    setEditedMaskFileUrl(response.response);
+                    imageEditor(response.response);
+                }
+            }
+        };
+
+        imageFunc();
+    }, [mode.image]);
+
+    const handleDeleteImage = (index: number) => {
+        dispatch(del(index));
+        const updatedURLs = [...imageURLs];
+        updatedURLs.splice(index, 1);
+        setImageURLs(updatedURLs);
+    };
+
+    useEffect(() => {
+
+        const imagePromiseFunc = async () => {
+            const promiseArr = mode.image.map((key) => {
+                return downloadImage(key)
+            })
+
+            const stringArr: string[] = []
+
+            for (const key of promiseArr) {
+                const response = (await key)
+                if (response.response){
+                    stringArr.push(response.response)
+                }else{
+                    stringArr.push("")
+                }
+            }
+
+            setImageURLs(stringArr)
+        }
+
+        imagePromiseFunc()
+
+    }, [mode.image]);
+
+    const handleMaskFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+
+        if (files) {
+
+            if (Object.keys(generatorsMap).length > 1 && ((maskImageURLs.length > 0) || (files.length > 1))){
+                message.error('Maximum limit reached. You can upload at most 1 images. When' +
+                    ' using more than one generator');
+                return;
+            }
+
+            // Check the limit before adding new images
+            if (mode.mask) {
+                if (mode.mask.length + files.length > 1) {
+                    message.error('Maximum limit reached. You can upload at most 5 images.');
+                    return;
+                }
+            }
+
+            // Iterate through the selected files
+            for (let i = 0; i < 1; i++) {
+                const file = files[i];
+                if (file instanceof Blob) {
+                    dispatch(appendAsyncMask(file));
+                }
             }
         }
     };
+
+    const handleDeleteMaskImage = (index: number) => {
+        dispatch(delMask());
+        const updatedURLs = [...imageURLs];
+        updatedURLs.splice(index, 1);
+        setMaskImageURLs(updatedURLs);
+    };
+
+    useEffect(() => {
+        const imagePromiseFunc = async () => {
+            if (mode.mask) {
+                const response = await downloadImage(mode.mask);
+
+                if (response.response) {
+                    setMaskImageURLs([response.response]);
+                } else {
+                    setMaskImageURLs([""]);
+                }
+            }
+        };
+
+        imagePromiseFunc();
+    }, [mode.mask]);
+
 
     const resetView = () => {
         addView("createMask")
     }
 
-    const imageEditor = (file: Blob | MediaSource) => {
+    const imageEditor = (file: string) => {
         const canvas = document.getElementById('myCanvas') as HTMLCanvasElement;
         const canvas2 = document.getElementById('myCanvas2') as HTMLCanvasElement;
         const outputCanvas = document.getElementById('outputCanvas') as HTMLCanvasElement;
@@ -53,8 +179,8 @@ const SimplifiedInpainting = () => {
         const ctx2 = (canvas2.getContext('2d') as CanvasRenderingContext2D);
         const outputCtx = (outputCanvas.getContext('2d') as CanvasRenderingContext2D);
         const brushSizeSlider = document.getElementById('brushSizeSlider') as HTMLInputElement;
-        const toggleCanvasButton = document.getElementById('toggleCanvasButton') as HTMLButtonElement;
-        const flipColorsButton = document.getElementById('flipColorsButton') as HTMLButtonElement;
+        // const toggleCanvasButton = document.getElementById('toggleCanvasButton') as HTMLButtonElement;
+        // const flipColorsButton = document.getElementById('flipColorsButton') as HTMLButtonElement;
         const resetButton = document.getElementById('resetButton') as HTMLButtonElement;
         const downloadButton = document.getElementById('downloadButton') as HTMLButtonElement;
         const saveButton = document.getElementById('saveButton') as HTMLButtonElement;
@@ -65,7 +191,7 @@ const SimplifiedInpainting = () => {
 
         let editedMaskImage;
 
-        img.src = URL.createObjectURL(file);
+        img.src = file;
 
         // Ensure the image is loaded before drawing on the canvas
         img.onload = function () {
@@ -106,8 +232,8 @@ const SimplifiedInpainting = () => {
             resetButton.addEventListener('click', resetButtonClickHandler);
             downloadButton.addEventListener('click', downloadButtonClickHandler);
             saveButton.addEventListener('click', saveButtonClickHandler);
-            toggleCanvasButton.addEventListener('click', toggleCanvasButtonClickHandler);
-            flipColorsButton.addEventListener('click', flipColorsButtonClickHandler);
+            // toggleCanvasButton.addEventListener('click', toggleCanvasButtonClickHandler);
+            // flipColorsButton.addEventListener('click', flipColorsButtonClickHandler);
         };
 
         const closeButton = document.querySelector('.file-input');
@@ -123,8 +249,8 @@ const SimplifiedInpainting = () => {
             resetButton.removeEventListener('click', resetButtonClickHandler);
             downloadButton.removeEventListener('click', downloadButtonClickHandler);
             saveButton.removeEventListener('click', saveButtonClickHandler);
-            toggleCanvasButton.removeEventListener('click', toggleCanvasButtonClickHandler);
-            flipColorsButton.removeEventListener('click', flipColorsButtonClickHandler);
+            // toggleCanvasButton.removeEventListener('click', toggleCanvasButtonClickHandler);
+            // flipColorsButton.removeEventListener('click', flipColorsButtonClickHandler);
         });
 
 
@@ -239,10 +365,24 @@ const SimplifiedInpainting = () => {
                 ia[i] = byteString.charCodeAt(i);
             }
             const editedMaskBlob = new Blob([ab], { type: mimeString });
+            const editedMaskFile = new File([editedMaskBlob], 'maskImage.png', { type: mimeString });
+            try {
+                dispatch(appendAsyncMask(editedMaskFile))
+                message.open(
+                    {
+                        type: "success",
+                        content: "Mask saved!",
+                    }
+                )
+            } catch (error) {
+                message.open({
+                    type: 'error',
+                    content: 'Error saving mask. Please try again.',
+                });
+            }
 
             // Set the edited mask file in the state
-            setEditedMaskFile(new File([editedMaskBlob], 'edited_mask.png'));
-            setEditedMaskFileUrl(URL.createObjectURL(editedMaskBlob));
+            // setEditedMaskFileUrl(URL.createObjectURL(editedMaskBlob));
         }
 
 
@@ -283,14 +423,10 @@ const SimplifiedInpainting = () => {
         }
     };
 
-    useEffect(() => {
-        console.log(editedMaskFile);
-    }, [editedMaskFile]);
 
     const [selectedMode, setSelectedMode] = useState("");
 
     function addView(currentMode: string) {
-        console.log("entered")
         const previousMode = document.getElementById(selectedMode);
         const mode = document.getElementById(currentMode);
 
@@ -328,8 +464,8 @@ const SimplifiedInpainting = () => {
                     <EditorButtonColumn>
                         <MaskEditorTitle>Mask Editor</MaskEditorTitle>
                         <EditButton id="resetButton">Reset Edits</EditButton>
-                        <EditButton id="toggleCanvasButton">Toggle Mask Preview</EditButton>
-                        <EditButton id="flipColorsButton">Flip Mask Output Color</EditButton>
+                        {/*<EditButton id="toggleCanvasButton">Toggle Mask Preview</EditButton>*/}
+                        {/*<EditButton id="flipColorsButton">Flip Mask Output Color</EditButton>*/}
                         <div style={{marginTop: "10px"}}>
                             <BrushTitle htmlFor="brushSizeSlider">Brush Size:</BrushTitle>
                             <ImageEditorSlider type="range" className="modal-editor-slider" id="brushSizeSlider" min="1"
@@ -354,29 +490,54 @@ const SimplifiedInpainting = () => {
         );
     };
 
+
+
     const renderUploadArea = () => {
         // Your upload area JSX goes here
-        console.log(editedMaskFile)
         return (
             <div style={{margin: "auto", minWidth: "300px", maxWidth: "60%"}}>
                 <UploadContainer style={{marginTop: "20px"}}>
                     <label htmlFor="maskInput">
-                        <InboxOutlined style={{fontSize: "50px", color: "#39a047"}}/>
-                        <h2 style={{color: "#c0c1c2", fontSize: "18px"}}>Click in this area to upload a masking
-                            file</h2>
-                        <p style={{color: "#5c5f63", fontSize: "14px"}}>Accepts .jpg & .png files</p>
+                        <InboxOutlined style={{ fontSize: '50px', color: '#39a047' }} />
+                        <h2 style={{ color: '#c0c1c2', fontSize: '18px' }}>
+                            Click in this area to upload a masking file
+                        </h2>
+                        <p style={{ color: '#5c5f63', fontSize: '14px' }}>Accepts a .jpg or .png file</p>
                         <input
                             id="maskInput"
                             className="mask-input"
                             type="file"
                             accept=".jpg, .jpeg, .png"
-                            onChange={(e) => handleMaskChange(e)}
+                            onChange={(e) => handleMaskFileChange(e)}
+                            multiple  // Allow multiple file selection
                         />
                     </label>
                 </UploadContainer>
-                <UploadedFileContainer visible={editedMaskFile !== null}>
-                    <PaperClipOutlined style={{marginRight: "15px"}}/>
-                    Uploaded File: {editedMaskFile !== null ? editedMaskFile.name : 'No file uploaded'}
+
+                <UploadedFileContainer visible={!!(mode.mask && mode.mask.length > 0)}>
+                    {mode.mask && mode.mask.length > 0 && (
+                        <ImageUploadCarousel
+                            arrows
+                            nextArrow={<ArrowRightOutlined />}
+                            prevArrow={<ArrowLeftOutlined />}
+                        >
+                            {maskImageURLs.map((url, index) => (
+                                <ImageContainer key={index}>
+                                    <Button
+                                        type="text"
+                                        icon={<DeleteOutlined />}
+                                        style={{ zIndex: "3" }}
+                                        onClick={() => handleDeleteMaskImage(index)}
+                                    />
+                                    <img
+                                        src={url}
+                                        alt={`Uploaded ${index + 1}`}
+                                        style={{ display: 'block', margin: '0 auto', maxWidth: '50%' }}
+                                    />
+                                </ImageContainer>
+                            ))}
+                        </ImageUploadCarousel>
+                    )}
                 </UploadedFileContainer>
 
             </div>
@@ -388,9 +549,11 @@ const SimplifiedInpainting = () => {
             <ModeHeader>Upload Image</ModeHeader>
             <UploadContainer>
                 <label htmlFor="fileInput">
-                    <InboxOutlined style={{fontSize: "50px", color: "#39a047"}}/>
-                    <h2 style={{color: "#c0c1c2", fontSize: "18px"}}>Click in this area to upload a file</h2>
-                    <p style={{color: "#5c5f63", fontSize: "14px"}}>Accepts .jpg & .png files</p>
+                    <InboxOutlined style={{ fontSize: '50px', color: '#39a047' }} />
+                    <h2 style={{ color: '#c0c1c2', fontSize: '18px' }}>
+                        Click in this area to upload file
+                    </h2>
+                    <p style={{ color: '#5c5f63', fontSize: '14px' }}>Accepts a .jpg or .png file</p>
                     <input
                         id="fileInput"
                         className="file-input"
@@ -398,12 +561,35 @@ const SimplifiedInpainting = () => {
                         accept=".jpg, .jpeg, .png"
                         onChange={(e) => handleFileChange(e)}
                         onClick={resetView}
+                        multiple  // Allow multiple file selection
                     />
                 </label>
             </UploadContainer>
-            <UploadedFileContainer visible={uploadedImageFile !== null}>
-                <PaperClipOutlined style={{marginRight: "15px"}}/>
-                Uploaded File: {uploadedImageFile !== null ? uploadedImageFile.name : 'No file uploaded'}
+
+            <UploadedFileContainer visible={mode.image.length > 0}>
+                {mode.image.length > 0 && (
+                    <ImageUploadCarousel
+                        arrows
+                        nextArrow={<ArrowRightOutlined />}
+                        prevArrow={<ArrowLeftOutlined />}
+                    >
+                        {imageURLs.map((url, index) => (
+                            <ImageContainer key={index}>
+                                <Button
+                                    type="text"
+                                    icon={<DeleteOutlined />}
+                                    style={{ zIndex: "3" }}
+                                    onClick={() => handleDeleteImage(index)}
+                                />
+                                <img
+                                    src={url}
+                                    alt={`Uploaded ${index + 1}`}
+                                    style={{ display: 'block', margin: '0 auto', maxWidth: '50%' }}
+                                />
+                            </ImageContainer>
+                        ))}
+                    </ImageUploadCarousel>
+                )}
             </UploadedFileContainer>
             <ModeHeader>Mask</ModeHeader>
             <ButtonRow>
@@ -416,12 +602,6 @@ const SimplifiedInpainting = () => {
             </ButtonRow>
             {selectedMode === 'createMask' ? renderMaskEditor() : null}
             {selectedMode === 'uploadMask' ? renderUploadArea() : null}
-            {editedMaskFileUrl && (
-                <div>
-                    <h2>Edited Mask</h2>
-                    <img src={editedMaskFileUrl} alt="Edited Mask" />
-                </div>
-            )}
 
         </div>
     );

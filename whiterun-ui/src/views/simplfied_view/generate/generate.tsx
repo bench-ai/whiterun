@@ -13,7 +13,7 @@ import {
     switchFalse,
     appendANMResultAsync,
     appendUPSResultAsync,
-    appendITIResultAsync
+    appendITIResultAsync, appendINPResultAsync
 } from "../../../state/results/resultSlice"
 
 export interface RestructuredGeneratorMap {
@@ -159,6 +159,9 @@ const GenerateButton = () => {
                 case "anm":
                     dispatch(appendANMResultAsync(res));
                     break;
+                case "inp":
+                    dispatch(appendINPResultAsync(res));
+                    break;
                 default:
                     console.error("in unknown case")
             }
@@ -204,6 +207,9 @@ const GenerateButton = () => {
                     break
                 case "anm":
                     dispatch(appendANMResultAsync(res));
+                    break;
+                case "inp":
+                    dispatch(appendINPResultAsync(res));
                     break;
                 default:
                     console.error("in unknown case")

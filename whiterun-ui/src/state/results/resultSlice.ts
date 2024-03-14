@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {animate, textToImage, upscale, imageToImage} from "../../views/simplfied_view/generate/requests/apiHandler";
+import {animate, textToImage, upscale, imageToImage, imageInpainting} from "../../views/simplfied_view/generate/requests/apiHandler";
 
 export interface Result {
     name: string
@@ -70,6 +70,12 @@ const resultSlice = createSlice({
             )
         })
         builder.addCase(appendITIResultAsync.fulfilled, (state, action: PayloadAction<Result>) => {
+            console.log(action.payload)
+            state.value.resultArr.push(
+                action.payload
+            )
+        })
+        builder.addCase(appendINPResultAsync.fulfilled, (state, action: PayloadAction<Result>) => {
             console.log(action.payload)
             state.value.resultArr.push(
                 action.payload
@@ -187,6 +193,38 @@ export const appendITIResultAsync = createAsyncThunk(
             res.name,
             res.image,
             res.settings
+        )
+
+        const finalResult: Result = {
+            ...res,
+            settings: {...res.settings},
+            result: result.response,
+        }
+
+        if (!result.success){
+            finalResult.error = result.error
+        }
+
+        return finalResult
+    }
+)
+
+export const appendINPResultAsync = createAsyncThunk(
+    "result/appendINPMaskResultAsync",
+    async (res: Result) => {
+
+        let posP = res.positivePrompt
+        if (res.enhanced && res.enhancedPrompt){
+            posP = res.enhancedPrompt
+        }
+
+        const result = await imageInpainting (
+            posP,
+            res.negativePrompt,
+            res.name,
+            res.image,
+            res.mask,
+            res.settings,
         )
 
         const finalResult: Result = {
